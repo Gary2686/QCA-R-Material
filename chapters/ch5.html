@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch.5 QCA 延伸 · QCA with R</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div id="readbar"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="../index.html"><span class="logo">Q</span><span>QCA with R<small>互動式教材</small></span></a>
+    <nav class="topnav">
+      <a href="../index.html">首頁</a>
+      <a href="ch2.html">Ch.2</a>
+      <a href="ch3.html">Ch.3 csQCA</a>
+      <a href="ch4.html">Ch.4 fsQCA</a>
+      <a href="ch5.html">Ch.5 延伸</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="chapter-head">
+  <div class="eyebrow">CHAPTER 5</div>
+  <h1>QCA 延伸</h1>
+  <div class="en">QCA Extensions: mvQCA &amp; tQCA</div>
+</div>
+
+<p class="lead">本章介紹 QCA 的兩個重要延伸：多值 QCA（mvQCA）允許條件取三個以上的離散值，突破清晰集的二元限制；時序 QCA（tQCA）則在布林最小化中加入條件出現的先後順序，使因果路徑更貼近「歷史過程」的現實。</p>
+
+<nav class="toc">
+  <strong>本章目錄</strong>
+  <ol>
+    <li><a href="#mv">5.1 多值 QCA（mvQCA）</a></li>
+    <li><a href="#mv-calib">5.2 mvQCA 資料準備與真值表</a></li>
+    <li><a href="#mv-min">5.3 mvQCA 布林最小化</a></li>
+    <li><a href="#tqca">5.4 時序 QCA（tQCA）</a></li>
+    <li><a href="#tqca-aux">5.5 輔助條件與「無關」值</a></li>
+    <li><a href="#tqca-min">5.6 tQCA 最小化</a></li>
+    <li><a href="#compare">5.7 三種 QCA 的比較</a></li>
+    <li><a href="#summary">本章回顧</a></li>
+  </ol>
+</nav>
+
+<!-- ==================== 5.1 ==================== -->
+<h2 id="mv">5.1 多值 QCA（mvQCA） <span class="en">· Multi-Value QCA</span></h2>
+
+<p>清晰集 csQCA 只允許條件取 0（缺席）或 1（在場）。但社會科學的許多概念天然地有三個以上的離散類別——例如選舉制度（多數制、混合制、比例代表制），硬要把它壓縮成二元往往會損失重要資訊，甚至引起<strong>二元化偏誤（dichotomization bias）</strong>。</p>
+
+<p><strong>多值 QCA（mvQCA）</strong>允許條件取整數值 0, 1, 2, …（或更多），從而完整表示多類別概念，而不失去 QCA 集合論的核心邏輯。</p>
+
+<div class="callout key">
+  <div class="ct">本節研究案例</div>
+  <p>Hartmann &amp; Kemmerzell (2008) 分析 30 個撒哈拉以南非洲國家的一黨禁令（party bans）。結果變項：BAN（是否存在一黨禁令，1=有，0=無）。條件包含：<br>
+  <strong>RPG</strong>（統治政黨型態，3 個值）、<strong>MIL</strong>（軍事干預，2 個值）、<strong>GEO</strong>（地理位置，3 個值）、<strong>EIN</strong>（獨立後政治菁英，2 個值）、<strong>COL</strong>（殖民宗主國，3 個值）。</p>
+</div>
+
+<h3>多值符號表示法 <span class="en">· Multi-value notation</span></h3>
+
+<p>在 mvQCA 的布林表達式中，多值條件用大括號和值表示：</p>
+
+<div class="table-wrap">
+<table class="tbl">
+  <thead><tr><th>符號</th><th>意義</th><th>對應 csQCA</th></tr></thead>
+  <tbody>
+    <tr><td><code>RPG{0}</code></td><td>RPG = 0（第一類）</td><td>~RPG（缺席）</td></tr>
+    <tr><td><code>RPG{1}</code></td><td>RPG = 1（第二類）</td><td>RPG（在場）</td></tr>
+    <tr><td><code>RPG{2}</code></td><td>RPG = 2（第三類）</td><td>無對應</td></tr>
+    <tr><td><code>RPG{0,2}</code></td><td>RPG = 0 或 2（合併類）</td><td>部分對應</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout tip">
+  <div class="ct">為何是大括號 { }？</div>
+  <p>在 mvQCA 的輸出中，<code class="inline">RPG{1}</code> 代表「RPG 等於 1 這個值」，而非清晰集的「RPG 在場」。這個符號體系來自多值邏輯（multi-valued logic），是 QCA 軟體（如 Thiem &amp; Duşa 的 <code class="inline">QCA</code> 套件）的標準輸出格式。</p>
+</div>
+
+<!-- SVG: mvQCA vs csQCA comparison -->
+<div class="diagram">
+  <svg viewBox="0 0 600 180" role="img" aria-label="csQCA vs mvQCA 比較">
+    <!-- csQCA side -->
+    <text x="150" y="25" text-anchor="middle" fill="var(--accent)" font-size="13" font-weight="700">csQCA 二元條件</text>
+    <rect x="50"  y="40" width="100" height="40" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+    <rect x="200" y="40" width="100" height="40" rx="6" fill="var(--bg-soft)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="100"  y="65" text-anchor="middle" fill="var(--accent)" font-size="13" font-weight="700">0</text>
+    <text x="250" y="65" text-anchor="middle" fill="var(--accent)" font-size="13" font-weight="700">1</text>
+    <text x="100"  y="95" text-anchor="middle" fill="var(--ink-faint)" font-size="11">缺席</text>
+    <text x="250" y="95" text-anchor="middle" fill="var(--ink-faint)" font-size="11">在場</text>
+    <text x="150" y="120" text-anchor="middle" fill="var(--ink-faint)" font-size="11">例：MIL（軍事干預：無/有）</text>
+    <!-- arrow -->
+    <text x="310" y="75" text-anchor="middle" fill="var(--ink-faint)" font-size="20">→</text>
+    <!-- mvQCA side -->
+    <text x="470" y="25" text-anchor="middle" fill="var(--accent2)" font-size="13" font-weight="700">mvQCA 多值條件</text>
+    <rect x="350" y="40" width="80" height="40" rx="6" fill="var(--accent2-soft)" stroke="var(--accent2)" stroke-width="1.5"/>
+    <rect x="440" y="40" width="80" height="40" rx="6" fill="var(--accent2-soft)" stroke="var(--accent2)" stroke-width="1.5"/>
+    <rect x="530" y="40" width="60" height="40" rx="6" fill="var(--accent2-soft)" stroke="var(--accent2)" stroke-width="1.5"/>
+    <text x="390" y="65" text-anchor="middle" fill="var(--accent2)" font-size="13" font-weight="700">0</text>
+    <text x="480" y="65" text-anchor="middle" fill="var(--accent2)" font-size="13" font-weight="700">1</text>
+    <text x="560" y="65" text-anchor="middle" fill="var(--accent2)" font-size="13" font-weight="700">2</text>
+    <text x="390" y="95" text-anchor="middle" fill="var(--ink-faint)" font-size="10">無選舉</text>
+    <text x="480" y="95" text-anchor="middle" fill="var(--ink-faint)" font-size="10">部分競爭</text>
+    <text x="560" y="95" text-anchor="middle" fill="var(--ink-faint)" font-size="10">全競爭</text>
+    <text x="470" y="120" text-anchor="middle" fill="var(--ink-faint)" font-size="11">例：RPG（統治政黨型態）</text>
+  </svg>
+  <figcaption>csQCA 僅區分在場/缺席，mvQCA 可保留三個以上的離散類別。</figcaption>
+</div>
+
+<!-- ==================== 5.2 ==================== -->
+<h2 id="mv-calib">5.2 mvQCA 資料準備與真值表 <span class="en">· Data Preparation &amp; Truth Table</span></h2>
+
+<p>mvQCA 的資料格式與 csQCA 相似——仍是整數值，但允許超過 0/1 的範圍。<strong>每個多值條件取幾個值，就有幾個「位元」參與布林最小化</strong>。一個條件取 k 個值會產生 k 個二元對應變數（dummy expansion），讓 QCA 套件在內部計算。</p>
+
+<h3>載入資料 <span class="en">· Loading the HarKem dataset</span></h3>
+
+<div class="code"><span class="c-prompt">&gt; </span><span class="c-fn">library</span>(QCA)
+<span class="c-prompt">&gt; </span><span class="c-fn">data</span>(HarKem)         <span class="c-com"># Hartmann &amp; Kemmerzell (2008) 資料集</span>
+<span class="c-prompt">&gt; </span><span class="c-fn">head</span>(HarKem)
+<span class="c-out">##    RPG MIL GEO EIN COL BAN</span>
+<span class="c-out">## AN   0   0   1   1   2   0</span>
+<span class="c-out">## BF   1   1   2   0   2   1</span>
+<span class="c-out">## BN   0   0   0   1   2   0</span>
+<span class="c-out">## BW   0   0   1   0   0   0</span>
+<span class="c-out">## CM   1   1   2   1   2   1</span>
+<span class="c-out">## CF   1   0   2   1   2   0</span>
+<span class="c-prompt">&gt; </span><span class="c-fn">sapply</span>(HarKem, <span class="c-fn">function</span>(x) <span class="c-fn">sort</span>(<span class="c-fn">unique</span>(x)))  <span class="c-com"># 查看各變項取值</span>
+<span class="c-out">## $RPG: 0 1 2    $MIL: 0 1    $GEO: 0 1 2</span>
+<span class="c-out">## $EIN: 0 1      $COL: 0 1 2  $BAN: 0 1</span></div>
+
+<div class="callout info">
+  <div class="ct">HarKem 變項說明</div>
+  <p>
+  <strong>RPG</strong>：統治政黨型態（0=軍政府/一黨, 1=半競爭, 2=競爭）<br>
+  <strong>MIL</strong>：軍事干預（0=無, 1=有）<br>
+  <strong>GEO</strong>：地緣位置（0=西非, 1=中非, 2=東/南非）<br>
+  <strong>EIN</strong>：菁英出身（0=殖民舊菁英, 1=新菁英）<br>
+  <strong>COL</strong>：殖民宗主國（0=英國, 1=其他, 2=法國）<br>
+  <strong>BAN</strong>：一黨禁令（0=無, 1=有）
+  </p>
+</div>
+
+<h3>建構 mvQCA 真值表 <span class="en">· Building the mvQCA truth table</span></h3>
+
+<p>建構 mvQCA 真值表的函數仍是 <code class="inline">truthTable()</code>，但需加上 <code class="inline">type = "mv"</code>（多值）。真值表的行數 = 每個條件取值數的乘積：本例 3 × 2 × 3 × 2 × 3 = 108 列。</p>
+
+<div class="code"><span class="c-prompt">&gt; </span>HarKemTT <span class="c-kw">&lt;-</span> <span class="c-fn">truthTable</span>(HarKem,
+<span class="c-plus">+</span>   outcome    <span class="c-kw">=</span> <span class="c-str">"BAN"</span>,
+<span class="c-plus">+</span>   conditions <span class="c-kw">=</span> <span class="c-fn">c</span>(<span class="c-str">"RPG"</span>, <span class="c-str">"MIL"</span>, <span class="c-str">"GEO"</span>, <span class="c-str">"EIN"</span>, <span class="c-str">"COL"</span>),
+<span class="c-plus">+</span>   complete   <span class="c-kw">=</span> <span class="c-num">TRUE</span>,
+<span class="c-plus">+</span>   show.cases <span class="c-kw">=</span> <span class="c-num">TRUE</span>)
+<span class="c-prompt">&gt; </span>HarKemTT</div>
+
+<div class="callout warn">
+  <div class="ct">mvQCA 的 incl.cut 預設值</div>
+  <p>mvQCA 的一致性（包含度）計算邏輯與 csQCA 相同（二元比例），因為條件和結果均為整數集合。<code class="inline">incl.cut = 1</code> 意味著一致性必須達到 100%（與 csQCA 相同）。如果允許略低於完全一致，可設 <code class="inline">incl.cut = 0.8</code> 並搭配 <code class="inline">n.cut = 2</code>（至少 2 個案例）。</p>
+</div>
+
+<!-- ==================== 5.3 ==================== -->
+<h2 id="mv-min">5.3 mvQCA 布林最小化 <span class="en">· mvQCA Boolean Minimization</span></h2>
+
+<h3>eqmcc() 搭配多值條件</h3>
+
+<div class="code"><span class="c-prompt">&gt; </span><span class="c-com"># 複雜解</span>
+<span class="c-prompt">&gt; </span>mvCS <span class="c-kw">&lt;-</span> <span class="c-fn">eqmcc</span>(HarKemTT, details <span class="c-kw">=</span> <span class="c-num">TRUE</span>, show.cases <span class="c-kw">=</span> <span class="c-num">TRUE</span>)
+<span class="c-prompt">&gt; </span>mvCS
+<span class="c-out">## M1: RPG{1}*MIL{1} + RPG{2}*GEO{2}*COL{2} + ... =&gt; BAN</span>
+<span class="c-out">##</span>
+<span class="c-out">##        incl    PRI    cov.r   cov.u</span>
+<span class="c-out">## M1      1.000   1.000  0.929   ...</span>
+<span class="c-prompt">&gt; </span>
+<span class="c-prompt">&gt; </span><span class="c-com"># 簡約解（加入邏輯餘項化簡）</span>
+<span class="c-prompt">&gt; </span>mvPS <span class="c-kw">&lt;-</span> <span class="c-fn">eqmcc</span>(HarKemTT, include <span class="c-kw">=</span> <span class="c-str">"?"</span>,
+<span class="c-plus">+</span>            details <span class="c-kw">=</span> <span class="c-num">TRUE</span>, show.cases <span class="c-kw">=</span> <span class="c-num">TRUE</span>)
+<span class="c-prompt">&gt; </span>mvPS</div>
+
+<h3>解讀 mvQCA 輸出 <span class="en">· Interpreting mvQCA output</span></h3>
+
+<p>mvQCA 輸出的因果路徑使用大括號符號。以下是一個假設的解示例：</p>
+
+<div style="background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;padding:1.2rem;margin:1rem 0;font-family:var(--mono)">
+  <div style="margin-bottom:.8rem;font-size:1.05rem">RPG{1}*MIL{1} + RPG{2}*GEO{2}*COL{2} ⇒ BAN</div>
+  <div style="font-size:.9rem;color:var(--ink-soft);line-height:1.8">
+    路徑 1：RPG{1}*MIL{1}<br>
+    &nbsp;&nbsp;→ 統治政黨型態 = 半競爭（RPG=1）<strong>AND</strong> 軍事干預 = 有（MIL=1）<br>
+    &nbsp;&nbsp;→ 這兩個條件共同出現 → 導致一黨禁令（BAN=1）<br><br>
+    路徑 2：RPG{2}*GEO{2}*COL{2}<br>
+    &nbsp;&nbsp;→ RPG = 競爭 AND 地處東/南非 AND 法國殖民地<br>
+    &nbsp;&nbsp;→ 三條件聯集 → 導致一黨禁令
+  </div>
+</div>
+
+<div class="callout tip">
+  <div class="ct">mvQCA 的 AND 與 OR 運算</div>
+  <p>與 csQCA 相同：<code class="inline">*</code> 代表 AND（集合交集），<code class="inline">+</code> 代表 OR（集合聯集），波浪號 <code class="inline">~</code> 代表 NOT（補集）。但在多值條件下，取補集較複雜——<code class="inline">~RPG{1}</code> 代表「RPG 不等於 1」，等同於 <code class="inline">RPG{0,2}</code>（0 或 2）。</p>
+</div>
+
+<!-- Interactive: mvQCA notation converter -->
+<div class="widget" id="mv-widget">
+  <div class="widget-head"><span class="wtag">互動</span> mvQCA 符號解碼器</div>
+  <div class="widget-body">
+    <p style="font-size:.9rem;color:var(--ink-soft)">選擇條件取值，即時看對應的 mvQCA 大括號符號表示法，以及其在 csQCA 中的對應意義（若適用）。</p>
+    <div class="controls">
+      <div class="field">
+        <label>條件名稱</label>
+        <select id="mv-cond">
+          <option value="RPG,3">RPG（3 個值：0=軍政府, 1=半競爭, 2=競爭）</option>
+          <option value="MIL,2">MIL（2 個值：0=無軍事干預, 1=有）</option>
+          <option value="GEO,3">GEO（3 個值：0=西非, 1=中非, 2=東南非）</option>
+          <option value="COL,3">COL（3 個值：0=英國殖民, 1=其他, 2=法國殖民）</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>選取的值（多選）</label>
+        <select id="mv-val" multiple size="3" style="min-width:160px"></select>
+      </div>
+    </div>
+    <div class="result-box" id="mv-out" style="font-size:.85rem"></div>
+  </div>
+</div>
+
+<!-- ==================== 5.4 ==================== -->
+<h2 id="tqca">5.4 時序 QCA（tQCA） <span class="en">· Temporal QCA</span></h2>
+
+<p>標準 csQCA / fsQCA 把所有條件視為<strong>無時序的同等成員</strong>——不管條件 A 在條件 B 之前或之後發生，它們都被等同對待。<strong>時序 QCA（tQCA）</strong>在布林最小化中加入條件的「先後順序」資訊，讓因果路徑反映歷史過程的時間維度。</p>
+
+<div class="callout key">
+  <div class="ct">本節研究案例</div>
+  <p>Ragin &amp; Strand (2008) 以 19 世紀末至 20 世紀初，10 個國家建立農業結盟（「綠色聯合」）為例，研究三個條件的時序效果：<br>
+  <strong>EBA</strong>（精英主導農業利益）、<strong>EBM</strong>（精英主導城市利益）、<strong>GRI</strong>（農民自主動員）<br>
+  資料集：<code class="inline">data(RagStr)</code>（QCA 套件內建）。</p>
+</div>
+
+<h3>tQCA 的核心概念：時序與組態 <span class="en">· Temporal sequences in QCA</span></h3>
+
+<p>tQCA 的關鍵貢獻是區分<strong>同樣的條件組合，但發生順序不同</strong>的情況。例如：</p>
+
+<div class="steps">
+  <div class="step">
+    <div>
+      <h4>組態相同、順序不同 → 不同結果</h4>
+      <p>A*B（A 先 B 後）≠ B*A（B 先 A 後）。傳統 QCA 把這兩種情況視為同一個組態「A 且 B」，tQCA 則將它們區分為不同的時序路徑。</p>
+    </div>
+  </div>
+  <div class="step">
+    <div>
+      <h4>時序組態的建立</h4>
+      <p>每個案例除了記錄哪些條件「在場」，還記錄條件出現的<strong>先後時序</strong>（或同時出現）。這些資訊被編碼進時序真值表中。</p>
+    </div>
+  </div>
+  <div class="step">
+    <div>
+      <h4>時序路徑的解讀</h4>
+      <p>最小化後的解以「&gt;」表示時序先後：<code class="inline">EBA &gt; GRI</code> 意味著「精英主導農業利益先出現，農民動員後出現」的時序路徑。</p>
+    </div>
+  </div>
+</div>
+
+<!-- SVG: temporal sequence illustration -->
+<div class="diagram">
+  <svg viewBox="0 0 560 130" role="img" aria-label="時序 QCA 示意">
+    <!-- Timeline -->
+    <line x1="40" y1="65" x2="520" y2="65" stroke="var(--ink-soft)" stroke-width="2"/>
+    <polygon points="520,61 528,65 520,69" fill="var(--ink-soft)"/>
+    <text x="535" y="69" fill="var(--ink-faint)" font-size="11">時間 →</text>
+    <!-- Case 1: EBA > GRI -->
+    <text x="40" y="25" fill="var(--accent)" font-size="12" font-weight="700">案例 1：EBA → GRI（精英先，農民後）</text>
+    <rect x="70"  y="45" width="90" height="40" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+    <rect x="220" y="45" width="90" height="40" rx="6" fill="var(--accent2-soft)" stroke="var(--accent2)" stroke-width="1.5"/>
+    <text x="115" y="70" text-anchor="middle" fill="var(--accent)" font-size="12" font-weight="700">EBA</text>
+    <text x="265" y="70" text-anchor="middle" fill="var(--accent2)" font-size="12" font-weight="700">GRI</text>
+    <!-- Arrow between events -->
+    <line x1="165" y1="65" x2="215" y2="65" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr)"/>
+    <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/></marker></defs>
+    <!-- Case 2: GRI > EBA -->
+    <text x="320" y="25" fill="var(--warn)" font-size="12" font-weight="700">案例 2：GRI → EBA（農民先，精英後）</text>
+    <rect x="340" y="45" width="90" height="40" rx="6" fill="var(--accent2-soft)" stroke="var(--accent2)" stroke-width="1.5"/>
+    <rect x="450" y="45" width="75" height="40" rx="6" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+    <text x="385" y="70" text-anchor="middle" fill="var(--accent2)" font-size="12" font-weight="700">GRI</text>
+    <text x="487" y="70" text-anchor="middle" fill="var(--warn)" font-size="12" font-weight="700">EBA</text>
+    <line x1="435" y1="65" x2="445" y2="65" stroke="#94a3b8" stroke-width="1.5"/>
+    <!-- caption -->
+    <text x="280" y="120" text-anchor="middle" fill="var(--ink-faint)" font-size="11">相同條件，不同時序 → tQCA 視為不同組態</text>
+  </svg>
+  <figcaption>tQCA 的核心：相同條件在不同時間順序下可能產生不同結果。</figcaption>
+</div>
+
+<!-- ==================== 5.5 ==================== -->
+<h2 id="tqca-aux">5.5 輔助條件與「無關」值 <span class="en">· Auxiliary Conditions &amp; Don't-Care Values</span></h2>
+
+<p>tQCA 引入了兩個 csQCA 沒有的概念：<strong>輔助條件（auxiliary conditions）</strong>和<strong>「無關」值（don't-care / dc values）</strong>。</p>
+
+<h3>輔助條件 <span class="en">· Auxiliary conditions</span></h3>
+<p>在時序路徑中，某些條件的「存在或缺席」本身已由時序邏輯決定，不需要額外在場。這些條件被稱為輔助條件（auxiliary conditions, AC），用來確定時序中的「空白位置」。</p>
+
+<h3>「無關」值（dc 值） <span class="en">· Don't-care values</span></h3>
+<p>某個位置的條件值「對分析結果無影響」時，可編碼為「無關」（don't care）。在 R 的 QCA 套件中，「無關」值可以用以下方式表示：</p>
+
+<div class="table-wrap">
+<table class="tbl">
+  <thead><tr><th>寫法</th><th>意義</th><th>使用情境</th></tr></thead>
+  <tbody>
+    <tr><td><code>-</code>（破折號）</td><td>此案例的此條件不適用</td><td>資料矩陣中</td></tr>
+    <tr><td><code>dc</code>（字串）</td><td>don't care，與 <code>-</code> 同義</td><td>部分函數輸入</td></tr>
+    <tr><td>負整數（如 <code>-9</code>）</td><td>缺失或無關，由研究者設定</td><td>數值型資料</td></tr>
+    <tr><td><code>NA</code></td><td>R 語言的缺失值</td><td>一般資料清理後</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="code"><span class="c-prompt">&gt; </span><span class="c-fn">data</span>(RagStr)       <span class="c-com"># Ragin &amp; Strand 資料集</span>
+<span class="c-prompt">&gt; </span>RagStr
+<span class="c-out">##       EBA EBM GRI OUT</span>
+<span class="c-out">## AUS     1   1   0   1</span>
+<span class="c-out">## BEL     1   1   0   0</span>
+<span class="c-out">## CAN     0   1   1  -1   &lt;-- 負整數 -1 表示 don't care (OUT)</span>
+<span class="c-out">## DEN     1   1   1   1</span>
+<span class="c-out">## FIN     1  -1   1   1   &lt;-- EBM = -1（don't care）</span>
+<span class="c-out">## FRA     1   1   0   0</span>
+<span class="c-out">## GER     1   1   1   1</span>
+<span class="c-out">## IRE     0   1   0   0</span>
+<span class="c-out">## SWE     1  -1   1   1   &lt;-- EBM = -1（don't care）</span>
+<span class="c-out">## USA     0   1   1   0</span>
+<span class="c-prompt">&gt; </span><span class="c-com"># 確認「無關」值的設定</span>
+<span class="c-prompt">&gt; </span>RagStr[RagStr == -1]  <span class="c-com"># 查看所有 dc 值的位置</span></div>
+
+<div class="callout key">
+  <div class="ct">RagStr 的時序意義</div>
+  <p>EBM = -1（FIN 與 SWE）的解讀：這兩個國家中，城市精英利益的存在/缺席對於農業聯盟的形成「無關緊要」——關鍵是農民動員（GRI=1）已先發生，城市精英的立場不再決定最終結果。這正是 tQCA 分析時序邏輯的精髓。</p>
+</div>
+
+<h3>在 truthTable() 中處理 dc 值</h3>
+
+<div class="code"><span class="c-prompt">&gt; </span><span class="c-com"># tQCA 用 truthTable()，將 dc 值以 -1（或其他負數）標記</span>
+<span class="c-prompt">&gt; </span>RagStrTT <span class="c-kw">&lt;-</span> <span class="c-fn">truthTable</span>(RagStr,
+<span class="c-plus">+</span>   outcome    <span class="c-kw">=</span> <span class="c-str">"OUT"</span>,
+<span class="c-plus">+</span>   conditions <span class="c-kw">=</span> <span class="c-fn">c</span>(<span class="c-str">"EBA"</span>, <span class="c-str">"EBM"</span>, <span class="c-str">"GRI"</span>),
+<span class="c-plus">+</span>   complete   <span class="c-kw">=</span> <span class="c-num">TRUE</span>,
+<span class="c-plus">+</span>   show.cases <span class="c-kw">=</span> <span class="c-num">TRUE</span>,
+<span class="c-plus">+</span>   dcc        <span class="c-kw">=</span> <span class="c-num">-1</span>)   <span class="c-com"># 指定 don't-care 代碼為 -1</span>
+<span class="c-prompt">&gt; </span>RagStrTT</div>
+
+<!-- ==================== 5.6 ==================== -->
+<h2 id="tqca-min">5.6 tQCA 最小化 <span class="en">· tQCA Minimization</span></h2>
+
+<p>tQCA 的布林最小化邏輯與 csQCA 相同，但化簡時還需考慮「時序覆蓋 (temporal coverage)」：一個時序路徑只能覆蓋在正確時序下發生的案例。</p>
+
+<div class="code"><span class="c-prompt">&gt; </span><span class="c-com"># 複雜解</span>
+<span class="c-prompt">&gt; </span>tCS <span class="c-kw">&lt;-</span> <span class="c-fn">eqmcc</span>(RagStrTT,
+<span class="c-plus">+</span>   details    <span class="c-kw">=</span> <span class="c-num">TRUE</span>,
+<span class="c-plus">+</span>   show.cases <span class="c-kw">=</span> <span class="c-num">TRUE</span>)
+<span class="c-prompt">&gt; </span>tCS
+<span class="c-out">## M1: EBA*GRI + EBA*~EBM =&gt; OUT</span>
+<span class="c-out">##</span>
+<span class="c-out">##       incl    PRI    cov.r  cov.u  cases</span>
+<span class="c-out">## EBA*GRI       1.000  1.000  0.600  0.400  DEN, FIN, GER, SWE</span>
+<span class="c-out">## EBA*~EBM      1.000  1.000  0.400  0.200  FIN, SWE</span>
+<span class="c-prompt">&gt; </span>
+<span class="c-prompt">&gt; </span><span class="c-com"># 簡約解（含邏輯餘項）</span>
+<span class="c-prompt">&gt; </span>tPS <span class="c-kw">&lt;-</span> <span class="c-fn">eqmcc</span>(RagStrTT, include <span class="c-kw">=</span> <span class="c-str">"?"</span>,
+<span class="c-plus">+</span>   details    <span class="c-kw">=</span> <span class="c-num">TRUE</span>,
+<span class="c-plus">+</span>   show.cases <span class="c-kw">=</span> <span class="c-num">TRUE</span>)
+<span class="c-prompt">&gt; </span>tPS</div>
+
+<h3>解讀 tQCA 輸出 <span class="en">· Interpreting tQCA results</span></h3>
+
+<p>在 tQCA 中，解的表示與 csQCA 相同（AND = <code class="inline">*</code>、OR = <code class="inline">+</code>、NOT = <code class="inline">~</code>）。<strong>時序關係</strong>體現在研究者對「哪個條件先出現」的理論說明中（通常在真值表建構時已編碼）。例如：</p>
+
+<div style="background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;padding:1.2rem;margin:1rem 0;font-family:var(--mono)">
+  <div style="font-size:1rem;margin-bottom:.8rem">EBA*GRI ⇒ OUT（農業聯盟形成）</div>
+  <div style="font-size:.9rem;color:var(--ink-soft);line-height:1.8">
+    csQCA 讀法：精英主導農業（EBA）AND 農民動員（GRI）→ 聯盟形成<br><br>
+    tQCA 讀法（搭配時序資料）：<br>
+    &nbsp;&nbsp;• FIN, SWE：GRI（農民動員）<em>先於</em> EBA（精英動員）→ 聯盟形成<br>
+    &nbsp;&nbsp;• DEN, GER：EBA 與 GRI 同時或接近同時 → 聯盟形成<br><br>
+    <span style="color:var(--warn)">時序方向由原始資料的編碼決定，最小化的結果需搭配案例說明才有完整意義。</span>
+  </div>
+</div>
+
+<div class="callout warn">
+  <div class="ct">tQCA 的限制與爭議</div>
+  <p>tQCA 的時序資訊主要依賴研究者對案例的歷史判斷，而非自動從資料提取。若時序編碼不準確，分析結果可能有誤。另外，樣本數小時（tQCA 常見）邏輯餘項多，化簡效果有限。<strong>建議搭配深度個案研究（within-case analysis）驗證時序路徑的因果機制。</strong></p>
+</div>
+
+<!-- Interactive: tQCA dc value simulator -->
+<div class="widget" id="tqca-widget">
+  <div class="widget-head"><span class="wtag">互動</span> tQCA 「無關」值模擬器</div>
+  <div class="widget-body">
+    <p style="font-size:.9rem;color:var(--ink-soft)">設定三個條件的值（0=缺席, 1=在場, dc=無關），觀察這個案例在真值表中的行為：是否能「覆蓋」多個真值表列。</p>
+    <div class="controls">
+      <div class="field">
+        <label>EBA（精英農業利益）</label>
+        <select id="tq-EBA">
+          <option value="1">1（在場）</option>
+          <option value="0">0（缺席）</option>
+          <option value="dc">dc（無關）</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>EBM（精英城市利益）</label>
+        <select id="tq-EBM">
+          <option value="1">1（在場）</option>
+          <option value="0">0（缺席）</option>
+          <option value="dc" selected>dc（無關）</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>GRI（農民動員）</label>
+        <select id="tq-GRI">
+          <option value="1" selected>1（在場）</option>
+          <option value="0">0（缺席）</option>
+          <option value="dc">dc（無關）</option>
+        </select>
+      </div>
+    </div>
+    <div class="result-box" id="tqca-out" style="font-size:.85rem"></div>
+  </div>
+</div>
+
+<!-- ==================== 5.7 ==================== -->
+<h2 id="compare">5.7 三種 QCA 的比較 <span class="en">· Comparing csQCA, mvQCA, and tQCA</span></h2>
+
+<p>三種 QCA 變體各有其適用場景，選擇時應依據研究問題與資料特性：</p>
+
+<div class="table-wrap">
+<table class="tbl">
+  <thead>
+    <tr>
+      <th>面向</th>
+      <th>csQCA（清晰集）</th>
+      <th>fsQCA（模糊集）</th>
+      <th>mvQCA（多值）</th>
+      <th>tQCA（時序）</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>條件型態</strong></td>
+      <td>二元（0/1）</td>
+      <td>連續（0–1）</td>
+      <td>離散多值（0/1/2/…）</td>
+      <td>二元 + 時序</td>
+    </tr>
+    <tr>
+      <td><strong>主要優點</strong></td>
+      <td>概念簡潔、最小化穩健</td>
+      <td>捕捉程度差異、更貼近連續概念</td>
+      <td>避免二元化偏誤、保留多類別資訊</td>
+      <td>加入因果時序、反映歷史過程</td>
+    </tr>
+    <tr>
+      <td><strong>主要限制</strong></td>
+      <td>二元化損失資訊；容易過度化簡</td>
+      <td>閾值設定主觀性高；交叉點需理論支持</td>
+      <td>真值表列數急遽增加；邏輯餘項極多</td>
+      <td>時序資料難以系統化蒐集；小樣本問題</td>
+    </tr>
+    <tr>
+      <td><strong>樣本數建議</strong></td>
+      <td>10–50 個案例</td>
+      <td>10–150 個案例</td>
+      <td>通常需 &gt;30 個案例</td>
+      <td>通常 &lt;30 個案例（歷史比較）</td>
+    </tr>
+    <tr>
+      <td><strong>R 套件功能</strong></td>
+      <td><code>truthTable()</code><br><code>eqmcc()</code></td>
+      <td><code>calibrate(type="fuzzy")</code><br><code>truthTable()</code><br><code>eqmcc()</code></td>
+      <td><code>truthTable()</code>（自動偵測多值）<br><code>eqmcc()</code></td>
+      <td><code>truthTable(dcc=)</code><br><code>eqmcc()</code></td>
+    </tr>
+    <tr>
+      <td><strong>資料集範例</strong></td>
+      <td><code>data(Krook)</code></td>
+      <td><code>data(Emmenegger)</code></td>
+      <td><code>data(HarKem)</code></td>
+      <td><code>data(RagStr)</code></td>
+    </tr>
+    <tr>
+      <td><strong>最小化輸出</strong></td>
+      <td><code>A*B + ~C</code></td>
+      <td><code>A*B + ~C</code>（模糊 AND/OR）</td>
+      <td><code>A{1}*B{0,2}</code></td>
+      <td><code>A*B</code>（搭配時序編碼解讀）</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- Choosing flowchart SVG -->
+<div class="diagram">
+  <svg viewBox="0 0 580 260" role="img" aria-label="QCA 方法選擇流程">
+    <!-- Start -->
+    <rect x="215" y="10" width="150" height="36" rx="18" fill="var(--accent)" />
+    <text x="290" y="33" text-anchor="middle" fill="white" font-size="13" font-weight="700">研究問題</text>
+    <!-- Arrow down -->
+    <line x1="290" y1="46" x2="290" y2="68" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <polygon points="286,68 290,76 294,68" fill="var(--ink-soft)"/>
+    <!-- Question 1 -->
+    <rect x="160" y="76" width="260" height="36" rx="6" fill="var(--bg-soft)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="290" y="99" text-anchor="middle" fill="var(--ink)" font-size="12">條件可以合理二元化嗎？</text>
+    <!-- Yes branch -->
+    <line x1="290" y1="112" x2="290" y2="134" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <polygon points="286,134 290,142 294,134" fill="var(--ink-soft)"/>
+    <text x="310" y="128" fill="var(--ink-faint)" font-size="11">是</text>
+    <!-- No branch (left) -->
+    <line x1="160" y1="94" x2="50" y2="94" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <line x1="50" y1="94" x2="50" y2="142" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <polygon points="46,142 50,150 54,142" fill="var(--ink-soft)"/>
+    <text x="90" y="112" fill="var(--ink-faint)" font-size="11">否（連續概念）</text>
+    <!-- No branch (right) -->
+    <line x1="420" y1="94" x2="530" y2="94" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <line x1="530" y1="94" x2="530" y2="142" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <polygon points="526,142 530,150 534,142" fill="var(--ink-soft)"/>
+    <text x="435" y="112" fill="var(--ink-faint)" font-size="11">否（多類別）</text>
+    <!-- Question 2 -->
+    <rect x="210" y="142" width="160" height="36" rx="6" fill="var(--bg-soft)" stroke="var(--border)" stroke-width="1.5"/>
+    <text x="290" y="162" text-anchor="middle" fill="var(--ink)" font-size="12">有時序資料？</text>
+    <!-- csQCA -->
+    <rect x="220" y="202" width="140" height="42" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+    <text x="290" y="227" text-anchor="middle" fill="var(--accent)" font-size="13" font-weight="700">csQCA</text>
+    <line x1="290" y1="178" x2="290" y2="202" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <polygon points="286,202 290,210 294,202" fill="var(--ink-soft)"/>
+    <text x="310" y="196" fill="var(--ink-faint)" font-size="11">否</text>
+    <!-- tQCA -->
+    <rect x="390" y="178" width="100" height="42" rx="8" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="2"/>
+    <text x="440" y="204" text-anchor="middle" fill="var(--warn)" font-size="13" font-weight="700">tQCA</text>
+    <line x1="290" y1="160" x2="390" y2="205" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <text x="360" y="178" fill="var(--ink-faint)" font-size="11">有時序</text>
+    <!-- fsQCA -->
+    <rect x="0" y="150" width="100" height="42" rx="8" fill="var(--accent2-soft)" stroke="var(--accent2)" stroke-width="2"/>
+    <text x="50" y="176" text-anchor="middle" fill="var(--accent2)" font-size="13" font-weight="700">fsQCA</text>
+    <!-- mvQCA -->
+    <rect x="480" y="150" width="100" height="42" rx="8" fill="var(--bg-soft)" stroke="var(--border)" stroke-width="2"/>
+    <text x="530" y="176" text-anchor="middle" fill="var(--ink)" font-size="13" font-weight="700">mvQCA</text>
+  </svg>
+  <figcaption>選擇 QCA 變體的決策流程（簡化版）。實際選擇還需考慮樣本數、理論架構與資料可得性。</figcaption>
+</div>
+
+<!-- ==================== 本章回顧 ==================== -->
+<h2 id="summary">本章回顧 <span class="en">· Chapter Summary</span></h2>
+
+<div class="callout info">
+  <div class="ct">mvQCA 重點整理</div>
+  <ul style="margin:.5rem 0;padding-left:1.5rem;line-height:1.9">
+    <li><strong>使用時機</strong>：條件天然有 3+ 個離散類別，且不宜二元化（避免資訊損失）。</li>
+    <li><strong>資料格式</strong>：整數值（0, 1, 2, …），與 csQCA 相同的 data.frame，但條件取多個值。</li>
+    <li><strong>真值表</strong>：<code class="inline">truthTable()</code> 自動偵測多值條件，行數 = 各條件取值數的乘積。</li>
+    <li><strong>輸出符號</strong>：大括號表示法 <code class="inline">RPG{1}</code>、<code class="inline">COL{0,2}</code>；AND/OR/NOT 符號與 csQCA 相同。</li>
+    <li><strong>主要挑戰</strong>：邏輯餘項急遽增多，限制化簡能力；建議搭配充分的案例數量。</li>
+  </ul>
+</div>
+
+<div class="callout info">
+  <div class="ct">tQCA 重點整理</div>
+  <ul style="margin:.5rem 0;padding-left:1.5rem;line-height:1.9">
+    <li><strong>使用時機</strong>：因果過程有明確的時序邏輯，且研究者有可靠的歷史時序資料。</li>
+    <li><strong>「無關」值</strong>：以 <code class="inline">-1</code>（或其他負整數）在資料中標記 don't-care 值；用 <code class="inline">dcc = -1</code> 告訴 <code class="inline">truthTable()</code> 這些值的代碼。</li>
+    <li><strong>分析流程</strong>：與 csQCA 相同（<code class="inline">truthTable()</code> → <code class="inline">eqmcc()</code>），但需特別處理 dc 值。</li>
+    <li><strong>解讀</strong>：最小化結果本身不直接標示時序，需搭配原始時序資料和案例分析才能完整解釋因果路徑。</li>
+    <li><strong>限制</strong>：時序判斷高度依賴研究者的歷史知識；適合歷史比較研究，樣本數通常較小。</li>
+  </ul>
+</div>
+
+<div class="callout tip">
+  <div class="ct">延伸學習資源</div>
+  <p>本教材覆蓋 Thiem &amp; Duşa (2013) 的核心內容。若需進一步學習：<br>
+  • <strong>Ragin (2008)</strong>：<em>Redesigning Social Inquiry</em>（fsQCA 深度）<br>
+  • <strong>Schneider &amp; Wagemann (2012)</strong>：<em>Set-Theoretic Methods for the Social Sciences</em>（全面系統介紹）<br>
+  • <strong>COMPASSS</strong>：<a href="https://www.compasss.org" target="_blank" rel="noopener">compasss.org</a>（QCA 學術社群，含最新文獻與軟體更新）<br>
+  • <strong>R 套件文件</strong>：<code class="inline">?QCA</code>、<code class="inline">vignette("QCA")</code></p>
+</div>
+
+<nav class="chap-nav">
+  <a href="ch4.html"><div class="dir">← 上一章</div><div class="ttl">Ch.4 模糊集 fsQCA</div></a>
+  <a class="next" href="../index.html"><div class="dir">回到首頁 →</div><div class="ttl">章節目錄</div></a>
+</nav>
+
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Thiem &amp; Duşa, <em>Qualitative Comparative Analysis with R</em> (Springer, 2013)</p>
+</footer>
+<script src="../js/main.js"></script>
+<script>
+/* ============================================================
+   Ch.5 互動元件
+   ============================================================ */
+
+/* ---- 1. mvQCA 符號解碼器 ---- */
+(function(){
+  const condSel = document.getElementById('mv-cond');
+  const valSel  = document.getElementById('mv-val');
+  const outEl   = document.getElementById('mv-out');
+
+  const condData = {
+    'RPG,3': { name:'RPG', labels:['0=軍政府/一黨','1=半競爭','2=完全競爭'] },
+    'MIL,2': { name:'MIL', labels:['0=無軍事干預','1=有軍事干預'] },
+    'GEO,3': { name:'GEO', labels:['0=西非','1=中非','2=東/南非'] },
+    'COL,3': { name:'COL', labels:['0=英國殖民','1=其他宗主','2=法國殖民'] }
+  };
+
+  function populateVals(){
+    const key = condSel.value;
+    const d   = condData[key];
+    valSel.innerHTML = '';
+    d.labels.forEach((lbl, i) => {
+      const opt = document.createElement('option');
+      opt.value = i; opt.textContent = lbl;
+      valSel.appendChild(opt);
+    });
+    // default: select first
+    if(valSel.options.length > 0) valSel.options[0].selected = true;
+    update();
+  }
+
+  function update(){
+    const key  = condSel.value;
+    const d    = condData[key];
+    const n    = parseInt(key.split(',')[1]);
+    const selected = [...valSel.selectedOptions].map(o => parseInt(o.value));
+    if(!selected.length){ outEl.textContent = '請選擇至少一個值'; return; }
+
+    const bracket = `${d.name}{${selected.join(',')}}`;
+    const allVals = Array.from({length:n}, (_,i)=>i);
+    const notSelected = allVals.filter(v => !selected.includes(v));
+    const notBracket = notSelected.length ? `${d.name}{${notSelected.join(',')}}` : '空集合';
+
+    const isCS = n === 2;
+    let csEquiv = '';
+    if(isCS){
+      if(selected.includes(1) && !selected.includes(0)) csEquiv = `csQCA 對應：${d.name}（在場，=1）`;
+      else if(selected.includes(0) && !selected.includes(1)) csEquiv = `csQCA 對應：~${d.name}（缺席，=0）`;
+      else csEquiv = 'csQCA 對應：${d.name} 或 ~${d.name}（全部，恆真）';
+    } else {
+      csEquiv = `此為多值條件（${n} 個值），csQCA 無直接對應\n需二元化才能用 csQCA（但會損失資訊）`;
+    }
+
+    outEl.innerHTML =
+      `選取值：${selected.map(v => d.labels[v]).join(', ')}\n\n` +
+      `mvQCA 符號：  ${bracket}\n` +
+      `補集符號：    ~${bracket} = ${notBracket}\n\n` +
+      csEquiv + '\n\n' +
+      `此條件有 ${n} 個值，完整選取所有值的組合數：2^${n} - 1 = ${Math.pow(2,n)-1} 種非空子集。`;
+  }
+
+  condSel.addEventListener('change', populateVals);
+  valSel.addEventListener('change', update);
+  populateVals();
+})();
+
+/* ---- 2. tQCA 「無關」值模擬器 ---- */
+(function(){
+  const conds = ['EBA','EBM','GRI'];
+  const labels = {
+    EBA: { 0:'缺席（無精英農業利益）', 1:'在場（有精英農業利益）', dc:'無關（don\'t care）' },
+    EBM: { 0:'缺席（無精英城市利益）', 1:'在場（有精英城市利益）', dc:'無關（don\'t care）' },
+    GRI: { 0:'缺席（無農民動員）',     1:'在場（有農民動員）',     dc:'無關（don\'t care）' }
+  };
+  const outEl = document.getElementById('tqca-out');
+
+  function calc(){
+    const vals = conds.map(id => document.getElementById('tq-' + id).value);
+    const dcCount = vals.filter(v => v === 'dc').length;
+
+    // Determine how many truth-table rows this case covers
+    const covered = Math.pow(2, dcCount);
+
+    // Generate truth table rows covered
+    const rows = [];
+    function expand(idx, current){
+      if(idx === conds.length){ rows.push([...current]); return; }
+      if(vals[idx] === 'dc'){
+        expand(idx+1, [...current, 0]);
+        expand(idx+1, [...current, 1]);
+      } else {
+        expand(idx+1, [...current, parseInt(vals[idx])]);
+      }
+    }
+    expand(0, []);
+
+    const rowStrs = rows.map(r => `[${r.join(', ')}]`).join('  ');
+    const pattern = vals.map((v,i) => v === 'dc' ? `${conds[i]}=dc` : `${conds[i]}=${v}`).join(', ');
+
+    outEl.innerHTML =
+      `案例組態：{ ${pattern} }\n\n` +
+      `「無關」(dc) 條件數量：${dcCount}\n` +
+      `覆蓋的真值表列數：2^${dcCount} = ${covered} 列\n\n` +
+      `覆蓋列：\n${rowStrs}\n\n` +
+      (dcCount > 0
+        ? `解讀：此案例因為 ${conds.filter((_,i)=>vals[i]==='dc').join(', ')} 標記為「無關」，\n在布林最小化中可以填補多個真值表列，提升化簡能力。`
+        : `解讀：所有條件均有明確值，此案例只對應 1 個真值表列。`);
+  }
+
+  conds.forEach(id => document.getElementById('tq-' + id).addEventListener('change', calc));
+  calc();
+})();
+</script>
+</body>
+</html>

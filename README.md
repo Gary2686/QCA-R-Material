@@ -10,11 +10,9 @@
 |------|------|------|
 | Ch.1 | 緒論 Introduction | ✅ 已完成 |
 | Ch.2 | R 語言入門 Introduction to R | ✅ 已完成 |
-| Ch.3 | 清晰集 csQCA | ⏳ 待補 |
-| Ch.4 | 模糊集 fsQCA | ⏳ 待補 |
-| Ch.5 | QCA 延伸（mvQCA / tQCA） | ⏳ 待補 |
-
-後續章節會依課程進度陸續補上。
+| Ch.3 | 清晰集 csQCA | ✅ 已完成 |
+| Ch.4 | 模糊集 fsQCA | ✅ 已完成 |
+| Ch.5 | QCA 延伸（mvQCA / tQCA） | ✅ 已完成 |
 
 ## 互動元件
 
@@ -33,8 +31,11 @@ qca-r-tutorial/
 ├── css/style.css         # 設計系統（含深色模式）
 ├── js/main.js            # 互動元件邏輯
 ├── chapters/
-│   ├── ch1.html          # 第 1 章
-│   └── ch2.html          # 第 2 章
+│   ├── ch1.html          # 第 1 章：緒論
+│   ├── ch2.html          # 第 2 章：R 語言入門（含 4 個互動元件）
+│   ├── ch3.html          # 第 3 章：清晰集 csQCA
+│   ├── ch4.html          # 第 4 章：模糊集 fsQCA
+│   └── ch5.html          # 第 5 章：QCA 延伸（mvQCA / tQCA）
 ├── .nojekyll             # 讓 GitHub Pages 原樣提供檔案
 └── README.md
 ```

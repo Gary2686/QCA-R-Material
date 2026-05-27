@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch.4 模糊集 fsQCA · QCA with R</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div id="readbar"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="../index.html"><span class="logo">Q</span><span>QCA with R<small>互動式教材</small></span></a>
+    <nav class="topnav">
+      <a href="../index.html">首頁</a>
+      <a href="ch2.html">Ch.2</a>
+      <a href="ch3.html">Ch.3 csQCA</a>
+      <a href="ch4.html">Ch.4 fsQCA</a>
+      <a href="ch5.html">Ch.5 延伸</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="chapter-head">
+  <div class="eyebrow">CHAPTER 4</div>
+  <h1>模糊集 QCA</h1>
+  <div class="en">Fuzzy-Set QCA (fsQCA)</div>
+</div>
+
+<p class="lead">本章以 Emmenegger (2011) 的就業保障法規研究為案例，逐步示範 fsQCA 的完整分析流程——從理論驅動的模糊集校準、必要性與充分性的模糊計算，到三種解的推導，並以 XY 散佈圖視覺化集合關係。</p>
+
+<nav class="toc">
+  <strong>本章目錄</strong>
+  <ol>
+    <li><a href="#calib">4.1 模糊集校準</a></li>
+    <li><a href="#nec">4.2 模糊集必要性</a></li>
+    <li><a href="#suf">4.3 充分性與真值表</a></li>
+    <li><a href="#plot">4.4 繪圖：XY 散佈圖</a></li>
+    <li><a href="#summary">本章回顧</a></li>
+  </ol>
+</nav>
+
+<!-- ==================== 4.1 ==================== -->
+<h2 id="calib">4.1 模糊集校準 <span class="en">· Calibrating Fuzzy Sets</span></h2>
+
+<p>模糊集（fuzzy set）允許案例的隸屬度<strong>連續分布於 0 到 1 之間</strong>。隸屬度 1 代表「完全屬於集合」，0 代表「完全不屬於集合」，而 <strong>0.5 是交叉點 (crossover point)——最大不確定性，既非屬於亦非不屬於</strong>。相較於清晰集，模糊集能捕捉真實世界中「程度」的差異，更符合社會科學概念的連續性本質。</p>
+
+<div class="callout key">
+  <div class="ct">本章研究案例</div>
+  <p>Emmenegger (2011) 分析 18 個富裕民主國家的就業保障法規強度（JSR，outcome）。五個條件均以模糊集校準：<br>
+  <strong>CO</strong>（工會集中度）、<strong>UR</strong>（工會權利）、<strong>SP</strong>（社會伙伴關係）、<strong>UE</strong>（失業率）、<strong>LP</strong>（左翼政黨執政比例）。</p>
+</div>
+
+<h3>交叉點的重要性 <span class="en">· The crossover point</span></h3>
+
+<p>交叉點（cross = 0.5）是模糊校準中最關鍵的決策點。案例隸屬度 &gt; 0.5 代表「更屬於集合」，&lt; 0.5 代表「更不屬於集合」。<strong>交叉點必須有實質的理論或概念依據</strong>——它不是統計中位數，而是「概念上模糊不清」的那個邊界值。</p>
+
+<div class="diagram">
+  <svg viewBox="0 0 600 90" role="img" aria-label="模糊隸屬度刻度">
+    <defs>
+      <linearGradient id="fuzzygrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%"   style="stop-color:#e2e8f0"/>
+        <stop offset="50%"  style="stop-color:#94a3b8"/>
+        <stop offset="100%" style="stop-color:#2b6cb0"/>
+      </linearGradient>
+    </defs>
+    <rect x="80" y="30" width="440" height="20" rx="4" fill="url(#fuzzygrad)"/>
+    <line x1="80"  y1="50" x2="80"  y2="60" stroke="#64748b" stroke-width="1.5"/>
+    <line x1="190" y1="50" x2="190" y2="58" stroke="#64748b" stroke-width="1.5"/>
+    <line x1="300" y1="50" x2="300" y2="62" stroke="#ef4444" stroke-width="2"/>
+    <line x1="410" y1="50" x2="410" y2="58" stroke="#64748b" stroke-width="1.5"/>
+    <line x1="520" y1="50" x2="520" y2="60" stroke="#64748b" stroke-width="1.5"/>
+    <text x="80"  y="74" text-anchor="middle" fill="#64748b" font-size="12" font-family="monospace">0</text>
+    <text x="190" y="74" text-anchor="middle" fill="#64748b" font-size="12" font-family="monospace">0.25</text>
+    <text x="300" y="74" text-anchor="middle" fill="#ef4444" font-size="12" font-family="monospace" font-weight="bold">0.5</text>
+    <text x="410" y="74" text-anchor="middle" fill="#64748b" font-size="12" font-family="monospace">0.75</text>
+    <text x="520" y="74" text-anchor="middle" fill="#64748b" font-size="12" font-family="monospace">1</text>
+    <text x="80"  y="22" text-anchor="middle" fill="#94a3b8" font-size="11">完全不屬於</text>
+    <text x="300" y="22" text-anchor="middle" fill="#ef4444" font-size="11" font-weight="bold">交叉點 crossover</text>
+    <text x="520" y="22" text-anchor="middle" fill="#2b6cb0" font-size="11">完全屬於</text>
+    <text x="300" y="88" text-anchor="middle" fill="#ef4444" font-size="10" font-family="monospace">最大不確定性</text>
+  </svg>
+  <figcaption>模糊隸屬度的概念刻度：0.5 是交叉點，不是切點而是「概念邊界」。</figcaption>
+</div>
+
+<h3>轉換校準法：calibrate() <span class="en">· Transformational calibration</span></h3>
+
+<p>QCA 套件的 <code class="inline">calibrate()</code> 函數將連續原始值透過邏輯斯蒂函數（S 型曲線）轉換為模糊隸屬度。需指定三個閾值：</p>
+
+<div class="table-wrap">
+<table class="tbl">
+  <thead><tr><th>參數</th><th>名稱</th><th>概念意義</th><th>對應輸出隸屬度</th></tr></thead>
+  <tbody>
+    <tr><td><code>e.ex</code></td><td>完全排除閾值<br>(fully-out threshold)</td><td>原始值低於此處，案例幾乎完全不屬於集合</td><td>≈ 0.05</td></tr>
+    <tr><td><code>cross</code></td><td>交叉點<br>(crossover point)</td><td>概念上「半屬於」的那個原始值；最大不確定性</td><td>= 0.5</td></tr>
+    <tr><td><code>e.in</code></td><td>完全納入閾值<br>(fully-in threshold)</td><td>原始值高於此處，案例幾乎完全屬於集合</td><td>≈ 0.95</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>以就業保障法規（JSR，指數 1–10）為例，研究者認定：指數 ≥ 8 表示高保障（完全屬於），指數 = 5 是「說不準」（交叉點），指數 ≤ 2 表示低保障（完全不屬於）：</p>
+
+<div class="code"><span class="c-prompt">&gt; </span><span class="c-fn">library</span>(QCA)
+<span class="c-prompt">&gt; </span><span class="c-fn">data</span>(Emmenegger)        <span class="c-com"># 載入 Emmenegger 資料集</span>
+<span class="c-prompt">&gt; </span>Emm <span class="c-kw">&lt;-</span> Emmenegger        <span class="c-com"># 工作副本</span>
+<span class="c-prompt">&gt; </span><span class="c-com"># 校準 JSR：正端點（遞增型），e.ex=2, cross=5, e.in=8</span>
+<span class="c-prompt">&gt; </span>Emm$JSR <span class="c-kw">&lt;-</span> <span class="c-fn">calibrate</span>(Emmenegger$JSR,
+<span class="c-plus">+</span>   type       <span class="c-kw">=</span> <span class="c-str">"fuzzy"</span>,
+<span class="c-plus">+</span>   thresholds <span class="c-kw">=</span> <span class="c-fn">c</span>(<span class="c-num">2</span>, <span class="c-num">5</span>, <span class="c-num">8</span>))  <span class="c-com"># c(e.ex, cross, e.in)</span>
+<span class="c-prompt">&gt; </span><span class="c-com"># 或用有名字的字串寫法：</span>
+<span class="c-prompt">&gt; </span>Emm$JSR <span class="c-kw">&lt;-</span> <span class="c-fn">calibrate</span>(Emmenegger$JSR,
+<span class="c-plus">+</span>   type       <span class="c-kw">=</span> <span class="c-str">"fuzzy"</span>,
+<span class="c-plus">+</span>   thresholds <span class="c-kw">=</span> <span class="c-str">"e.in=8, cross=5, e.ex=2"</span>)
+<span class="c-prompt">&gt; </span><span class="c-fn">round</span>(Emm$JSR, <span class="c-num">3</span>)</div>
+
+<div class="callout tip">
+  <div class="ct">thresholds 向量順序</div>
+  <p>以向量傳入時，QCA 按<strong>升序排列</strong>對應 e.ex → cross → e.in（正端點，隸屬度遞增）；若傳入<strong>降序</strong>（如 <code class="inline">c(8, 5, 2)</code>），則對應 e.ex → cross → e.in（負端點，隸屬度遞減）。排列順序決定校準的方向，務必搭配理論含義確認。</p>
+</div>
+
+<h3>四種概念類型 <span class="en">· Four calibration concept types</span></h3>
+
+<p>依據閾值排列方式，模糊集校準描述四種不同的概念形態。前兩種（端點型）最為常見：</p>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0">
+
+  <div style="background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;padding:1rem">
+    <strong style="color:var(--accent)">S1 — 正端點（Endpoint-Positive）</strong>
+    <p style="font-size:.85rem;margin:.5rem 0 .3rem">原始值愈高 → 隸屬度愈高。最常見。<br>排列：<code>e.ex &lt; cross &lt; e.in</code></p>
+    <svg width="100%" height="70" viewBox="0 0 180 70">
+      <path d="M5,65 C30,65 55,62 90,35 C125,8 150,5 175,5" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+      <line x1="5" y1="35" x2="175" y2="35" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="90" y="68" text-anchor="middle" fill="var(--ink-faint)" font-size="9" font-family="monospace">原始值 →</text>
+      <text x="3" y="38" fill="#ef4444" font-size="8" font-family="monospace">0.5</text>
+    </svg>
+    <p style="font-size:.8rem;color:var(--ink-soft);margin:.3rem 0 0">範例：左翼政黨執政比例 → 「左翼主政」集合</p>
+  </div>
+
+  <div style="background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;padding:1rem">
+    <strong style="color:var(--accent)">S2 — 負端點（Endpoint-Negative）</strong>
+    <p style="font-size:.85rem;margin:.5rem 0 .3rem">原始值愈高 → 隸屬度愈低（取補集）。<br>排列：<code>e.ex &gt; cross &gt; e.in</code></p>
+    <svg width="100%" height="70" viewBox="0 0 180 70">
+      <path d="M5,5 C30,5 55,8 90,35 C125,62 150,65 175,65" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+      <line x1="5" y1="35" x2="175" y2="35" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="90" y="68" text-anchor="middle" fill="var(--ink-faint)" font-size="9" font-family="monospace">原始值 →</text>
+      <text x="3" y="38" fill="#ef4444" font-size="8" font-family="monospace">0.5</text>
+    </svg>
+    <p style="font-size:.8rem;color:var(--ink-soft);margin:.3rem 0 0">範例：失業率 → 「低失業率」集合（高失業 = 低隸屬）</p>
+  </div>
+
+  <div style="background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;padding:1rem">
+    <strong style="color:var(--accent2)">M1 — 正中點（Midpoint-Positive）</strong>
+    <p style="font-size:.85rem;margin:.5rem 0 .3rem">中間值隸屬度最高，兩端低。需 4 個閾值：<br><code>c(e.ex.lo, e.in.lo, e.in.hi, e.ex.hi)</code></p>
+    <svg width="100%" height="70" viewBox="0 0 180 70">
+      <path d="M5,65 C25,60 55,10 90,5 C125,10 155,60 175,65" fill="none" stroke="var(--accent2)" stroke-width="2.5"/>
+      <line x1="5" y1="35" x2="175" y2="35" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="90" y="68" text-anchor="middle" fill="var(--ink-faint)" font-size="9" font-family="monospace">原始值 →</text>
+      <text x="3" y="38" fill="#ef4444" font-size="8" font-family="monospace">0.5</text>
+    </svg>
+    <p style="font-size:.8rem;color:var(--ink-soft);margin:.3rem 0 0">範例：溫度 → 「宜居溫度」集合（極端皆低隸屬）</p>
+  </div>
+
+  <div style="background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;padding:1rem">
+    <strong style="color:var(--accent2)">M2 — 負中點（Midpoint-Negative）</strong>
+    <p style="font-size:.85rem;margin:.5rem 0 .3rem">中間值隸屬度最低，兩端高。概念的典型在兩極。<br>需 4 個閾值。</p>
+    <svg width="100%" height="70" viewBox="0 0 180 70">
+      <path d="M5,5 C25,10 55,60 90,65 C125,60 155,10 175,5" fill="none" stroke="var(--accent2)" stroke-width="2.5"/>
+      <line x1="5" y1="35" x2="175" y2="35" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="90" y="68" text-anchor="middle" fill="var(--ink-faint)" font-size="9" font-family="monospace">原始值 →</text>
+      <text x="3" y="38" fill="#ef4444" font-size="8" font-family="monospace">0.5</text>
+    </svg>
+    <p style="font-size:.8rem;color:var(--ink-soft);margin:.3rem 0 0">範例：政黨意識形態 → 「極端」集合（中間派低隸屬）</p>
+  </div>
+
+</div>
+
+<!-- ==================== 互動：校準曲線模擬器 ==================== -->
+<div class="widget" id="fuzzy-calib-widget">
+  <div class="widget-head"><span class="wtag">互動</span> 模糊校準曲線模擬器</div>
+  <div class="widget-body">
+    <p style="font-size:.9rem;color:var(--ink-soft)">調整三個閾值，觀察 S 型校準曲線如何變化，以及原始值 1–10 被轉換成什麼隸屬度。遞增排列（e.ex &lt; cross &lt; e.in）為 S1 正端點；遞減排列為 S2 負端點。</p>
+    <div class="controls">
+      <div class="field"><label>e.ex（完全排除，原始值）</label><input type="number" id="f-eex" value="2" step="0.5" min="0" max="10"></div>
+      <div class="field"><label>cross（交叉點，原始值）</label><input type="number" id="f-cross" value="5" step="0.5" min="0" max="10"></div>
+      <div class="field"><label>e.in（完全納入，原始值）</label><input type="number" id="f-ein" value="8" step="0.5" min="0" max="10"></div>
+    </div>
+    <canvas id="calib-canvas" width="520" height="210" style="display:block;max-width:100%;border:1px solid var(--border);border-radius:6px;background:var(--bg-soft);margin:.5rem 0"></canvas>
+    <div class="result-box" id="fuzzy-calib-out" style="font-size:.83rem"></div>
+  </div>
+</div>
+
+<h3>ECDF 校準法 <span class="en">· ECDF calibration</span></h3>
+
+<p>當研究者缺乏明確的理論閾值時，可用「經驗累積分布函數 (Empirical CDF, ECDF)」校準：以資料的分位數位置作為隸屬度，確保隸屬度分布反映資料本身的分布形狀。</p>
+
+<div class="callout warn">
+  <div class="ct">ECDF 校準的限制</div>
+  <p>ECDF 校準沒有真正的概念型「交叉點」，其分位數 0.5 不代表集合理論上的模糊邊界，只是分布的中位數。<strong>Ragin (2008) 建議只在有明確理論支撐的三點閾值無法取得時才考慮 ECDF，並需在報告中說明理由。</strong></p>
+</div>
+
+<div class="code"><span class="c-prompt">&gt; </span><span class="c-com"># ECDF 校準方法一：用 R base 的 ecdf()</span>
+<span class="c-prompt">&gt; </span>ecdf_fn    <span class="c-kw">&lt;-</span> <span class="c-fn">ecdf</span>(Emmenegger$LP)
+<span class="c-prompt">&gt; </span>Emm$LP_ecdf <span class="c-kw">&lt;-</span> <span class="c-fn">ecdf_fn</span>(Emmenegger$LP)
+<span class="c-prompt">&gt; </span>
+<span class="c-prompt">&gt; </span><span class="c-com"># ECDF 校準方法二：用 calibrate() 搭配 quantile() 自動計算閾值</span>
+<span class="c-prompt">&gt; </span>q_thresh <span class="c-kw">&lt;-</span> <span class="c-fn">quantile</span>(Emmenegger$LP, <span class="c-fn">c</span>(<span class="c-num">0.1</span>, <span class="c-num">0.5</span>, <span class="c-num">0.9</span>))
+<span class="c-prompt">&gt; </span>Emm$LP   <span class="c-kw">&lt;-</span> <span class="c-fn">calibrate</span>(Emmenegger$LP,
+<span class="c-plus">+</span>   type       <span class="c-kw">=</span> <span class="c-str">"fuzzy"</span>,
+<span class="c-plus">+</span>   thresholds <span class="c-kw">=</span> q_thresh)</div>
+
+<!-- ==================== 4.2 ==================== -->
+<h2 id="nec">4.2 模糊集必要性 <span class="en">· Necessity in fsQCA</span></h2>
+
+<p>在清晰集 csQCA 中，必要性是二元的：條件 C 要麼覆蓋所有結果為 1 的案例，要麼沒有。在模糊集 fsQCA 中，必要性是<strong>程度問題</strong>：我們用「最小值 (min) 運算」來量化 O 在多大程度上是 C 的子集。</p>
+
+<h3>集合論直覺 <span class="en">· Set-theoretic logic</span></h3>
+
+<p>「C 是 O 的必要條件」在集合論中等同於「O ⊆ C（O 是 C 的子集）」。在模糊集中，O ⊆ C 意味著每個案例的 O<sub>i</sub> ≤ C<sub>i</sub>。當存在違反此規則的案例時，一致性 (InclN) 會下降：</p>
+
+<div class="diagram">
+  <svg viewBox="0 0 560 150" role="img" aria-label="模糊必要性示意圖">
+    <!-- Large ellipse C -->
+    <ellipse cx="280" cy="80" rx="220" ry="60" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+    <!-- Smaller ellipse O inside -->
+    <ellipse cx="280" cy="85" rx="130" ry="38" fill="var(--accent2-soft)" stroke="var(--accent2)" stroke-width="2"/>
+    <!-- A violating point outside C -->
+    <circle cx="115" cy="65" r="7" fill="#ef4444" opacity="0.9"/>
+    <!-- Inside points -->
+    <circle cx="230" cy="80" r="5" fill="var(--accent2)" opacity="0.8"/>
+    <circle cx="280" cy="90" r="5" fill="var(--accent2)" opacity="0.8"/>
+    <circle cx="320" cy="75" r="5" fill="var(--accent2)" opacity="0.8"/>
+    <!-- Labels -->
+    <text x="440" y="45" fill="var(--accent)" font-size="13" font-weight="700">集合 C（條件）</text>
+    <text x="280" y="118" text-anchor="middle" fill="var(--accent2)" font-size="12" font-weight="700">集合 O（結果）</text>
+    <text x="115" y="48" text-anchor="middle" fill="#ef4444" font-size="11">違反必要性</text>
+    <text x="115" y="60" text-anchor="middle" fill="#ef4444" font-size="10">（O=高，C=低）</text>
+    <text x="280" y="20" text-anchor="middle" fill="var(--ink-soft)" font-size="12">必要性：O ⊆ C（O 應為 C 的子集）</text>
+  </svg>
+  <figcaption>完美必要性：O 完全包含於 C。紅點表示違反——結果出現了但條件缺席。</figcaption>
+</div>
+
+<h3>公式 <span class="en">· Formulas</span></h3>
+
+<div style="background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;padding:1.2rem;margin:1rem 0;font-family:var(--mono);line-height:2.2">
+  <div><strong>InclN</strong>（必要性一致性）= Σ min(C<sub>i</sub>, O<sub>i</sub>) / Σ O<sub>i</sub></div>
+  <div><strong>CovN</strong>（必要性涵蓋率）= Σ min(C<sub>i</sub>, O<sub>i</sub>) / Σ C<sub>i</sub></div>
+  <div><strong>RoN</strong>（必要性相關性）= [Σ O<sub>i</sub> − Σ min(C<sub>i</sub>, O<sub>i</sub>)] / Σ(1−C<sub>i</sub>)</div>
+  <div style="font-size:.85rem;color:var(--ink-soft);line-height:1.5;margin-top:.3rem">min(C, O) = 取兩者中的較小值，代表「同時屬於 C 且屬於 O」的程度（模糊 AND）</div>
+</div>
+
+<p>三個指標的解讀：</p>
+
+<div class="table-wrap">
+<table class="tbl">
+  <thead><tr><th>指標</th><th>計算邏輯</th><th>含義</th><th>門檻建議</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>InclN</strong></td>
+      <td>min(C,O) 之和 ÷ O 之和</td>
+      <td>「O 在場時，C 也在場」的程度。越高越支持必要性。</td>
+      <td>≥ 0.90</td>
+    </tr>
+    <tr>
+      <td><strong>CovN</strong></td>
+      <td>min(C,O) 之和 ÷ C 之和</td>
+      <td>C 是否「太過寬泛（trivially necessary）」。越高表示 C 非瑣碎。</td>
+      <td>≥ 0.60</td>
+    </tr>
+    <tr>
+      <td><strong>RoN</strong></td>
+      <td>（O之和 − min之和）÷ (1−C) 之和</td>
+      <td>C 對解釋 ~O（結果缺席）的相對貢獻。高 RoN 警示 C 幾乎是常數 1。</td>
+      <td>&gt; 0.50 為可接受</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h3>PRI：比例一致性減量 <span class="en">· Proportional Reduction in Inconsistency</span></h3>
+
+<p>PRI 用來偵測「同時必要且充分 (SUIN/NOSC)」的特殊問題——當 C 同時支持 O 和 ~O（結果與其補集），InclN 可能被高估。PRI 修正了這個問題：</p>
+
+<div style="background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;padding:1.2rem;margin:1rem 0;font-family:var(--mono);line-height:2">
+  <div><strong>PRI</strong> = [ Σ min(C,O) − Σ min(C, O, ~O) ] / [ Σ O − Σ min(C, O, ~O) ]</div>
+  <div style="font-size:.85rem;color:var(--ink-soft);line-height:1.5;margin-top:.3rem">PRI → 1：C 幾乎只支持 O（好）<br>PRI → 0：C 同時強烈支持 O 和 ~O（SUIN 問題，需注意）</div>
+</div>
+
+<h3>使用 superSubset() 和 pof()</h3>
+
+<div class="code"><span class="c-prompt">&gt; </span><span class="c-com"># 必要性分析：搜尋 JSR 的必要條件</span>
+<span class="c-prompt">&gt; </span>nec_result <span class="c-kw">&lt;-</span> <span class="c-fn">superSubset</span>(Emm,
+<span class="c-plus">+</span>   outcome    <span class="c-kw">=</span> <span class="c-str">"JSR"</span>,
+<span class="c-plus">+</span>   conditions <span class="c-kw">=</span> <span class="c-fn">c</span>(<span class="c-str">"CO"</span>, <span class="c-str">"UR"</span>, <span class="c-str">"SP"</span>, <span class="c-str">"UE"</span>, <span class="c-str">"LP"</span>),
+<span class="c-plus">+</span>   incl.cut   <span class="c-kw">=</span> <span class="c-num">0.9</span>,   <span class="c-com"># InclN 門檻</span>
+<span class="c-plus">+</span>   cov.cut    <span class="c-kw">=</span> <span class="c-num">0.6</span>,   <span class="c-com"># CovN 門檻（非瑣碎）</span>
+<span class="c-plus">+</span>   ron.cut    <span class="c-kw">=</span> <span class="c-num">0.5</span>)   <span class="c-com"># RoN 門檻</span>
+<span class="c-prompt">&gt; </span>nec_result
+<span class="c-out">##       incl   PRI   cov.r  cov.u  RoN</span>
+<span class="c-out">## SP    0.910  0.858  0.730  0.730  0.713</span>
+<span class="c-out">## CO    0.882  0.821  0.691  0.691  0.743</span>
+<span class="c-prompt">&gt; </span><span class="c-com"># pof() 手動計算特定條件的適合度指標</span>
+<span class="c-prompt">&gt; </span><span class="c-com"># pof(setx, sety) 計算 setx ⊆ sety 的充分性（setx 為子集）</span>
+<span class="c-prompt">&gt; </span><span class="c-com"># → 互換 setx/sety 即得到必要性（sety ⊆ setx）</span>
+<span class="c-prompt">&gt; </span><span class="c-fn">pof</span>(Emm$JSR, Emm$SP)  <span class="c-com"># JSR ⊆ SP → SP 作為 JSR 的必要條件</span>
+<span class="c-out">##       incl   PRI   cov.r  cov.u</span>
+<span class="c-out">## JSR   0.910  0.858  0.730  0.730</span></div>
+
+<!-- ==================== 互動：fsQCA 必要性計算器 ==================== -->
+<div class="widget" id="nec-widget">
+  <div class="widget-head"><span class="wtag">互動</span> fsQCA 必要性計算器</div>
+  <div class="widget-body">
+    <p style="font-size:.9rem;color:var(--ink-soft)">輸入 6 個案例的條件隸屬度（C）與結果隸屬度（O），即時計算 InclN、CovN、PRI 與 RoN。</p>
+    <div style="overflow-x:auto">
+    <table class="tbl" style="font-size:.85rem">
+      <thead><tr><th>案例</th><th>C（條件隸屬度）</th><th>O（結果隸屬度）</th></tr></thead>
+      <tbody id="nec-rows"></tbody>
+    </table>
+    </div>
+    <div class="result-box" id="nec-out" style="font-size:.85rem;margin-top:.5rem"></div>
+  </div>
+</div>
+
+<!-- ==================== 4.3 ==================== -->
+<h2 id="suf">4.3 充分性與真值表 <span class="en">· Sufficiency &amp; Truth Table</span></h2>
+
+<p>fsQCA 的充分性分析同樣以真值表為核心，但建構方式與 csQCA 有兩點不同：（1）案例用 <strong>&gt;0.5 規則</strong>分配到真值表列（binarization）；（2）計算每列 InclS 時仍使用<strong>原始模糊分數</strong>（而非二元化後的值）。</p>
+
+<h3>大於 0.5 規則 <span class="en">· The &gt;0.5 rule</span></h3>
+
+<p>每個案例依其 k 個條件的模糊隸屬度決定所屬的真值表列：</p>
+
+<div style="background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;padding:1rem;margin:1rem 0;font-family:var(--mono)">
+  <div style="margin-bottom:.5rem">條件 C<sub>i</sub> <strong>&gt; 0.5</strong> → 該列對應的位元為 <strong>1</strong>（案例「更屬於」此條件集合）</div>
+  <div>條件 C<sub>i</sub> <strong>≤ 0.5</strong> → 該列對應的位元為 <strong>0</strong>（案例「更不屬於」此條件集合）</div>
+  <div style="margin-top:.7rem;font-size:.85rem;color:var(--ink-soft)">例：案例 A 的 (CO=0.71, UR=0.29, SP=0.83, UE=0.44, LP=0.62)<br>→ 二元化為 [1, 0, 1, 0, 1] → 分配到真值表第 21 列（10101₂ = 21）</div>
+</div>
+
+<div class="callout tip">
+  <div class="ct">為何要先二元化？</div>
+  <p>fsQCA 的 2^k 真值表結構來自集合論的組態思維——每個條件「在場」或「缺席」構成一種組態，對應確定的因果解釋。二元化讓研究者能判斷哪些組態有足夠的案例支持，以及每種組態是否充分導致結果。</p>
+</div>
+
+<h3>InclS 與 CovS 的模糊公式 <span class="en">· Fuzzy InclS and CovS</span></h3>
+
+<div style="background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;padding:1.2rem;margin:1rem 0;font-family:var(--mono);line-height:2.2">
+  <div><strong>X<sub>i</sub></strong> = min(C1<sub>i</sub>, C2<sub>i</sub>, …, Ck<sub>i</sub>)　<span style="font-size:.85rem;color:var(--ink-soft)">（列 i 的模糊 AND，所有條件隸屬度的最小值）</span></div>
+  <div><strong>InclS</strong> = Σ min(X<sub>i</sub>, O<sub>i</sub>) / Σ X<sub>i</sub>　<span style="font-size:.85rem;color:var(--ink-soft)">（充分性一致性）</span></div>
+  <div><strong>CovS</strong> = Σ min(X<sub>i</sub>, O<sub>i</sub>) / Σ O<sub>i</sub>　<span style="font-size:.85rem;color:var(--ink-soft)">（充分性涵蓋率）</span></div>
+  <div><strong>CovU</strong> = 唯一涵蓋率　<span style="font-size:.85rem;color:var(--ink-soft)">（排除其他路徑後，此路徑獨立貢獻的涵蓋率）</span></div>
+</div>
+
+<h3>建構真值表 <span class="en">· Building the truth table</span></h3>
+
+<div class="code"><span class="c-prompt">&gt; </span>tt <span class="c-kw">&lt;-</span> <span class="c-fn">truthTable</span>(Emm,
+<span class="c-plus">+</span>   outcome    <span class="c-kw">=</span> <span class="c-str">"JSR"</span>,
+<span class="c-plus">+</span>   conditions <span class="c-kw">=</span> <span class="c-fn">c</span>(<span class="c-str">"CO"</span>, <span class="c-str">"UR"</span>, <span class="c-str">"SP"</span>, <span class="c-str">"UE"</span>, <span class="c-str">"LP"</span>),
+<span class="c-plus">+</span>   incl.cut   <span class="c-kw">=</span> <span class="c-num">0.8</span>,   <span class="c-com"># InclS 門檻（fsQCA 常用 0.75–0.85）</span>
+<span class="c-plus">+</span>   n.cut      <span class="c-kw">=</span> <span class="c-num">1</span>,     <span class="c-com"># 每列至少 1 個案例才納入</span>
+<span class="c-plus">+</span>   complete   <span class="c-kw">=</span> <span class="c-num">TRUE</span>,  <span class="c-com"># 顯示所有 2^5=32 列（含邏輯餘項）</span>
+<span class="c-plus">+</span>   show.cases <span class="c-kw">=</span> <span class="c-num">TRUE</span>,  <span class="c-com"># 顯示各列包含哪些案例</span>
+<span class="c-plus">+</span>   sort.by    <span class="c-kw">=</span> <span class="c-str">"incl"</span>) <span class="c-com"># 依 InclS 由高至低排序</span>
+<span class="c-prompt">&gt; </span>tt             <span class="c-com"># 檢視真值表</span>
+<span class="c-prompt">&gt; </span>tt$tt          <span class="c-com"># 直接存取真值表 data.frame</span>
+<span class="c-prompt">&gt; </span><span class="c-com"># 查看 OUT 編碼邏輯</span>
+<span class="c-prompt">&gt; </span><span class="c-com"># OUT=1：incl ≥ incl.cut；OUT=0：incl &lt; incl.cut；OUT=?：邏輯餘項</span></div>
+
+<div class="callout key">
+  <div class="ct">fsQCA 的 incl.cut 如何選擇？</div>
+  <p>fsQCA 的一致性門檻反映的是「模糊充分性」的接受水準：<br>
+  • Ragin (2008) 建議最低 <strong>0.75</strong><br>
+  • 實務研究常採用 <strong>0.80</strong> 作為基準<br>
+  • 高度嚴格的研究可設到 <strong>0.85–0.90</strong><br>
+  <strong>門檻越高，進入最小化的列越少（越嚴格），但可能遺漏弱充分的路徑。</strong>應在複雜解、簡約解、中間解三者中保持一致。</p>
+</div>
+
+<h3>三種解的推導 <span class="en">· Deriving three solutions</span></h3>
+
+<div class="code"><span class="c-prompt">&gt; </span><span class="c-com"># ── 複雜解（Conservative Solution）──────────────────────────────</span>
+<span class="c-prompt">&gt; </span><span class="c-com"># 只用有案例的組態（OUT=1），不化簡邏輯餘項</span>
+<span class="c-prompt">&gt; </span>cs <span class="c-kw">&lt;-</span> <span class="c-fn">eqmcc</span>(tt, details <span class="c-kw">=</span> <span class="c-num">TRUE</span>, show.cases <span class="c-kw">=</span> <span class="c-num">TRUE</span>)
+<span class="c-prompt">&gt; </span>cs
+<span class="c-prompt">&gt; </span><span class="c-com"># ── 簡約解（Parsimonious Solution）──────────────────────────────</span>
+<span class="c-prompt">&gt; </span><span class="c-com"># 加入所有邏輯餘項（include="?"），讓布林最小化自由化簡</span>
+<span class="c-prompt">&gt; </span>ps <span class="c-kw">&lt;-</span> <span class="c-fn">eqmcc</span>(tt,
+<span class="c-plus">+</span>   include    <span class="c-kw">=</span> <span class="c-str">"?"</span>,
+<span class="c-plus">+</span>   details    <span class="c-kw">=</span> <span class="c-num">TRUE</span>,
+<span class="c-plus">+</span>   show.cases <span class="c-kw">=</span> <span class="c-num">TRUE</span>)
+<span class="c-prompt">&gt; </span>ps
+<span class="c-prompt">&gt; </span><span class="c-com"># ── 中間解（Intermediate Solution）──────────────────────────────</span>
+<span class="c-prompt">&gt; </span><span class="c-com"># 加入邏輯餘項，但只用符合「方向性預期」的邏輯餘項</span>
+<span class="c-prompt">&gt; </span>is <span class="c-kw">&lt;-</span> <span class="c-fn">eqmcc</span>(tt,
+<span class="c-plus">+</span>   include    <span class="c-kw">=</span> <span class="c-str">"?"</span>,
+<span class="c-plus">+</span>   direxp     <span class="c-kw">=</span> <span class="c-fn">c</span>(CO<span class="c-kw">=</span><span class="c-num">1</span>, UR<span class="c-kw">=</span><span class="c-num">1</span>, SP<span class="c-kw">=</span><span class="c-num">1</span>, UE<span class="c-kw">=</span><span class="c-num">0</span>, LP<span class="c-kw">=</span><span class="c-num">1</span>),
+<span class="c-plus">+</span>   details    <span class="c-kw">=</span> <span class="c-num">TRUE</span>,
+<span class="c-plus">+</span>   show.cases <span class="c-kw">=</span> <span class="c-num">TRUE</span>)
+<span class="c-prompt">&gt; </span>is</div>
+
+<div class="callout tip">
+  <div class="ct">方向性預期 direxp 的設定依據</div>
+  <p><code class="inline">direxp</code> 中 <code class="inline">1</code> 表示「預期條件以<em>在場</em>形式進入解（正向）」，<code class="inline">0</code> 表示「以<em>缺席</em>（取補集 ~）形式進入解」。以本例而言：研究者理論上預期 CO（工會集中度高）、UR（工會權利多）、SP（有社會伙伴關係）、LP（左翼政黨執政比例高）均「在場」才有利於高就業保障；而 UE（高失業）「缺席」（低失業）才有利。<strong>設定 direxp 必須有文獻或理論根據，而非資料導向。</strong></p>
+</div>
+
+<h3>矛盾性化簡假設 CSA 檢驗 <span class="en">· Checking for CSA</span></h3>
+
+<p>中間解與簡約解都使用了「化簡假設 (Simplifying Assumptions, SA)」——假設某邏輯餘項的結果為 1，從而允許化簡。若某一邏輯餘項同時被假設為 1（在簡約解的正向分析中）和 0（在簡約解的負向分析中），則構成「矛盾性化簡假設 (Contradictory Simplifying Assumptions, CSA)」：</p>
+
+<div class="code"><span class="c-prompt">&gt; </span><span class="c-com"># 取得三種解各自使用的化簡假設清單</span>
+<span class="c-prompt">&gt; </span>SA_is <span class="c-kw">&lt;-</span> is$SA       <span class="c-com"># 中間解的 SA（包含 $pos 和 $neg）</span>
+<span class="c-prompt">&gt; </span>SA_ps <span class="c-kw">&lt;-</span> ps$SA       <span class="c-com"># 簡約解的 SA</span>
+<span class="c-prompt">&gt; </span><span class="c-com"># CSA = 中間解中，同時出現於正向與負向 SA 的邏輯餘項</span>
+<span class="c-prompt">&gt; </span>CSA <span class="c-kw">&lt;-</span> <span class="c-fn">intersect</span>(SA_is$pos, SA_is$neg)
+<span class="c-prompt">&gt; </span>CSA
+<span class="c-out">## character(0)   # 理想情況：無 CSA</span>
+<span class="c-prompt">&gt; </span><span class="c-com"># 若有 CSA，可查看對應的組態</span>
+<span class="c-prompt">&gt; </span><span class="c-fn">if</span>(<span class="c-fn">length</span>(CSA) <span class="c-kw">&gt;</span> <span class="c-num">0</span>) tt$tt[CSA, ]</div>
+
+<!-- ==================== 互動：真值表列分配模擬器 ==================== -->
+<div class="widget" id="tt-widget">
+  <div class="widget-head"><span class="wtag">互動</span> 真值表列分配模擬器</div>
+  <div class="widget-body">
+    <p style="font-size:.9rem;color:var(--ink-soft)">輸入一個案例的 5 個條件模糊隸屬度，觀察它被 &gt;0.5 規則分配到哪個真值表列，以及列的 min 值（模糊 AND）。</p>
+    <div class="controls">
+      <div class="field"><label>CO（工會集中度）</label><input type="number" id="tt-CO" value="0.71" step="0.05" min="0.01" max="0.99"></div>
+      <div class="field"><label>UR（工會權利）</label><input type="number" id="tt-UR" value="0.29" step="0.05" min="0.01" max="0.99"></div>
+      <div class="field"><label>SP（社會伙伴）</label><input type="number" id="tt-SP" value="0.83" step="0.05" min="0.01" max="0.99"></div>
+      <div class="field"><label>UE（失業率）</label><input type="number" id="tt-UE" value="0.44" step="0.05" min="0.01" max="0.99"></div>
+      <div class="field"><label>LP（左翼政黨）</label><input type="number" id="tt-LP" value="0.62" step="0.05" min="0.01" max="0.99"></div>
+    </div>
+    <div class="result-box" id="tt-out" style="font-size:.85rem"></div>
+  </div>
+</div>
+
+<!-- ==================== 4.4 ==================== -->
+<h2 id="plot">4.4 繪圖：XY 散佈圖 <span class="en">· XY Scatter Plots</span></h2>
+
+<p>XY 散佈圖（又稱集合論散佈圖）是 fsQCA 最重要的視覺化工具：透過案例在二維空間的分布，直觀呈現集合關係（必要性或充分性）的一致性程度。</p>
+
+<h3>必要性 XY 圖 <span class="en">· Necessity XY plot</span></h3>
+<p>橫軸（X）= 條件 C 的模糊隸屬度；縱軸（Y）= 結果 O 的模糊隸屬度。若 C 是 O 的完美必要條件，所有案例應落在對角線 Y = X 以下（O ≤ C）。</p>
+
+<h3>充分性 XY 圖 <span class="en">· Sufficiency XY plot</span></h3>
+<p>橫軸（X）= 條件 C；縱軸（Y）= 結果 O。若 C 是 O 的完美充分條件，所有案例應落在對角線以上（O ≥ C）。</p>
+
+<!-- Dual SVG illustration -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:1.5rem 0">
+<div class="diagram">
+  <svg viewBox="0 0 220 220" role="img" aria-label="必要性 XY 圖示意">
+    <!-- axes -->
+    <line x1="35" y1="185" x2="200" y2="185" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <line x1="35" y1="185" x2="35"  y2="15"  stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <!-- diagonal: perfect necessity line -->
+    <line x1="35" y1="185" x2="200" y2="20" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5,4"/>
+    <!-- upper-left forbidden zone (shaded) -->
+    <polygon points="35,185 35,20 200,20" fill="#ef444418"/>
+    <!-- points below the line (O ≤ C — necessity holds) -->
+    <circle cx="65"  cy="168" r="5" fill="var(--accent)" opacity=".8"/>
+    <circle cx="90"  cy="150" r="5" fill="var(--accent)" opacity=".8"/>
+    <circle cx="120" cy="130" r="5" fill="var(--accent)" opacity=".8"/>
+    <circle cx="150" cy="95"  r="5" fill="var(--accent)" opacity=".8"/>
+    <circle cx="175" cy="55"  r="5" fill="var(--accent)" opacity=".8"/>
+    <!-- one violation (O > C) -->
+    <circle cx="80"  cy="105" r="6" fill="#ef4444" opacity=".9"/>
+    <text x="80" y="95" text-anchor="middle" fill="#ef4444" font-size="9">違反</text>
+    <!-- labels -->
+    <text x="118" y="200" text-anchor="middle" fill="var(--ink-faint)" font-size="11">條件 C →</text>
+    <text x="16" y="103" fill="var(--ink-faint)" font-size="11" transform="rotate(-90,16,103)">結果 O →</text>
+    <text x="185" y="35" fill="#ef4444" font-size="10">Y=X 線</text>
+    <text x="112" y="15" text-anchor="middle" fill="var(--ink-soft)" font-size="11" font-weight="bold">必要性圖</text>
+    <text x="60" y="55" text-anchor="middle" fill="#ef4444" font-size="9" opacity=".7">違反區域</text>
+  </svg>
+  <figcaption>必要性：點應在對角線以下（O ≤ C）。<br>落在左上方 = 違反必要性。</figcaption>
+</div>
+<div class="diagram">
+  <svg viewBox="0 0 220 220" role="img" aria-label="充分性 XY 圖示意">
+    <!-- axes -->
+    <line x1="35" y1="185" x2="200" y2="185" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <line x1="35" y1="185" x2="35"  y2="15"  stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <!-- diagonal -->
+    <line x1="35" y1="185" x2="200" y2="20" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5,4"/>
+    <!-- lower-right forbidden zone (shaded) -->
+    <polygon points="35,185 200,185 200,20" fill="#ef444418"/>
+    <!-- points above the line (O ≥ C — sufficiency holds) -->
+    <circle cx="60"  cy="128" r="5" fill="var(--accent2)" opacity=".8"/>
+    <circle cx="85"  cy="100" r="5" fill="var(--accent2)" opacity=".8"/>
+    <circle cx="115" cy="70"  r="5" fill="var(--accent2)" opacity=".8"/>
+    <circle cx="145" cy="45"  r="5" fill="var(--accent2)" opacity=".8"/>
+    <circle cx="175" cy="25"  r="5" fill="var(--accent2)" opacity=".8"/>
+    <!-- one violation (O < C) -->
+    <circle cx="145" cy="130" r="6" fill="#ef4444" opacity=".9"/>
+    <text x="145" y="147" text-anchor="middle" fill="#ef4444" font-size="9">違反</text>
+    <!-- labels -->
+    <text x="118" y="200" text-anchor="middle" fill="var(--ink-faint)" font-size="11">條件 C →</text>
+    <text x="16" y="103" fill="var(--ink-faint)" font-size="11" transform="rotate(-90,16,103)">結果 O →</text>
+    <text x="185" y="35" fill="#ef4444" font-size="10">Y=X 線</text>
+    <text x="112" y="15" text-anchor="middle" fill="var(--ink-soft)" font-size="11" font-weight="bold">充分性圖</text>
+    <text x="165" y="160" text-anchor="middle" fill="#ef4444" font-size="9" opacity=".7">違反區域</text>
+  </svg>
+  <figcaption>充分性：點應在對角線以上（O ≥ C）。<br>落在右下方 = 違反充分性。</figcaption>
+</div>
+</div>
+
+<div class="code"><span class="c-prompt">&gt; </span><span class="c-com"># ── 必要性 XY 圖：SP 是否為 JSR 的必要條件？ ──</span>
+<span class="c-prompt">&gt; </span><span class="c-fn">plot</span>(Emm$SP, Emm$JSR,
+<span class="c-plus">+</span>   xlim <span class="c-kw">=</span> <span class="c-fn">c</span>(<span class="c-num">0</span>, <span class="c-num">1</span>), ylim <span class="c-kw">=</span> <span class="c-fn">c</span>(<span class="c-num">0</span>, <span class="c-num">1</span>),
+<span class="c-plus">+</span>   xlab <span class="c-kw">=</span> <span class="c-str">"SP (Social Partnership)"</span>,
+<span class="c-plus">+</span>   ylab <span class="c-kw">=</span> <span class="c-str">"JSR (Job Security Regulations)"</span>,
+<span class="c-plus">+</span>   main <span class="c-kw">=</span> <span class="c-str">"Necessity plot: Is SP necessary for JSR?"</span>,
+<span class="c-plus">+</span>   pch  <span class="c-kw">=</span> <span class="c-num">21</span>, bg <span class="c-kw">=</span> <span class="c-str">"steelblue"</span>, cex <span class="c-kw">=</span> <span class="c-num">1.2</span>)
+<span class="c-prompt">&gt; </span><span class="c-fn">abline</span>(a <span class="c-kw">=</span> <span class="c-num">0</span>, b <span class="c-kw">=</span> <span class="c-num">1</span>, lty <span class="c-kw">=</span> <span class="c-num">2</span>, col <span class="c-kw">=</span> <span class="c-str">"red"</span>)    <span class="c-com"># 對角線</span>
+<span class="c-prompt">&gt; </span><span class="c-fn">text</span>(Emm$SP, Emm$JSR,
+<span class="c-plus">+</span>   labels <span class="c-kw">=</span> <span class="c-fn">rownames</span>(Emm), pos <span class="c-kw">=</span> <span class="c-num">3</span>, cex <span class="c-kw">=</span> <span class="c-num">0.65</span>)  <span class="c-com"># 案例標籤</span>
+<span class="c-prompt">&gt; </span>
+<span class="c-prompt">&gt; </span><span class="c-com"># ── 充分性 XY 圖（SP → JSR）──</span>
+<span class="c-prompt">&gt; </span><span class="c-fn">plot</span>(Emm$SP, Emm$JSR,
+<span class="c-plus">+</span>   xlim <span class="c-kw">=</span> <span class="c-fn">c</span>(<span class="c-num">0</span>, <span class="c-num">1</span>), ylim <span class="c-kw">=</span> <span class="c-fn">c</span>(<span class="c-num">0</span>, <span class="c-num">1</span>),
+<span class="c-plus">+</span>   xlab <span class="c-kw">=</span> <span class="c-str">"SP"</span>, ylab <span class="c-kw">=</span> <span class="c-str">"JSR"</span>,
+<span class="c-plus">+</span>   main <span class="c-kw">=</span> <span class="c-str">"Sufficiency plot: Is SP sufficient for JSR?"</span>,
+<span class="c-plus">+</span>   pch  <span class="c-kw">=</span> <span class="c-num">21</span>, bg <span class="c-kw">=</span> <span class="c-str">"darkorange"</span>, cex <span class="c-kw">=</span> <span class="c-num">1.2</span>)
+<span class="c-prompt">&gt; </span><span class="c-fn">abline</span>(a <span class="c-kw">=</span> <span class="c-num">0</span>, b <span class="c-kw">=</span> <span class="c-num">1</span>, lty <span class="c-kw">=</span> <span class="c-num">2</span>, col <span class="c-kw">=</span> <span class="c-str">"red"</span>)
+<span class="c-prompt">&gt; </span>
+<span class="c-prompt">&gt; </span><span class="c-com"># ── 解的路徑 XY 圖（用最小化後的 PI 隸屬度）──</span>
+<span class="c-prompt">&gt; </span><span class="c-com"># is$pims$i.sol$C1P1 包含每個 PI 對每個案例的模糊隸屬度</span>
+<span class="c-prompt">&gt; </span>PI_memb <span class="c-kw">&lt;-</span> is$pims$i.sol$C1P1[ , <span class="c-num">1</span>]  <span class="c-com"># 取第一條路徑的隸屬度</span>
+<span class="c-prompt">&gt; </span><span class="c-fn">plot</span>(PI_memb, Emm$JSR,
+<span class="c-plus">+</span>   xlim <span class="c-kw">=</span> <span class="c-fn">c</span>(<span class="c-num">0</span>, <span class="c-num">1</span>), ylim <span class="c-kw">=</span> <span class="c-fn">c</span>(<span class="c-num">0</span>, <span class="c-num">1</span>),
+<span class="c-plus">+</span>   xlab <span class="c-kw">=</span> <span class="c-str">"PI membership (path 1)"</span>, ylab <span class="c-kw">=</span> <span class="c-str">"JSR"</span>,
+<span class="c-plus">+</span>   main <span class="c-kw">=</span> <span class="c-str">"Sufficiency: Path 1 of intermediate solution"</span>)
+<span class="c-prompt">&gt; </span><span class="c-fn">abline</span>(a <span class="c-kw">=</span> <span class="c-num">0</span>, b <span class="c-kw">=</span> <span class="c-num">1</span>, lty <span class="c-kw">=</span> <span class="c-num">2</span>, col <span class="c-kw">=</span> <span class="c-str">"red"</span>)</div>
+
+<div class="callout tip">
+  <div class="ct">讀圖要訣</div>
+  <p><strong>必要性圖</strong>：案例點分布在對角線以下代表 C 覆蓋 O（O ≤ C）；落在對角線左上方的點是「違反案例」——O 高但 C 低，拉低 InclN。<br>
+  <strong>充分性圖</strong>：案例點應在對角線以上（O ≥ C）；落在右下方的點是違反充分性的案例。<br>
+  兩種圖的<strong>對角線斜率都是 1，截距都是 0</strong>（<code class="inline">abline(a=0, b=1)</code>）。案例離線越遠，對應的一致性貢獻越差。</p>
+</div>
+
+<!-- ==================== 本章回顧 ==================== -->
+<h2 id="summary">本章回顧 <span class="en">· Chapter Summary</span></h2>
+
+<div class="callout info">
+  <div class="ct">fsQCA 完整分析流程</div>
+  <ol style="margin:.5rem 0;padding-left:1.5rem;line-height:1.9">
+    <li><strong>校準</strong>：<code class="inline">calibrate(type="fuzzy", thresholds=c(e.ex, cross, e.in))</code>。三個閾值必須有理論依據，特別是交叉點（cross）。四種概念類型：S1（正端點）、S2（負端點）、M1（正中點）、M2（負中點）。</li>
+    <li><strong>必要性</strong>：<code class="inline">superSubset(incl.cut=0.9, cov.cut=0.6, ron.cut=0.5)</code>。評估 InclN、CovN、PRI、RoN 四個指標；PRI 低表示 SUIN 問題。</li>
+    <li><strong>真值表</strong>：<code class="inline">truthTable(incl.cut=0.8, n.cut=1)</code>。用 &gt;0.5 規則分配案例到 2^k 列；InclS ≥ 0.8 列編碼 OUT=1。</li>
+    <li><strong>布林最小化</strong>：<code class="inline">eqmcc()</code> 複雜解；<code class="inline">include="?"</code> 得簡約解；<code class="inline">direxp</code> 加入方向性預期得中間解。</li>
+    <li><strong>CSA 診斷</strong>：<code class="inline">intersect(SA_is$pos, SA_is$neg)</code> 找矛盾化簡假設；理想情況為空集合。</li>
+    <li><strong>視覺化</strong>：<code class="inline">plot() + abline(a=0, b=1)</code> 畫必要性圖（點應在線下）與充分性圖（點應在線上）。</li>
+  </ol>
+</div>
+
+<div class="table-wrap">
+<table class="tbl">
+  <thead>
+    <tr><th>比較面向</th><th>csQCA（清晰集）</th><th>fsQCA（模糊集）</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>隸屬度</td><td>0 或 1（二元）</td><td>0.001 到 0.999（連續）</td></tr>
+    <tr><td>校準函數</td><td><code>calibrate(thresholds=t)</code><br>或 <code>ifelse()</code></td><td><code>calibrate(type="fuzzy",<br>thresholds=c(e.ex, cross, e.in))</code></td></tr>
+    <tr><td>AND 運算</td><td>最小值 min() ≡ 乘積（csQCA 下等同）</td><td>最小值 <code>pmin()</code> 或 <code>min()</code></td></tr>
+    <tr><td>真值表列分配</td><td>直接用 0/1 隸屬度</td><td>&gt;0.5 規則二元化</td></tr>
+    <tr><td>InclS 計算</td><td>比例（出現 1 的案例數）</td><td>Σmin(X,O)/ΣX（連續加權）</td></tr>
+    <tr><td>incl.cut 常用值</td><td>1.0（完全一致）</td><td>0.75–0.85</td></tr>
+    <tr><td>PRI</td><td>不適用</td><td>偵測同時支持 O 和 ~O 的問題</td></tr>
+    <tr><td>視覺化</td><td>Venn 圖（VennDiagram 套件）</td><td>XY 散佈圖（plot + abline）</td></tr>
+  </tbody>
+</table>
+</div>
+
+<nav class="chap-nav">
+  <a href="ch3.html"><div class="dir">← 上一章</div><div class="ttl">Ch.3 清晰集 csQCA</div></a>
+  <a class="next" href="ch5.html"><div class="dir">下一章 →</div><div class="ttl">Ch.5 QCA 延伸</div></a>
+</nav>
+
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Thiem &amp; Duşa, <em>Qualitative Comparative Analysis with R</em> (Springer, 2013)</p>
+</footer>
+<script src="../js/main.js"></script>
+<script>
+/* ============================================================
+   Ch.4 互動元件
+   ============================================================ */
+
+/* ---- 1. 模糊校準曲線模擬器 ---- */
+(function(){
+  const eexIn  = document.getElementById('f-eex');
+  const crossIn= document.getElementById('f-cross');
+  const einIn  = document.getElementById('f-ein');
+  const canvas = document.getElementById('calib-canvas');
+  const outEl  = document.getElementById('fuzzy-calib-out');
+  const ctx    = canvas.getContext('2d');
+
+  // Sample raw values 1–10
+  const samples = [1,2,3,4,5,6,7,8,9,10];
+
+  function logistic(x, b, c){ return 1 / (1 + Math.exp(-b * (x - c))); }
+
+  function calibrateVal(x, eex, cross, ein){
+    const decreasing = eex > cross;
+    const pivot = decreasing ? cross : cross;
+    const span  = Math.abs(ein - cross);
+    if(span < 0.001) return 0.5;
+    const b = Math.log(19) / span;  // log(0.95/0.05)
+    const raw = logistic(x, b, cross);
+    return decreasing ? 1 - raw : raw;
+  }
+
+  function draw(){
+    const eex   = parseFloat(eexIn.value)  || 2;
+    const cross = parseFloat(crossIn.value)|| 5;
+    const ein   = parseFloat(einIn.value)  || 8;
+    const W = canvas.width, H = canvas.height;
+    const pad = {l:52, r:22, t:28, b:38};
+    const pw = W - pad.l - pad.r;
+    const ph = H - pad.t - pad.b;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Background
+    ctx.fillStyle = '#f8fafc';
+    try {
+      const s = getComputedStyle(document.documentElement);
+      const bg = s.getPropertyValue('--bg-soft').trim();
+      if(bg) ctx.fillStyle = bg;
+    } catch(e){}
+    ctx.fillRect(0, 0, W, H);
+
+    // Grid + y-axis labels
+    ctx.font = '11px monospace';
+    ctx.textAlign = 'right';
+    [0, 0.25, 0.5, 0.75, 1].forEach(yv => {
+      const py = pad.t + ph - yv * ph;
+      ctx.strokeStyle = yv === 0.5 ? '#ef4444' : '#cbd5e1';
+      ctx.lineWidth   = yv === 0.5 ? 1.2 : 0.8;
+      ctx.setLineDash(yv === 0.5 ? [4,3] : [2,2]);
+      ctx.beginPath(); ctx.moveTo(pad.l, py); ctx.lineTo(pad.l + pw, py); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = yv === 0.5 ? '#ef4444' : '#94a3b8';
+      ctx.fillText(yv.toFixed(2), pad.l - 5, py + 4);
+    });
+
+    // X-axis ticks
+    ctx.fillStyle = '#94a3b8';
+    ctx.textAlign = 'center';
+    for(let xv = 0; xv <= 10; xv += 2){
+      const px = pad.l + (xv / 10) * pw;
+      ctx.fillText(xv, px, pad.t + ph + 16);
+    }
+
+    // Axis labels
+    ctx.fillStyle = '#64748b';
+    ctx.fillText('原始值 (raw value)', pad.l + pw / 2, pad.t + ph + 32);
+    ctx.save();
+    ctx.translate(14, pad.t + ph / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.fillText('隸屬度 (membership)', 0, 0);
+    ctx.restore();
+
+    // Threshold vertical lines
+    const thresholds = [
+      { v: eex,   label: `e.ex=${eex}`,    color: '#f59e0b' },
+      { v: cross, label: `cross=${cross}`, color: '#ef4444' },
+      { v: ein,   label: `e.in=${ein}`,    color: '#10b981' }
+    ];
+    thresholds.forEach(({v, label, color}) => {
+      const px = pad.l + (v / 10) * pw;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath(); ctx.moveTo(px, pad.t); ctx.lineTo(px, pad.t + ph); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = color;
+      ctx.textAlign = 'center';
+      ctx.font = '10px monospace';
+      ctx.fillText(label, px, pad.t - 8);
+    });
+
+    // S-curve
+    const span = Math.abs(ein - cross);
+    if(span > 0.001){
+      const b = Math.log(19) / span;
+      const dec = eex > cross;
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      for(let px = 0; px <= pw; px++){
+        const rawX = (px / pw) * 10;
+        const raw  = logistic(rawX, b, cross);
+        const score= dec ? 1 - raw : raw;
+        const py   = pad.t + ph - score * ph;
+        if(px === 0) ctx.moveTo(pad.l + px, py);
+        else         ctx.lineTo(pad.l + px, py);
+      }
+      ctx.stroke();
+    }
+
+    // Sample data points
+    const lines = [];
+    samples.forEach(x => {
+      const score = Math.max(0.001, Math.min(0.999, calibrateVal(x, eex, cross, ein)));
+      const px = pad.l + (x / 10) * pw;
+      const py = pad.t + ph - score * ph;
+      ctx.fillStyle = '#6366f1';
+      ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fill();
+      lines.push(`${x} → ${score.toFixed(3)}`);
+    });
+
+    outEl.textContent = '原始值 → 模糊隸屬度:\n'
+      + lines.slice(0,5).join('   ') + '\n'
+      + lines.slice(5).join('   ');
+  }
+
+  [eexIn, crossIn, einIn].forEach(el => el.addEventListener('input', draw));
+  draw();
+})();
+
+/* ---- 2. fsQCA 必要性計算器 ---- */
+(function(){
+  const tbody = document.getElementById('nec-rows');
+  const outEl = document.getElementById('nec-out');
+  const defaults = [[0.8,0.7],[0.6,0.9],[0.3,0.2],[0.9,0.8],[0.4,0.5],[0.7,0.6]];
+
+  defaults.forEach((pair, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      `<td style="padding:.3rem .5rem">案例 ${i+1}</td>` +
+      `<td style="padding:.3rem .5rem"><input type="number" class="nec-c" value="${pair[0]}" min="0" max="1" step="0.05" style="width:64px"></td>` +
+      `<td style="padding:.3rem .5rem"><input type="number" class="nec-o" value="${pair[1]}" min="0" max="1" step="0.05" style="width:64px"></td>`;
+    tbody.appendChild(tr);
+  });
+
+  function calc(){
+    const cs   = [...document.querySelectorAll('.nec-c')].map(e => +e.value);
+    const os   = [...document.querySelectorAll('.nec-o')].map(e => +e.value);
+    const mins     = cs.map((c,i) => Math.min(c, os[i]));
+    const minsN    = cs.map((c,i) => Math.min(c, os[i], 1 - os[i]));
+    const sumO     = os.reduce((a,b) => a+b, 0);
+    const sumC     = cs.reduce((a,b) => a+b, 0);
+    const sum1minC = cs.reduce((a,c) => a + (1-c), 0);
+    const sumMin   = mins.reduce((a,b) => a+b, 0);
+    const sumMinN  = minsN.reduce((a,b) => a+b, 0);
+
+    if(sumO < 0.001 || sumC < 0.001){ outEl.textContent = 'O 或 C 總和為 0，無法計算'; return; }
+
+    const InclN = sumMin / sumO;
+    const CovN  = sumMin / sumC;
+    const PRI   = (sumMin - sumMinN) / (sumO - sumMinN + 0.0001);
+    const RoN   = sum1minC < 0.001 ? 0 : (sumO - sumMin) / sum1minC;
+
+    const ok = (v, th) => +v.toFixed(3) >= th;
+    outEl.innerHTML =
+      `InclN（必要性一致性）= ${sumMin.toFixed(3)} / ${sumO.toFixed(3)} = ${InclN.toFixed(4)}  ${ok(InclN,0.9)?'✓ ≥0.9':'✗ <0.9'}\n` +
+      `CovN （必要性涵蓋率）= ${sumMin.toFixed(3)} / ${sumC.toFixed(3)} = ${CovN.toFixed(4)}  ${ok(CovN,0.6)?'✓ ≥0.6 非瑣碎':'✗ <0.6 可能瑣碎'}\n` +
+      `PRI  （比例一致減量）= ${PRI.toFixed(4)}  ${ok(PRI,0.5)?'✓ ≥0.5 無 SUIN 問題':'⚠ <0.5 注意 SUIN'}\n` +
+      `RoN  （必要性相關性）= ${RoN.toFixed(4)}  ${ok(RoN,0.5)?'✓ ≥0.5 非常數必要':'⚠ <0.5 C 可能幾乎恆為 1'}\n\n` +
+      (ok(InclN,0.9) && ok(CovN,0.6)
+        ? '→ 支持 C 為 O 的必要條件（non-trivially necessary）'
+        : '→ 尚未達到必要條件標準，請調整分析');
+  }
+
+  tbody.addEventListener('input', calc);
+  calc();
+})();
+
+/* ---- 3. 真值表列分配模擬器 ---- */
+(function(){
+  const conds = ['CO','UR','SP','UE','LP'];
+  const outEl = document.getElementById('tt-out');
+
+  function calc(){
+    const vals   = conds.map(id => +document.getElementById('tt-' + id).value);
+    const binary = vals.map(v => v > 0.5 ? 1 : 0);
+    const rowMin = Math.min(...vals);
+    const rowNum = parseInt(binary.join(''), 2);
+
+    const detail = conds.map((id, i) =>
+      `  ${id}=${vals[i].toFixed(2)}  ${vals[i]>0.5 ? '> 0.5 → 1（屬於）' : '≤ 0.5 → 0（不屬於）'}`
+    ).join('\n');
+
+    outEl.innerHTML =
+      `真值表列：[ ${binary.join(', ')} ]（十進位列號 = ${rowNum}）\n\n` +
+      `各條件判斷：\n${detail}\n\n` +
+      `列最小值 min(${vals.map(v=>v.toFixed(2)).join(', ')}) = ${rowMin.toFixed(3)}\n` +
+      `（此值作為模糊 AND，用於計算 InclS 時的 X）`;
+  }
+
+  conds.forEach(id => document.getElementById('tt-' + id).addEventListener('input', calc));
+  calc();
+})();
+</script>
+</body>
+</html>
