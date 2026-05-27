@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QCA with R · 互動式教材</title>
+<meta name="description" content="《Qualitative Comparative Analysis with R》互動式中英對照教材">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="readbar"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html">
+      <span class="logo">Q</span>
+      <span>QCA with R<small>互動式教材 · Interactive Tutorial</small></span>
+    </a>
+    <nav class="topnav">
+      <a href="index.html">首頁</a>
+      <a href="chapters/ch1.html">Ch.1 緒論</a>
+      <a href="chapters/ch2.html">Ch.2 R 入門</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <span class="tag">Thiem &amp; Duşa (2013) · Springer</span>
+  <h1>用 R 學質性比較分析</h1>
+  <p class="sub">Qualitative Comparative Analysis with R — 一本書、一套 <code class="inline">QCA</code> 套件，帶你從集合論觀念走到布林最小化。本教材以互動圖示與可操作的小工具，逐章拆解核心概念。</p>
+</section>
+
+<main class="wrap">
+
+  <div class="callout key">
+    <div class="ct">這套教材是什麼？ · What is this?</div>
+    <p>這是根據 Alrik Thiem 與 Adrian Duşa 的 <em>Qualitative Comparative Analysis with R</em>（Springer, 2013）整理的<strong>互動式學習網站</strong>。每一章都有概念說明、視覺化圖示，以及可以即時操作的小工具。內容採<strong>中英對照</strong>：說明用中文，R 程式碼與專有名詞保留英文原貌。</p>
+  </div>
+
+  <h2>章節目錄 <span class="en">· Chapters</span></h2>
+  <p class="lead">目前已完成前兩章，後續章節會依課程進度陸續補上。</p>
+
+  <div class="card-grid">
+    <a class="chapter-card" href="chapters/ch1.html">
+      <span class="badge ready">已完成</span>
+      <span class="num">CHAPTER 1</span>
+      <h3>緒論</h3>
+      <div class="en">Introduction</div>
+      <p>QCA 是什麼、為什麼重要、三種變體（csQCA / mvQCA / fsQCA）的差異，以及為何選擇 R。</p>
+    </a>
+
+    <a class="chapter-card" href="chapters/ch2.html">
+      <span class="badge ready">已完成</span>
+      <span class="num">CHAPTER 2</span>
+      <h3>R 語言入門</h3>
+      <div class="en">Introduction to R</div>
+      <p>安裝與套件、基本運算、資料結構、集合運算與集合隸屬度計算——做 QCA 所需的最小 R 基礎。</p>
+    </a>
+
+    <div class="chapter-card locked">
+      <span class="badge soon">課程進度中</span>
+      <span class="num">CHAPTER 3</span>
+      <h3>清晰集 QCA</h3>
+      <div class="en">Crisp-Set QCA</div>
+      <p>校準清晰集、必要性與充分性檢定、真值表建構與布林最小化。</p>
+    </div>
+
+    <div class="chapter-card locked">
+      <span class="badge soon">課程進度中</span>
+      <span class="num">CHAPTER 4</span>
+      <h3>模糊集 QCA</h3>
+      <div class="en">Fuzzy-Set QCA</div>
+      <p>模糊集校準、隸屬度分數、一致性與涵蓋率、邏輯餘項的處理。</p>
+    </div>
+
+    <div class="chapter-card locked">
+      <span class="badge soon">課程進度中</span>
+      <span class="num">CHAPTER 5</span>
+      <h3>QCA 延伸</h3>
+      <div class="en">QCA Extensions</div>
+      <p>多值 QCA（mvQCA）與時序 QCA（tQCA）。</p>
+    </div>
+  </div>
+
+  <h2>怎麼使用 <span class="en">· How to use</span></h2>
+  <div class="steps">
+    <div class="step">
+      <div>
+        <h4>依序閱讀</h4>
+        <p>從第 1 章開始建立直覺，再進入第 2 章的 R 操作。每頁開頭都有本章目錄。</p>
+      </div>
+    </div>
+    <div class="step">
+      <div>
+        <h4>動手玩互動元件</h4>
+        <p>看到標示「互動」的方框，直接拖曳滑桿、輸入數字或切換選項，即時看到 R 對應的輸出。</p>
+      </div>
+    </div>
+    <div class="step">
+      <div>
+        <h4>對照原書與 QCA 套件</h4>
+        <p>程式碼可直接貼到 R 主控台執行。建議先 <code class="inline">install.packages("QCA")</code> 再 <code class="inline">library("QCA")</code>。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="ct">關於著作權 · Copyright</div>
+    <p>本網站為學習用途的<strong>概念整理與重新詮釋</strong>，文字說明與圖示皆為原創，並未重製原書內容。原著版權屬 Springer 與作者所有。若要深入學習，請參閱原書與 <a href="https://www.compasss.org" target="_blank" rel="noopener">COMPASSS</a> 資源。</p>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Thiem &amp; Duşa, <em>Qualitative Comparative Analysis with R</em> (Springer, 2013)<br>
+  以學習為目的整理 · 程式碼搭配 R 套件 <code class="inline">QCA</code></p>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch.2 R 語言入門 · QCA with R</title>
+<meta name="description" content="做 QCA 所需的最小 R 基礎：運算、資料結構、集合與隸屬度">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div id="readbar"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="../index.html">
+      <span class="logo">Q</span>
+      <span>QCA with R<small>互動式教材 · Interactive Tutorial</small></span>
+    </a>
+    <nav class="topnav">
+      <a href="../index.html">首頁</a>
+      <a href="ch1.html">Ch.1 緒論</a>
+      <a href="ch2.html">Ch.2 R 入門</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="chapter-head">
+    <div class="eyebrow">CHAPTER 2</div>
+    <h1>R 語言入門</h1>
+    <div class="en">Introduction to R</div>
+  </div>
+
+  <p class="lead">這一章把「做 QCA 所需的最小 R 知識」教給你：基本運算、資料結構、以及最關鍵的<strong>集合運算</strong>與<strong>集合隸屬度計算</strong>。不需要任何 R 先備知識。</p>
+
+  <nav class="toc">
+    <strong>本章目錄</strong>
+    <ol>
+      <li><a href="#install">安裝、套件與基本運算</a></li>
+      <li><a href="#console">互動：R 主控台</a></li>
+      <li><a href="#assign">物件與賦值</a></li>
+      <li><a href="#struct">資料結構：向量、矩陣、資料框、清單</a></li>
+      <li><a href="#types">資料型別與階層</a></li>
+      <li><a href="#access">存取資料</a></li>
+      <li><a href="#sets">集合運算（互動 Venn 圖）</a></li>
+      <li><a href="#member">集合隸屬度運算（互動計算器）</a></li>
+      <li><a href="#truth">真值表（互動產生器）</a></li>
+      <li><a href="#io">匯入匯出與求助</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="install">1. 安裝、套件與基本運算 <span class="en">· Install, packages, basics</span></h2>
+  <p>R 可從官方網站 <code class="inline">r-project.org</code> 下載。它沒有像 SPSS 那樣的點選式介面——你用<strong>指令</strong>跟它溝通，指令打在主控台（console）裡，提示符號是 <code class="inline">&gt;</code>。</p>
+
+  <p>「套件（package）」是擴充 R 功能的程式庫。<code class="inline">QCA</code> 套件就包含了做 QCA 的所有函式、資料集與說明檔。安裝與載入分兩步：</p>
+
+  <span class="code-label">安裝（只需一次）／載入（每次開新 session）</span>
+  <div class="code"><span class="c-prompt">&gt; </span><span class="c-fn">install.packages</span>(<span class="c-str">"QCA"</span>, dependencies = <span class="c-kw">TRUE</span>)
+<span class="c-prompt">&gt; </span><span class="c-fn">library</span>(<span class="c-str">"QCA"</span>)</div>
+
+  <div class="callout info">
+    <div class="ct">為什麼要 dependencies = TRUE？</div>
+    <p>QCA 套件的部分功能依賴其他套件（例如 <code class="inline">lpSolve</code>）。設 <code class="inline">dependencies = TRUE</code> 會一併把這些相依套件裝好，省去後續報錯。</p>
+  </div>
+
+  <p>R 本質上是一台「可無限擴充的可程式化計算機」。最基本的工作流程是：<strong>寫一個指令 → 送給直譯器執行</strong>。結果前面的 <code class="inline">[1]</code> 是「索引」，代表這是輸出的第一個元素。</p>
+
+  <span class="code-label">基本算術與邏輯</span>
+  <div class="code"><span class="c-prompt">&gt; </span>3 * 5
+<span class="c-out">[1] 15</span>
+<span class="c-prompt">&gt; </span><span class="c-fn">sin</span>(pi/2)
+<span class="c-out">[1] 1</span>
+<span class="c-prompt">&gt; </span>6 == 7      <span class="c-com"># 是否相等</span>
+<span class="c-out">[1] FALSE</span>
+<span class="c-prompt">&gt; </span><span class="c-kw">FALSE</span> & <span class="c-kw">TRUE</span>   <span class="c-com"># 邏輯 AND</span>
+<span class="c-out">[1] FALSE</span>
+<span class="c-prompt">&gt; </span>2 == 2 | 2 == 3  <span class="c-com"># 邏輯 OR</span>
+<span class="c-out">[1] TRUE</span></div>
+
+  <div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th>類別</th><th>運算子 / 函式</th><th>說明</th></tr></thead>
+    <tbody>
+      <tr><td>算術</td><td><code>+ - * / ^</code></td><td>加、減、乘、除、次方</td></tr>
+      <tr><td>算術函式</td><td><code>sum() prod() sqrt() abs() log() exp()</code></td><td>總和、乘積、平方根、絕對值、對數、指數</td></tr>
+      <tr><td>取整</td><td><code>round() floor() ceiling()</code></td><td>四捨五入、向下、向上取整</td></tr>
+      <tr><td>比較</td><td><code>== != &gt; &gt;= &lt; &lt;=</code></td><td>等於、不等於、大小比較</td></tr>
+      <tr><td>邏輯</td><td><code>&amp; | ! xor</code></td><td>AND、OR、NOT、互斥或</td></tr>
+      <tr><td>特殊值</td><td><code>pi NA NULL Inf NaN TRUE FALSE</code></td><td>圓周率、缺失值、空集合、無限、非數值、真假</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2 id="console">2. 互動：試試 R 主控台 <span class="en">· Try the R console</span></h2>
+  <p>下面是一個迷你的 R 主控台模擬器。輸入運算式後按 <kbd>Enter</kbd>（或按執行）。試試 <code class="inline">3 * 5</code>、<code class="inline">sqrt(16)</code>、<code class="inline">sum(3, 5)</code>、<code class="inline">1:5</code>、<code class="inline">rep(5, 3)</code>、<code class="inline">sin(pi/2)</code>、<code class="inline">6 == 7</code>。</p>
+
+  <div class="widget" id="minir" data-widget="minir">
+    <div class="widget-head"><span class="wtag">互動</span> 迷你 R 主控台</div>
+    <div class="widget-body">
+      <div class="controls">
+        <div class="field" style="flex:1">
+          <label>輸入運算式（基本算術／sum／prod／sqrt／seq／rep／a:b）</label>
+          <input type="text" placeholder="例如：3 * 5" autocomplete="off">
+        </div>
+        <button class="btn">執行</button>
+      </div>
+      <div class="result-box" data-rlog style="max-height:200px;overflow:auto"><span class="c-out">&gt; 在上方輸入並按 Enter…</span></div>
+    </div>
+  </div>
+
+  <h2 id="assign">3. 物件與賦值 <span class="en">· Objects &amp; assignment</span></h2>
+  <p>R 是物件導向語言：任何運算結果都能存成「物件」。最常用的賦值符號是「箭頭」<code class="inline">&lt;-</code>（小於號加減號，中間不空格）。<code class="inline">c()</code> 函式把多個值串接成一個向量。</p>
+
+  <span class="code-label">把兩個總和存進物件 x</span>
+  <div class="code"><span class="c-prompt">&gt; </span>x <span class="c-kw">&lt;-</span> <span class="c-fn">c</span>(<span class="c-fn">sum</span>(3, 5), <span class="c-fn">sum</span>(4, 9))  <span class="c-com"># 8 與 13</span>
+<span class="c-prompt">&gt; </span>x
+<span class="c-out">[1]  8 13</span></div>
+
+  <div class="callout tip">
+    <div class="ct">命名小撇步</div>
+    <p>因為 <code class="inline">c</code> 是內建函式，新物件最好<strong>別取名為小寫 c</strong>。命名可用駝峰式 <code class="inline">dataAuthor</code> 或點分隔 <code class="inline">data.author</code>。把整個運算式用括號包起來 <code class="inline">(x &lt;- ...)</code>，可以「賦值的同時印出結果」。</p>
+  </div>
+
+  <h2 id="struct">4. 資料結構 <span class="en">· Data structures</span></h2>
+  <p>社會科學最常用四種資料結構。它們的差別在於「維度」與「能不能混型別」：</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 660 250" role="img" aria-label="四種 R 資料結構示意">
+      <!-- vector -->
+      <text x="80" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">Vector 向量</text>
+      <g fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5">
+        <rect x="30" y="40" width="34" height="34"/><rect x="64" y="40" width="34" height="34"/>
+        <rect x="98" y="40" width="34" height="34"/>
+      </g>
+      <text x="81" y="95" text-anchor="middle" font-size="10" fill="var(--ink-soft)">一排，同型別</text>
+      <!-- matrix -->
+      <text x="260" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">Matrix 矩陣</text>
+      <g fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5">
+        <rect x="210" y="40" width="30" height="30"/><rect x="240" y="40" width="30" height="30"/><rect x="270" y="40" width="30" height="30"/>
+        <rect x="210" y="70" width="30" height="30"/><rect x="240" y="70" width="30" height="30"/><rect x="270" y="70" width="30" height="30"/>
+      </g>
+      <text x="255" y="120" text-anchor="middle" font-size="10" fill="var(--ink-soft)">列×欄，同型別</text>
+      <!-- data frame -->
+      <text x="470" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent2)">Data frame 資料框</text>
+      <g stroke="var(--accent2)" stroke-width="1.5">
+        <rect x="410" y="40" width="50" height="30" fill="var(--accent2-soft)"/><rect x="460" y="40" width="50" height="30" fill="var(--accent2-soft)"/><rect x="510" y="40" width="40" height="30" fill="var(--accent2-soft)"/>
+        <rect x="410" y="70" width="50" height="28" fill="var(--bg-card)"/><rect x="460" y="70" width="50" height="28" fill="var(--bg-card)"/><rect x="510" y="70" width="40" height="28" fill="var(--bg-card)"/>
+      </g>
+      <text x="480" y="118" text-anchor="middle" font-size="10" fill="var(--ink-soft)">列×欄，每欄可不同型別</text>
+      <!-- list -->
+      <text x="330" y="165" text-anchor="middle" font-size="13" font-weight="700" fill="var(--warn)">List 清單</text>
+      <g stroke="var(--warn)" stroke-width="1.5" fill="var(--warn-soft)">
+        <rect x="150" y="178" width="100" height="40"/>
+        <rect x="270" y="178" width="60" height="40"/>
+        <rect x="350" y="178" width="150" height="40"/>
+      </g>
+      <text x="200" y="202" text-anchor="middle" font-size="10" fill="var(--ink-soft)">資料框</text>
+      <text x="300" y="202" text-anchor="middle" font-size="10" fill="var(--ink-soft)">向量</text>
+      <text x="425" y="202" text-anchor="middle" font-size="10" fill="var(--ink-soft)">任何東西都能裝</text>
+      <text x="330" y="238" text-anchor="middle" font-size="10" fill="var(--ink-soft)">最有彈性：可同時裝下上面所有結構</text>
+    </svg>
+    <figcaption>四種結構由簡到繁：向量 → 矩陣 → 資料框 → 清單。</figcaption>
+  </div>
+
+  <ul>
+    <li><strong>向量 Vector</strong>：單一列或欄，所有元素<strong>同型別</strong>。用 <code class="inline">c()</code>、<code class="inline">rep()</code>、<code class="inline">seq()</code> 或 <code class="inline">1:5</code> 產生。</li>
+    <li><strong>矩陣 Matrix</strong>：長方形排列，<strong>同型別</strong>。用 <code class="inline">matrix()</code>、<code class="inline">cbind()</code>、<code class="inline">rbind()</code> 建立，預設<strong>逐欄填入</strong>。</li>
+    <li><strong>資料框 Data frame</strong>：社會科學最常用，像矩陣但<strong>每一欄可不同型別</strong>。用 <code class="inline">data.frame()</code> 建立。</li>
+    <li><strong>清單 List</strong>：最有彈性，可把以上結構全裝進同一個物件。QCA 的 <code class="inline">truthTable()</code> 等複雜函式回傳的就是清單。</li>
+  </ul>
+
+  <span class="code-label">用三種變體的應用數做一個資料框</span>
+  <div class="code"><span class="c-prompt">&gt; </span>QCAdat <span class="c-kw">&lt;-</span> <span class="c-fn">data.frame</span>(variant = <span class="c-fn">c</span>(<span class="c-str">"csQCA"</span>, <span class="c-str">"mvQCA"</span>, <span class="c-str">"fsQCA"</span>),
+<span class="c-plus">+ </span>                     number = <span class="c-fn">c</span>(170, 7, 62))
+<span class="c-prompt">&gt; </span>QCAdat
+<span class="c-out">  variant number
+1   csQCA    170
+2   mvQCA      7
+3   fsQCA     62</span></div>
+
+  <div class="callout warn">
+    <div class="ct">向量循環（vector recycling）</div>
+    <p>當兩個長度不同的向量做運算時，R 會自動「循環」較短的向量來補齊（前提是長向量長度是短向量的整數倍）。這個特性在計算集合補集 <code class="inline">1 - SET</code> 時很方便——純量 <code class="inline">1</code> 不必重複寫成一整列。</p>
+  </div>
+
+  <h2 id="types">5. 資料型別與階層 <span class="en">· Data types &amp; hierarchy</span></h2>
+  <p>最底層的物件分三種原子型別，依「優先序」由低到高為：<strong>logical（邏輯）→ numeric（數值）→ character（字元）</strong>。這個階層源自集合關係：邏輯值是實數的子集、實數又是字元的子集。</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 460 200" role="img" aria-label="資料型別階層的子集關係">
+      <ellipse cx="230" cy="100" rx="215" ry="90" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="230" y="40" text-anchor="middle" font-size="13" fill="var(--accent)" font-weight="700">character 字元</text>
+      <ellipse cx="200" cy="110" rx="140" ry="62" fill="var(--accent2-soft)" stroke="var(--accent2)" stroke-width="1.5"/>
+      <text x="200" y="78" text-anchor="middle" font-size="13" fill="var(--accent2)" font-weight="700">numeric 數值</text>
+      <ellipse cx="175" cy="120" rx="70" ry="36" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+      <text x="175" y="124" text-anchor="middle" font-size="12" fill="var(--warn)" font-weight="700">logical</text>
+      <text x="175" y="140" text-anchor="middle" font-size="9" fill="var(--ink-soft)">TRUE / FALSE</text>
+    </svg>
+    <figcaption>型別階層：logical ⊂ numeric ⊂ character。混合時 R 會自動轉成「階層最高」者以避免資訊遺失。</figcaption>
+  </div>
+
+  <p>關鍵推論：在 R 裡 <code class="inline">TRUE</code> 等同數值 <code class="inline">1</code>、<code class="inline">FALSE</code> 等同 <code class="inline">0</code>。這正是稍後真值表能用數值運算來算「真假」的原因。可用 <code class="inline">mode()</code> 查型別、<code class="inline">is.character()</code> 檢查、<code class="inline">as.integer()</code> 強制轉換。</p>
+
+  <h2 id="access">6. 存取資料 <span class="en">· Accessing data</span></h2>
+  <p>有幾種常見方式可以從資料框中取值：</p>
+  <div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th>方法</th><th>語法</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td><code>$</code> 取欄</td><td><code>QCAdat$number</code></td><td>取出某一欄，或新增／運算一個變項</td></tr>
+      <tr><td><code>subset()</code></td><td><code>subset(QCAdat, number &gt; 50)</code></td><td>用邏輯條件篩選列，<code>select=</code> 選欄</td></tr>
+      <tr><td>索引 <code>[列, 欄]</code></td><td><code>QCAdat[2, 2]</code></td><td>用位置取值；留空代表「全部」</td></tr>
+      <tr><td>清單索引 <code>[[ ]]</code></td><td><code>QCAlist[[2]]</code></td><td>取清單的第 n 個元素</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <span class="code-label">用 $ 新增變項、用 subset() 篩選</span>
+  <div class="code"><span class="c-prompt">&gt; </span>QCAdat$occur <span class="c-kw">&lt;-</span> <span class="c-fn">c</span>(<span class="c-str">"sociology"</span>, <span class="c-fn">rep</span>(<span class="c-str">"politics"</span>, 2))
+<span class="c-prompt">&gt; </span><span class="c-fn">sum</span>(QCAdat$number)
+<span class="c-out">[1] 239</span>
+<span class="c-prompt">&gt; </span><span class="c-fn">subset</span>(QCAdat, subset = number &gt; 50, select = variant)
+<span class="c-out">  variant
+1   csQCA
+3   fsQCA</span></div>
+
+  <h2 id="sets">7. 集合運算 <span class="en">· Operations on sets</span></h2>
+  <p>這節處理「集合的<strong>元素</strong>」運算（隸屬度假設為清晰）。四個核心函式：<code class="inline">union()</code>（聯集）、<code class="inline">intersect()</code>（交集）、<code class="inline">setdiff()</code>（差集）、<code class="inline">setequal()</code>（是否相等）。</p>
+
+  <div class="callout warn">
+    <div class="ct">注意「unique」</div>
+    <p>這些函式比較的是<strong>唯一元素</strong>。所以 <code class="inline">A = c(1,2,3,4)</code> 與 <code class="inline">B = c(1,1,2,3,3,3,4)</code> 用 <code class="inline">setequal()</code> 會回傳 <code class="inline">TRUE</code>（唯一元素相同）。若要檢查「完全相同」，要用 <code class="inline">identical()</code>。</p>
+  </div>
+
+  <p>下面把兩個整數集合 X、Y 拿來操作，並用 Venn 圖即時顯示結果：</p>
+
+  <div class="widget" id="setops" data-widget="setops">
+    <div class="widget-head"><span class="wtag">互動</span> 集合運算 Venn 圖</div>
+    <div class="widget-body">
+      <div class="controls">
+        <div class="field"><label>集合 X（逗號或空格分隔）</label><input type="text" data-x value="3 4 5 7 2 8"></div>
+        <div class="field"><label>集合 Y</label><input type="text" data-y value="6 3 4 5 1 2"></div>
+        <div class="field"><label>運算</label>
+          <select data-op>
+            <option value="union">union(X, Y) 聯集</option>
+            <option value="intersect">intersect(X, Y) 交集</option>
+            <option value="setdiff">setdiff(X, Y) 差集</option>
+            <option value="setequal">setequal(X, Y) 是否相等</option>
+          </select>
+        </div>
+      </div>
+      <div class="venn-stage">
+        <svg width="320" height="180" viewBox="0 0 320 180" role="img" aria-label="X 與 Y 的 Venn 圖">
+          <circle class="venn-circle venn-L" cx="125" cy="90" r="70" fill="#cbd5e0" fill-opacity=".35" stroke="#2b6cb0" stroke-width="2"/>
+          <circle class="venn-circle venn-R" cx="195" cy="90" r="70" fill="#cbd5e0" fill-opacity=".35" stroke="#2c9c8f" stroke-width="2"/>
+          <text x="80" y="50" font-size="14" font-weight="700" fill="#2b6cb0">X</text>
+          <text x="232" y="50" font-size="14" font-weight="700" fill="#2c9c8f">Y</text>
+        </svg>
+      </div>
+      <div class="result-box" data-out></div>
+    </div>
+  </div>
+
+  <h2 id="member">8. 集合隸屬度運算 <span class="en">· Operations on set memberships</span></h2>
+  <p class="lead">這是 QCA 計算的心臟。前一節算的是「集合裡有哪些元素」，這節算的是「每個案例對集合的<strong>隸屬度分數</strong>」。布林邏輯與隸屬度的對應規則只有三條：</p>
+
+  <div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th>布林運算</th><th>意義</th><th>隸屬度計算</th><th>R 函式</th></tr></thead>
+    <tbody>
+      <tr><td>AND（·）</td><td>交集</td><td>取<strong>最小值</strong> min</td><td><code>pmin()</code></td></tr>
+      <tr><td>OR（+）</td><td>聯集</td><td>取<strong>最大值</strong> max</td><td><code>pmax()</code></td></tr>
+      <tr><td>NOT（小寫）</td><td>補集</td><td><code>1 - 隸屬度</code></td><td><code>1 - SET</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout key">
+    <div class="ct">為什麼是 pmin / pmax 而不是 min / max？</div>
+    <p><code class="inline">pmin()</code>／<code class="inline">pmax()</code> 取的是「<strong>平行</strong>最小／最大值」——它<strong>逐列（逐案例）</strong>比較，而不是把所有值丟在一起取單一最小值。每個案例各自算各自的，這才符合 QCA「每個案例有自己的隸屬度」的邏輯。</p>
+  </div>
+
+  <p>拖曳滑桿改變案例對集合 A、B 的隸屬度，切換運算看結果如何變化：</p>
+
+  <div class="widget" id="fuzzy" data-widget="fuzzy">
+    <div class="widget-head"><span class="wtag">互動</span> 模糊隸屬度計算器（pmin / pmax / 1−x）</div>
+    <div class="widget-body">
+      <div class="slider-row">
+        <span class="sl-label">A</span>
+        <input type="range" data-fs="A" min="0" max="1" step="0.01" value="0.7">
+        <output data-ro="A">0.70</output>
+      </div>
+      <div class="slider-row">
+        <span class="sl-label">B</span>
+        <input type="range" data-fs="B" min="0" max="1" step="0.01" value="0.3">
+        <output data-ro="B">0.30</output>
+      </div>
+      <div class="controls" style="margin-top:1rem">
+        <div class="field"><label>布林運算</label>
+          <select data-fop>
+            <option value="and">A · B　(A AND B)　→ pmin(A, B)</option>
+            <option value="or">A + B　(A OR B)　→ pmax(A, B)</option>
+            <option value="notA">a　(NOT A)　→ 1 - A</option>
+            <option value="aAndB">a · B　(NOT A AND B)　→ pmin(1 - A, B)</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin:.8rem 0">
+        <div style="font-size:.8rem;color:var(--ink-soft);margin-bottom:.2rem">A</div>
+        <div style="background:var(--bg-soft);border-radius:6px;height:14px;overflow:hidden"><div data-bar="A" style="height:100%;background:var(--accent);width:70%;transition:width .12s"></div></div>
+        <div style="font-size:.8rem;color:var(--ink-soft);margin:.4rem 0 .2rem">B</div>
+        <div style="background:var(--bg-soft);border-radius:6px;height:14px;overflow:hidden"><div data-bar="B" style="height:100%;background:var(--accent2);width:30%;transition:width .12s"></div></div>
+        <div style="font-size:.8rem;color:var(--warn);font-weight:700;margin:.4rem 0 .2rem">結果 Result</div>
+        <div style="background:var(--bg-soft);border-radius:6px;height:18px;overflow:hidden"><div data-bar="R" style="height:100%;background:var(--warn);width:30%;transition:width .12s"></div></div>
+      </div>
+      <div class="result-box" data-fout></div>
+    </div>
+  </div>
+
+  <span class="code-label">在資料框上計算複合運算式（取自原書示範）</span>
+  <div class="code"><span class="c-prompt">&gt; </span>datFS$aBC   <span class="c-kw">&lt;-</span> <span class="c-fn">pmin</span>(1 - datFS$A, datFS$B, datFS$C)   <span class="c-com"># a · B · C</span>
+<span class="c-prompt">&gt; </span>datFS$<span class="c-str">"A+b+C"</span> <span class="c-kw">&lt;-</span> <span class="c-fn">pmax</span>(datFS$A, 1 - datFS$B, datFS$C)   <span class="c-com"># A + b + C</span>
+<span class="c-prompt">&gt; </span>datFS$<span class="c-str">"Ab+Bc"</span> <span class="c-kw">&lt;-</span> <span class="c-fn">pmax</span>(
+<span class="c-plus">+ </span>  <span class="c-fn">pmin</span>(datFS$A, 1 - datFS$B),
+<span class="c-plus">+ </span>  <span class="c-fn">pmin</span>(datFS$B, 1 - datFS$C))            <span class="c-com"># A · b + B · c</span></div>
+
+  <div class="callout tip">
+    <div class="ct">為什麼欄名要加引號？</div>
+    <p>像 <code class="inline">"A+b+C"</code> 這種含有布林「+」的欄名必須用雙引號包起來，否則 R 會把 <code class="inline">+</code> 當成算術加號，而不是欄位名稱的一部分。</p>
+  </div>
+
+  <h2 id="truth">9. 真值表 <span class="en">· Truth tables</span></h2>
+  <p>有了 <code class="inline">pmin()</code> 與 <code class="inline">pmax()</code>，甚至可以親手建出完整的<strong>真值表</strong>。k 個條件會產生 <code class="inline">2^k</code> 個 configuration（條件組態）。下面用 k = 3（A、B、C）共 8 列來示範。</p>
+  <p>由於 R 裡 <code class="inline">TRUE = 1</code>、<code class="inline">FALSE = 0</code>，可以直接對 0/1 做數值運算來算出每個組態的 <strong>outcome value（真值）</strong>。切換運算式，看哪些組態的結果為 1：</p>
+
+  <div class="widget" id="truthtable" data-widget="truthtable">
+    <div class="widget-head"><span class="wtag">互動</span> 真值表產生器（k = 3）</div>
+    <div class="widget-body">
+      <div class="controls">
+        <div class="field"><label>運算式（outcome）</label>
+          <select data-ttexpr>
+            <option value="aBC">a · B · C　→ pmin(1-A, B, C)</option>
+            <option value="ABC">A · B · C　→ pmin(A, B, C)</option>
+            <option value="A+bc">A + b · c　→ pmax(A, pmin(1-B,1-C))</option>
+            <option value="Ab+Bc">A · b + B · c　→ pmax(pmin(A,1-B), pmin(B,1-C))</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>#</th><th>A</th><th>B</th><th>C</th><th>OUT</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p data-ttnote style="font-size:.9rem;color:var(--ink-soft)"></p>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="ct">連到第 3 章</div>
+    <p>真值表是 csQCA 與 fsQCA 的共同核心。第 3 章會用 QCA 套件的 <code class="inline">truthTable()</code> 函式自動建表，再用<strong>布林最小化（Boolean minimization）</strong>把這張表化簡成精簡的「解（solution）」。你在這裡親手算的，正是那個流程的第一步。</p>
+  </div>
+
+  <h2 id="io">10. 匯入匯出與求助 <span class="en">· I/O &amp; getting help</span></h2>
+  <ul>
+    <li><strong>匯入</strong>：最簡單是把資料存成 tab 分隔的 <code class="inline">.txt</code>，再用 <code class="inline">read.table("檔名.txt", header = TRUE, row.names = "State")</code> 讀入。CSV 用 <code class="inline">read.csv()</code>；SPSS/Stata 檔可用 <code class="inline">foreign</code> 套件。</li>
+    <li><strong>注意路徑</strong>：Windows 路徑要寫成 <code class="inline">"C:/folder"</code> 或 <code class="inline">"C:\\folder"</code>，不能用單一反斜線。用 <code class="inline">getwd()</code> 看工作目錄、<code class="inline">setwd()</code> 切換。</li>
+    <li><strong>匯出</strong>：<code class="inline">write.table(myfile, file = "myfile.txt", sep = "\t", quote = FALSE)</code>。</li>
+    <li><strong>求助</strong>：在函式前加問號，例如 <code class="inline">?prod</code>，會開啟說明文件（Description／Usage／Arguments／Details／Value／Examples）。</li>
+  </ul>
+
+  <div class="callout warn">
+    <div class="ct">最常見的 NA 陷阱</div>
+    <p>很多函式（如 <code class="inline">prod()</code>、<code class="inline">mean()</code>）預設 <code class="inline">na.rm = FALSE</code>。只要資料裡有一個 <code class="inline">NA</code>，結果就會變成 <code class="inline">NA</code>。想忽略缺失值，要明確加上 <code class="inline">na.rm = TRUE</code>。準備資料時，所有缺失值都應先標成 <code class="inline">NA</code>、且欄名與數值都不要有空格。</p>
+  </div>
+
+  <div class="callout tip">
+    <div class="ct">本章重點回顧</div>
+    <p>① R 用指令溝通；<code class="inline">install.packages("QCA")</code> 再 <code class="inline">library("QCA")</code>。<br>
+    ② 四種資料結構：向量／矩陣／資料框／清單。<br>
+    ③ 型別階層 logical ⊂ numeric ⊂ character，所以 <code class="inline">TRUE=1</code>、<code class="inline">FALSE=0</code>。<br>
+    ④ QCA 計算三規則：AND→<code class="inline">pmin</code>、OR→<code class="inline">pmax</code>、NOT→<code class="inline">1-x</code>，逐案例計算。<br>
+    ⑤ 用這三規則就能手算真值表——正是 csQCA／fsQCA 的起點。</p>
+  </div>
+
+  <nav class="chap-nav">
+    <a href="ch1.html"><div class="dir">← 上一章</div><div class="ttl">Ch.1 緒論</div></a>
+    <a class="next" href="../index.html"><div class="dir">下一章 →</div><div class="ttl">Ch.3 csQCA（課程進度中）</div></a>
+  </nav>
+
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Thiem &amp; Duşa, <em>Qualitative Comparative Analysis with R</em> (Springer, 2013)</p>
+</footer>
+
+<script src="../js/main.js"></script>
+</body>
+</html>

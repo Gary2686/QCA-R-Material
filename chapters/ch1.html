@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ch.1 緒論 · QCA with R</title>
+<meta name="description" content="QCA 是什麼、三種變體、為何用 R">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div id="readbar"></div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="../index.html">
+      <span class="logo">Q</span>
+      <span>QCA with R<small>互動式教材 · Interactive Tutorial</small></span>
+    </a>
+    <nav class="topnav">
+      <a href="../index.html">首頁</a>
+      <a href="ch1.html">Ch.1 緒論</a>
+      <a href="ch2.html">Ch.2 R 入門</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="chapter-head">
+    <div class="eyebrow">CHAPTER 1</div>
+    <h1>緒論</h1>
+    <div class="en">Introduction</div>
+  </div>
+
+  <nav class="toc">
+    <strong>本章目錄</strong>
+    <ol>
+      <li><a href="#what">QCA 是什麼？</a></li>
+      <li><a href="#why">為什麼 QCA 重要</a></li>
+      <li><a href="#core">核心觀念：集合、必要性、充分性</a></li>
+      <li><a href="#variants">三種變體：csQCA / mvQCA / fsQCA</a></li>
+      <li><a href="#software">軟體與為何選 R</a></li>
+      <li><a href="#book">本書如何組織</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="what">1. QCA 是什麼？ <span class="en">· What is QCA</span></h2>
+  <p class="lead">質性比較分析（<strong>Qualitative Comparative Analysis, QCA</strong>）是過去二十年社會科學方法論上最具影響力的創新之一，由政治社會學家 <strong>Charles Ragin</strong> 在 1987 年提出。</p>
+
+  <p>傳統的迴歸分析問的是：「<em>某個變項增加一單位，結果平均會改變多少？</em>」它把每個自變項視為獨立、可加總的「淨效果」。QCA 問的卻是另一種問題：</p>
+
+  <div class="callout key">
+    <div class="ct">QCA 的核心提問</div>
+    <p>「<strong>哪些條件的『組合』，會共同導致某個結果出現？</strong>」<br>
+    QCA 用<strong>集合論（set theory）</strong>與<strong>布林代數（Boolean algebra）</strong>來分析「條件組態（configurations）」與「結果」之間的關係，特別適合<strong>中小樣本</strong>（small-to-medium N）的比較研究。</p>
+  </div>
+
+  <p>它有三個關鍵特徵，正好對應傳統量化方法常忽略的三件事：</p>
+
+  <div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th>特徵</th><th>英文</th><th>意思</th></tr></thead>
+    <tbody>
+      <tr><td>結合因果</td><td>Conjunctural causation</td><td>條件常常是「組合在一起」才有效，單獨一個不一定有用。</td></tr>
+      <tr><td>等效性</td><td>Equifinality</td><td>通往同一結果的路徑可能不只一條（多條不同的條件組合都能導致結果）。</td></tr>
+      <tr><td>非對稱性</td><td>Asymmetry</td><td>「導致結果出現」的條件，不等於把它反過來就能「導致結果不出現」。</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2 id="why">2. 為什麼 QCA 重要 <span class="en">· Why it matters</span></h2>
+  <p>QCA 最早只被一小群宏觀社會學家採用，但隨著 Ragin 的兩本代表作——<em>The Comparative Method</em>（1987，引入 csQCA）與 <em>Fuzzy-Set Social Science</em>（2000，引入 fsQCA）——出版，應用數量快速成長。書中稱這波擴散為「Ragin 革命」。</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 640 280" role="img" aria-label="QCA 期刊應用數量成長趨勢示意">
+      <!-- axes -->
+      <line x1="60" y1="240" x2="600" y2="240" stroke="var(--ink-faint)" stroke-width="1.5"/>
+      <line x1="60" y1="240" x2="60" y2="30" stroke="var(--ink-faint)" stroke-width="1.5"/>
+      <text x="330" y="272" text-anchor="middle" fill="var(--ink-faint)" font-size="13">年份 (1987 → 2011)</text>
+      <text x="20" y="135" text-anchor="middle" fill="var(--ink-faint)" font-size="13" transform="rotate(-90 20 135)">年發表應用數</text>
+      <!-- trend curve (schematic) -->
+      <polyline points="80,232 140,228 200,222 260,210 320,196 380,168 440,128 500,92 560,52"
+        fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- markers -->
+      <circle cx="80" cy="232" r="4" fill="var(--accent)"/>
+      <circle cx="320" cy="196" r="4" fill="var(--accent)"/>
+      <circle cx="560" cy="52" r="5" fill="var(--accent2)"/>
+      <!-- annotations -->
+      <text x="86" y="222" fill="var(--ink-soft)" font-size="11">1987 csQCA 問世</text>
+      <text x="300" y="186" fill="var(--ink-soft)" font-size="11">2000 fsQCA</text>
+      <text x="500" y="44" fill="var(--accent2)" font-size="11" font-weight="700">2011：約 35 篇</text>
+    </svg>
+    <figcaption>圖示：QCA 期刊應用數量自 2003 年後快速攀升（示意趨勢，非精確數據）。</figcaption>
+  </div>
+
+  <p>應用領域的分布反映了 QCA 早期推廣者的背景：超過半數集中在<strong>社會學（約 23%）</strong>與<strong>政治學含國際關係（約 31%）</strong>，其餘散見於商業與經濟、健康與教育、管理與組織、法律與犯罪學等領域。</p>
+
+  <h2 id="core">3. 核心觀念：集合、必要性、充分性 <span class="en">· Sets, Necessity &amp; Sufficiency</span></h2>
+  <p>QCA 把每個「條件」與「結果」都看成一個<strong>集合（set）</strong>，每個案例（case）對這個集合有不同程度的<strong>隸屬度（membership）</strong>。分析就是在問兩個集合之間的關係。最重要的兩種關係是<strong>必要性</strong>與<strong>充分性</strong>。</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 640 240" role="img" aria-label="必要條件與充分條件的集合關係圖">
+      <!-- Sufficiency: condition ⊆ outcome -->
+      <g>
+        <text x="160" y="28" text-anchor="middle" font-size="14" font-weight="700" fill="var(--accent2)">充分條件 Sufficiency</text>
+        <circle cx="160" cy="135" r="80" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+        <circle cx="160" cy="155" r="42" fill="var(--accent2-soft)" stroke="var(--accent2)" stroke-width="2"/>
+        <text x="160" y="80" text-anchor="middle" font-size="13" fill="var(--accent)">結果 Y</text>
+        <text x="160" y="160" text-anchor="middle" font-size="13" fill="var(--accent2)" font-weight="700">條件 X</text>
+        <text x="160" y="232" text-anchor="middle" font-size="11" fill="var(--ink-soft)">X ⊆ Y：有 X 就一定有 Y</text>
+      </g>
+      <!-- Necessity: outcome ⊆ condition -->
+      <g>
+        <text x="480" y="28" text-anchor="middle" font-size="14" font-weight="700" fill="var(--accent)">必要條件 Necessity</text>
+        <circle cx="480" cy="135" r="80" fill="var(--accent2-soft)" stroke="var(--accent2)" stroke-width="2"/>
+        <circle cx="480" cy="155" r="42" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="480" y="80" text-anchor="middle" font-size="13" fill="var(--accent2)">條件 X</text>
+        <text x="480" y="160" text-anchor="middle" font-size="13" fill="var(--accent)" font-weight="700">結果 Y</text>
+        <text x="480" y="232" text-anchor="middle" font-size="11" fill="var(--ink-soft)">Y ⊆ X：要有 Y 就一定先有 X</text>
+      </g>
+    </svg>
+    <figcaption>充分 vs. 必要：差別在「誰是誰的子集合」。充分＝條件被結果包住；必要＝結果被條件包住。</figcaption>
+  </div>
+
+  <div class="callout tip">
+    <div class="ct">用一句話記住</div>
+    <p><strong>充分（sufficient）</strong>：只要 X 出現，Y 就會出現（X 是 Y 的子集合）。<br>
+    <strong>必要（necessary）</strong>：Y 要出現，X 必須先在場（Y 是 X 的子集合）。<br>
+    這兩種關係在第 3、4 章會用「一致性 consistency」與「涵蓋率 coverage」兩個量化指標來檢定。</p>
+  </div>
+
+  <h2 id="variants">4. 三種變體 <span class="en">· Three variants</span></h2>
+  <p>QCA 不是單一技術，而是依「集合隸屬度如何取值」分成三種變體。差別就在下面這條線上：</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 640 170" role="img" aria-label="三種 QCA 變體的隸屬度取值方式">
+      <!-- crisp -->
+      <text x="100" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">csQCA</text>
+      <text x="100" y="48" text-anchor="middle" font-size="10" fill="var(--ink-faint)">清晰集</text>
+      <line x1="40" y1="80" x2="160" y2="80" stroke="var(--border)" stroke-width="2"/>
+      <circle cx="40" cy="80" r="7" fill="var(--accent)"/><text x="40" y="105" text-anchor="middle" font-size="11">0</text>
+      <circle cx="160" cy="80" r="7" fill="var(--accent)"/><text x="160" y="105" text-anchor="middle" font-size="11">1</text>
+      <text x="100" y="135" text-anchor="middle" font-size="10" fill="var(--ink-soft)">只有「是 / 否」</text>
+      <!-- multi -->
+      <text x="320" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent2)">mvQCA</text>
+      <text x="320" y="48" text-anchor="middle" font-size="10" fill="var(--ink-faint)">多值集</text>
+      <line x1="260" y1="80" x2="380" y2="80" stroke="var(--border)" stroke-width="2"/>
+      <circle cx="260" cy="80" r="6" fill="var(--accent2)"/><text x="260" y="105" text-anchor="middle" font-size="11">0</text>
+      <circle cx="320" cy="80" r="6" fill="var(--accent2)"/><text x="320" y="105" text-anchor="middle" font-size="11">1</text>
+      <circle cx="380" cy="80" r="6" fill="var(--accent2)"/><text x="380" y="105" text-anchor="middle" font-size="11">2</text>
+      <text x="320" y="135" text-anchor="middle" font-size="10" fill="var(--ink-soft)">多個離散類別</text>
+      <!-- fuzzy -->
+      <text x="540" y="30" text-anchor="middle" font-size="13" font-weight="700" fill="var(--warn)">fsQCA</text>
+      <text x="540" y="48" text-anchor="middle" font-size="10" fill="var(--ink-faint)">模糊集</text>
+      <defs><linearGradient id="fz" x1="0" x2="1"><stop offset="0" stop-color="var(--accent-soft)"/><stop offset="1" stop-color="var(--warn)"/></linearGradient></defs>
+      <rect x="480" y="74" width="120" height="12" rx="6" fill="url(#fz)"/>
+      <text x="480" y="105" text-anchor="middle" font-size="11">0.0</text>
+      <text x="540" y="105" text-anchor="middle" font-size="11">0.5</text>
+      <text x="600" y="105" text-anchor="middle" font-size="11">1.0</text>
+      <text x="540" y="135" text-anchor="middle" font-size="10" fill="var(--ink-soft)">0 到 1 連續隸屬度</text>
+    </svg>
+    <figcaption>三種變體的差別只在「一個案例對集合的隸屬度怎麼取值」。</figcaption>
+  </div>
+
+  <div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th>變體</th><th>隸屬度取值</th><th>適用情境</th><th>本書章節</th></tr></thead>
+    <tbody>
+      <tr><td><strong>csQCA</strong><br>crisp-set</td><td>只有 <code>0</code> 或 <code>1</code>（在/不在）</td><td>條件可清楚二分時，最直觀。</td><td>第 3 章</td></tr>
+      <tr><td><strong>mvQCA</strong><br>multi-value</td><td>多個離散值 <code>0, 1, 2, …</code></td><td>條件本質是多分類（如政體類型）。應用最少。</td><td>第 5 章</td></tr>
+      <tr><td><strong>fsQCA</strong><br>fuzzy-set</td><td>連續 <code>0.0 ~ 1.0</code></td><td>「程度」有意義時（如「多民主」）。最常用、最有彈性。</td><td>第 4 章</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout info">
+    <div class="ct">小知識</div>
+    <p>在 1984–2011 年間發表的 235 篇應用中，csQCA 與 fsQCA 持續成長，但 <strong>mvQCA 一直很冷門</strong>——僅約 7 篇採用。所以本書把 csQCA（第 3 章）與 fsQCA（第 4 章）寫成各自獨立、可單獨閱讀的章節，mvQCA 則歸入第 5 章的「延伸」。</p>
+  </div>
+
+  <h2 id="software">5. 軟體與為何選 R <span class="en">· Software &amp; why R</span></h2>
+  <p>在本書寫作的年代，主流 QCA 軟體各有缺口：沒有任何一套涵蓋全部功能。作者用一張對照表點出這個問題——這也正是 <code class="inline">QCA</code> 套件想填補的空白。</p>
+
+  <div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th>軟體</th><th>模糊集</th><th>多值</th><th>中間解</th><th>適配參數</th><th>跨平台</th></tr></thead>
+    <tbody>
+      <tr><td>fs/QCA</td><td>✓</td><td>✗</td><td>✓</td><td>✓</td><td>僅 Windows*</td></tr>
+      <tr><td>Tosmana</td><td>✗</td><td>✓</td><td>✗</td><td>✗</td><td>✓</td></tr>
+      <tr><td>fuzzy (Stata)</td><td>✓</td><td>✗</td><td>—</td><td>✓</td><td>✓</td></tr>
+      <tr><td><strong>QCA (R 套件)</strong></td><td><strong>✓</strong></td><td><strong>✓</strong></td><td><strong>✓</strong></td><td><strong>✓</strong></td><td><strong>✓</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="font-size:.85rem;color:var(--ink-faint)">* 為本書寫作當時（2012）的狀況；各軟體後續版本已有變化。</p>
+
+  <div class="callout key">
+    <div class="ct">為什麼用 R？</div>
+    <p>R 是資料分析最強大的工具之一、跨所有作業系統、且免費開源。代價是<strong>學習曲線較陡</strong>。本書的策略是：用 <code class="inline">QCA</code> 套件統一並增強各家軟體的功能，同時用第 2 章把「做 QCA 所需的最少 R 知識」教給你，降低進入門檻。</p>
+  </div>
+
+  <h2 id="book">6. 本書如何組織 <span class="en">· How the book is structured</span></h2>
+  <p>本書假設你已熟悉 QCA 的基本觀念（Ragin 1987, 2000, 2008），但<strong>不假設你會 R</strong>。內容圍繞四大部分，並用真實研究的資料來示範複製（replication）：</p>
+
+  <div class="steps">
+    <div class="step"><div><h4>第 2 章：R 環境入門</h4><p>把做 QCA 所需的 R 操作壓到最小，但夠用。</p></div></div>
+    <div class="step"><div><h4>第 3 章：csQCA</h4><p>以 Krook (2010) 西方國會女性代表性研究為例。</p></div></div>
+    <div class="step"><div><h4>第 4 章：fsQCA</h4><p>以 Emmenegger (2011) 西方民主國家工作保障法規研究為例。</p></div></div>
+    <div class="step"><div><h4>第 5 章：延伸</h4><p>mvQCA（Hartmann &amp; Kemmerzell 2010 政黨禁令）與 tQCA（學生工會案例）。需先讀過第 3 章。</p></div></div>
+  </div>
+
+  <div class="callout tip">
+    <div class="ct">本章重點回顧</div>
+    <p>① QCA 用集合論看「條件組合 → 結果」，強調結合、等效、非對稱因果。<br>
+    ② 兩種核心關係：<strong>必要</strong>（結果是條件的子集）與<strong>充分</strong>（條件是結果的子集）。<br>
+    ③ 三種變體 csQCA / mvQCA / fsQCA，差別在隸屬度取值方式。<br>
+    ④ <code class="inline">QCA</code> 這個 R 套件涵蓋了全部功能，所以下一章先補 R 基礎。</p>
+  </div>
+
+  <nav class="chap-nav">
+    <a href="../index.html"><div class="dir">← 回到</div><div class="ttl">首頁目錄</div></a>
+    <a class="next" href="ch2.html"><div class="dir">下一章 →</div><div class="ttl">Ch.2 R 語言入門</div></a>
+  </nav>
+
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Thiem &amp; Duşa, <em>Qualitative Comparative Analysis with R</em> (Springer, 2013)</p>
+</footer>
+
+<script src="../js/main.js"></script>
+</body>
+</html>
