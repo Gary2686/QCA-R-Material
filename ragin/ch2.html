@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 2 章 模糊集與模糊集合關係 · 重新設計社會科學研究</title>
+<meta name="description" content="Ragin《重新設計社會科學研究》第 2 章互動教材：模糊隸屬分數、定性錨點、模糊集運算（非、交集、聯集）、模糊子集關係與 XY 圖">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="css/ragin.css">
+<style>
+  .ops-row { display: flex; flex-wrap: wrap; gap: .5rem .9rem; align-items: center; margin: .35rem 0; }
+  .ops-row label.neg { display: inline-flex; align-items: center; gap: .25rem; font-size: .92rem; color: var(--ink-soft); }
+  .judge-item { border: 1px solid var(--border); border-radius: 10px; padding: .7rem .9rem; margin: .55rem 0; background: var(--bg-card); }
+  .judge-item p { margin: 0 0 .45rem; }
+  .judge-item .fb { font-size: .92rem; color: var(--ink-soft); margin-top: .45rem; display: none; }
+  .judge-item.done .fb { display: block; }
+  .judge-item.good { border-color: var(--ok); }
+  .judge-item.badd { border-color: var(--bad); }
+  .judge-item .seg button[disabled] { cursor: default; }
+  table.tbl tr.pick td { cursor: pointer; }
+  .scale-bar { position: relative; height: 30px; margin: .9rem .4rem .2rem; border-radius: 6px;
+    background: linear-gradient(90deg, var(--bg-soft), var(--accent)); border: 1px solid var(--border); }
+  .scale-bar .mk { position: absolute; top: -6px; width: 3px; height: 40px; background: var(--rose); border-radius: 2px; transform: translateX(-1px); }
+  .scale-bar .anc { position: absolute; top: 32px; font-size: .75rem; color: var(--ink-faint); transform: translateX(-50%); white-space: nowrap; }
+  .scale-wrap { padding-bottom: 1.3rem; }
+</style>
+</head>
+<body>
+<div id="readbar"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="logo rg">R</span><span>重新設計社會科學研究<small>Ragin (2008) 互動教材</small></span></a>
+    <nav class="topnav">
+      <a href="index.html">本書首頁</a>
+      <a href="ch0.html">導讀</a>
+      <a href="ch1.html">第一篇</a>
+      <a href="ch4.html">第二篇</a>
+      <a href="ch6.html">第三篇</a>
+      <a href="ch8.html">第四篇</a>
+      <a href="../index.html">QCA with R ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="chapter-head">
+  <div class="part">第一篇　集合關係與相關關係</div>
+  <div class="eyebrow">CHAPTER 2</div>
+  <h1>模糊集與模糊集合關係</h1>
+  <div class="en">Fuzzy Sets and Fuzzy Set Relations</div>
+  <div class="src">對應原書第 2 章（中譯本頁 15–25）</div>
+</div>
+
+<p class="lead">你會說自己「是夜貓子」嗎？有人凌晨三點才睡，毫無疑問是；有人十點就寢，顯然不是；但十二點半才睡的人呢？——「有點算，但不完全算」。社會科學的概念大多就是這樣：民主、富裕、強大的工會……都有<strong>程度</strong>之分。第 1 章的清晰集只能說「在」或「不在」，本章要介紹的<strong>模糊集（fuzzy set）</strong>，讓我們既能保留程度上的細緻差異，又不必放棄集合關係的分析邏輯。</p>
+
+<div class="objectives">
+  <div class="ct">🎯 讀完本章，你應該能夠……</div>
+  <ol>
+    <li>解釋模糊隸屬分數的意義，以及三個<strong>定性錨點</strong>（1、0.5、0）各代表什麼。</li>
+    <li>分辨三值、四值、六值與連續模糊集，並說明它們為什麼<strong>不是</strong>定序量表。</li>
+    <li>指出「依最小值／最大值或排名機械換算」為什麼是錯誤的校準方式。</li>
+    <li>熟練計算模糊集的<strong>否定</strong>（1 − x）、<strong>交集</strong>（取最小值）、<strong>聯集</strong>（取最大值）。</li>
+    <li>用 XY 圖判斷模糊子集關係：點都在對角線上方 → X ⊆ Y（充分性的型態）。</li>
+    <li>說明為什麼相關係數不完美（r = 0.766）時，集合關係仍可能完全成立。</li>
+  </ol>
+</div>
+
+<nav class="toc">
+  <strong>本章目錄</strong>
+  <ol>
+    <li><a href="#s1">為什麼需要模糊集</a></li>
+    <li><a href="#s2">模糊集的本質：隸屬分數與定性錨點</a></li>
+    <li><a href="#s3">模糊集不是一般變數：校準要有目的</a></li>
+    <li><a href="#s4">模糊集的三種基本運算</a></li>
+    <li><a href="#s5">模糊子集關係與 XY 圖</a></li>
+    <li><a href="#s6">實作：畫出模糊集合關係（fsQCA／R）</a></li>
+    <li><a href="#s7">本章重點、名詞與自我測驗</a></li>
+  </ol>
+</nav>
+
+<!-- ================================================= -->
+<h2 id="s1">1. 為什麼需要模糊集 <span class="en">· Why fuzzy sets?</span></h2>
+
+<p>第 1 章說服我們：社會科學的理論多半是集合陳述，應該用集合關係來檢驗。但馬上會有人反駁——</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>常見的質疑</h4>
+    <ul>
+      <li>很多國家介於「民主」與「不民主」之間，硬分成 0／1 太粗糙。</li>
+      <li>名義尺度（nominal scale）被認為是「原始」的測量。</li>
+      <li>把定距（interval）、定比（ratio）變數切成二分類，等於把資訊「降級」，而且切點選在哪裡？研究者會不會挑一個對自己有利的切點？</li>
+    </ul>
+  </div>
+  <div class="new">
+    <h4>模糊集的回應</h4>
+    <ul>
+      <li>用 0 到 1 之間的分數表示<strong>部分隸屬</strong>，保留程度差異。</li>
+      <li>同時保留子集合、交集、聯集等<strong>集合論的核心運算</strong>。</li>
+      <li>數學基礎是 Zadeh（1965）提出的<strong>模糊集合理論</strong>，是一套成熟的數學體系。</li>
+    </ul>
+  </div>
+</div>
+
+<p>換句話說，模糊集讓我們可以問「已開發國家是不是民主國家的子集合？」——即使開發程度與民主程度都是用細緻的連續尺度衡量，也<strong>不必退回清晰集</strong>。</p>
+
+<!-- ================================================= -->
+<h2 id="s2">2. 模糊集的本質：隸屬分數與定性錨點 <span class="en">· The nature of fuzzy sets</span></h2>
+
+<p>模糊集<strong>同時是質性的也是量化的</strong>：它像連續變數一樣能表達程度，但每個分數都有「在集合裡有多深」的<strong>質性意義</strong>。Ragin 舉的例子是：美國在「已開發國家」集合的隸屬分數可以是 1.0（完全隸屬），但在「民主國家」集合可能只有 0.9（很接近、但不完全隸屬）——尤其考量到 2000 年總統大選的爭議。</p>
+
+<div class="callout key">
+  <div class="ct">🔑 三個定性錨點（qualitative breakpoints）</div>
+  <p><strong>1.0 ＝ 完全隸屬（full membership）</strong>：毫無爭議地屬於這個集合。<br>
+  <strong>0.5 ＝ 交叉點（crossover point）</strong>：最模糊的點——說它「偏在裡面」或「偏在外面」都一樣有道理。<br>
+  <strong>0.0 ＝ 完全不隸屬（full non-membership）</strong>：毫無爭議地不屬於這個集合。</p>
+  <p>其他分數都相對於這三個錨點來解讀：0.8、0.9 是「強隸屬但不完全」；0.2、0.3 是「偏向不隸屬，但仍是很弱的成員」。<strong>大於 0.5 = 偏在集合內；小於 0.5 = 偏在集合外</strong>。</p>
+</div>
+
+<p>所以，模糊集可以看成一種<strong>經過有目的的校準（calibrated）</strong>的連續變數：它被刻意調整成「表示案例在某個定義清楚的集合裡的隸屬程度」。決定三個錨點必須靠<strong>理論知識與實質知識</strong>（第 4、5 章會詳述）。例如，某個連續變數低端的案例可能全部「完全不隸屬」（分數一律截為 0），高端的案例則全部「完全隸屬」（一律截為 1）。</p>
+
+<h3>五種集合尺度（原書表 2-1）</h3>
+<p>從最粗到最細，Ragin 列出五種方案：</p>
+
+<div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th>清晰集</th><th>三值模糊集</th><th>四值模糊集</th><th>六值模糊集</th><th>連續模糊集</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>1 = 完全隸屬<br>0 = 完全不隸屬</td>
+        <td>1 = 完全隸屬<br>0.5 = 既非完全在內、也非完全在外<br>0 = 完全不隸屬</td>
+        <td>1 = 完全隸屬<br>0.67 = 偏隸屬<br>0.33 = 偏不隸屬<br>0 = 完全不隸屬</td>
+        <td>1 = 完全隸屬<br>0.8 = 大致隸屬<br>0.6 = 有點隸屬<br>0.4 = 有點不隸屬<br>0.2 = 大致不隸屬<br>0 = 完全不隸屬</td>
+        <td>1 = 完全隸屬<br>偏隸屬：0.5 &lt; x &lt; 1<br>0.5 = 交叉點<br>偏不隸屬：0 &lt; x &lt; 0.5<br>0 = 完全不隸屬</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p style="font-size:.88rem;color:var(--ink-faint)">註：簡中譯本譯者指出，英文原書在四值方案的敘述中把「1.0」誤植為「0.1」，正確應為 1.0。</p>
+
+<ul>
+  <li><strong>三值模糊集</strong>是最基本的模糊集：在「在內」「在外」之間加了一個灰色地帶 0.5。</li>
+  <li><strong>四值模糊集</strong>在你對案例掌握很多資訊、但資訊不夠系統、案例之間不完全可比時特別好用——它刻意<strong>沒有</strong> 0.5，逼你判斷每個案例「偏在內」還是「偏在外」。</li>
+  <li><strong>六值模糊集</strong>在交叉點兩側各插入兩個中間值（0.2、0.4 與 0.6、0.8）。</li>
+  <li><strong>連續模糊集</strong>允許 0 到 1 之間任何值，但仍保有三個定性錨點。</li>
+</ul>
+
+<div class="widget" id="w-anchor">
+  <div class="widget-head"><span class="wtag">互動</span> 同一個案例，在不同尺度下怎麼被記錄？</div>
+  <div class="widget-body">
+    <p style="margin-top:0">拖曳滑桿，設定某國在「民主國家」集合中的「真實」隸屬程度，看看五種方案各會把它記成什麼。</p>
+    <div class="controls">
+      <div class="seg" data-pre>
+        <button data-v="1">美國・已開發（1.0）</button>
+        <button data-v="0.9" class="on">美國・民主（0.9）</button>
+        <button data-v="0.5">最模糊（0.5）</button>
+        <button data-v="0.3">弱成員（0.3）</button>
+      </div>
+    </div>
+    <div class="slider-row"><span class="sl-label">x</span><input type="range" min="0" max="1" step="0.01" value="0.9" data-x style="flex:1"><output data-xo>0.90</output></div>
+    <div class="scale-wrap">
+      <div class="scale-bar" data-bar>
+        <span class="anc" style="left:0%">0 完全不隸屬</span>
+        <span class="anc" style="left:50%">0.5 交叉點</span>
+        <span class="anc" style="left:100%;transform:translateX(-100%)">1 完全隸屬</span>
+        <span class="mk" data-mk></span>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl center" data-scales>
+        <thead><tr><th>方案</th><th>記錄為</th><th>意義</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="result-box" data-anchorout></div>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s3">3. 模糊集不是一般變數：校準要有目的 <span class="en">· Calibration, not mere measurement</span></h2>
+
+<h3>四值、六值模糊集 ≠ 定序量表</h3>
+<p>乍看之下，0／0.2／0.4／0.6／0.8／1 很像一個六級的定序量表（ordinal scale）。但兩者根本不同：</p>
+<ul>
+  <li><strong>定序量表</strong>只是把類別<em>相對</em>排序（第 1 名、第 2 名……），每個類別與「是否屬於某集合」沒有關係。</li>
+  <li><strong>模糊集分數</strong>則每個值都<em>對照外部標準</em>：0 就是「完全不屬於」，1 就是「完全屬於」。</li>
+</ul>
+
+<div class="callout tip">
+  <div class="ct">📌 Ragin 的例子：六級國家財富量表 → 「富裕國家」模糊集</div>
+  <p>假設你有一個從「極貧」到「超級富有」的六級財富定序量表。把它<strong>機械地</strong>換成 0、0.2、0.4、0.6、0.8、1 是錯的。比較合理的轉換可能是：</p>
+  <div class="table-wrap">
+    <table class="tbl center">
+      <thead><tr><th>定序等級</th><th>1（最窮）</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6（最富）</th></tr></thead>
+      <tbody>
+        <tr><th>機械換算 ✘</th><td>0</td><td>0.2</td><td>0.4</td><td>0.6</td><td>0.8</td><td>1</td></tr>
+        <tr><th>有目的的校準 ✔</th><td class="lo">0</td><td class="lo">0</td><td>0.3</td><td><em>依實質知識判斷</em></td><td class="hi">1</td><td class="hi">1</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>最低兩級都「完全不富裕」，最高兩級都「完全富裕」，第三級可能只值 0.3（而不是 0.2）。關鍵是：<strong>定序類別的實質內容，與研究者如何定義、命名這個集合是否吻合</strong>。校準應該深思熟慮，而不是機械操作。（第 4 級的分數原書未給，這裡留白以示需要判斷。）</p>
+</div>
+
+<h3>連續模糊集：兩個嚴重錯誤</h3>
+<p>以「人均國民生產毛額（GNP per capita）」建構「富裕國家」連續模糊集為例，Ragin 點名兩種<strong>嚴重錯誤</strong>：</p>
+<ol>
+  <li>把最窮的國家設為 0、最富的設為 1，其他國家依數值<strong>等比例</strong>放在中間。</li>
+  <li>依國家的<strong>排名</strong>來分配隸屬分數。</li>
+</ol>
+<p>正確做法是先找出三個<strong>定性錨點</strong>：毫無爭議的富裕國家從哪裡開始（完全隸屬）、毫無爭議的不富裕國家到哪裡為止（完全不隸屬）、以及最難判斷的交叉點（0.5），而且每個錨點都要能<strong>說出理由</strong>。</p>
+
+<div class="widget" id="w-calib">
+  <div class="widget-head"><span class="wtag">互動</span> 三種把人均 GNP 變成「富裕國家」隸屬分數的方法</div>
+  <div class="widget-body">
+    <p style="margin-top:0">以下 10 個國家的人均 GNP 是<strong>假想資料</strong>（單位：千美元）。調整三個錨點，比較「錨點校準」與兩種錯誤做法的差別。錨點之間採線性內插、錨點以外截斷為 0 或 1（第 5 章會改用更平滑的對數勝算法）。</p>
+    <div class="slider-row"><span class="sl-label" style="width:auto">完全不隸屬</span><input type="range" min="1" max="20" step="0.5" value="4" data-non style="flex:1"><output data-nono>4</output></div>
+    <div class="slider-row"><span class="sl-label" style="width:auto">交叉點</span><input type="range" min="5" max="40" step="0.5" value="15" data-cro style="flex:1"><output data-croo>15</output></div>
+    <div class="slider-row"><span class="sl-label" style="width:auto">完全隸屬</span><input type="range" min="10" max="70" step="0.5" value="30" data-ful style="flex:1"><output data-fulo>30</output></div>
+    <div class="table-wrap">
+      <table class="tbl center" data-caltbl>
+        <thead><tr><th>國家</th><th>人均 GNP</th><th>✘ 最小–最大等比</th><th>✘ 依排名</th><th>✔ 錨點校準</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="result-box" data-calout></div>
+  </div>
+</div>
+
+<div class="callout key">
+  <div class="ct">🔑 錨點區分「相關」與「無關」的變異</div>
+  <p>從「富裕國家」這個集合來看，兩個非常富有的國家之間的 GNP 差距是<strong>無關的變異（irrelevant variation）</strong>：它們都是 1。同理，兩個非常貧窮國家的差距也與「富裕」無關，它們都是 0。只開發一個能排出相對位置的指標（如人均 GNP）是不夠的，還必須用知識把指標分數<strong>連結到</strong>集合隸屬。</p>
+</div>
+
+<details class="think">
+  <summary>想一想：同一個人均 GNP，為什麼可能得出完全不同的隸屬分數？</summary>
+  <div class="ans">
+    <p>因為隸屬分數是相對於「集合的定義」而來的。如果研究焦點從「富裕國家」改成「<strong>中等收入國家</strong>」，最富有的國家在新集合中反而會是 0（它們不是「中等」），中段國家才會接近 1。指標沒變，概念與標籤變了，分數就跟著變——這正是模糊集與「一般變數」最大的不同。</p>
+  </div>
+</details>
+
+<div class="widget" id="w-judge">
+  <div class="widget-head"><span class="wtag">練習</span> 判斷題：模糊集的觀念對不對？</div>
+  <div class="widget-body">
+    <p style="margin-top:0">逐題判斷「對」或「錯」，按下後會出現解說。</p>
+    <div data-judge></div>
+    <div class="result-box" data-judgeout>已作答 0 題。</div>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s4">4. 模糊集的三種基本運算 <span class="en">· Negation, logical and, logical or</span></h2>
+
+<p>使用模糊集評估集合關係時，結果與前因條件都可以用模糊隸屬分數表示（清晰集條件與模糊集條件也可以混用）。Ragin 用一個<strong>先進工業民主國家的階級投票（class voting）</strong>例子示範：結果是「<strong>弱階級投票</strong>國家」集合（W），以 Nieuwbeerta（1995）彙整的二戰後調查資料為基礎。四個前因條件是：</p>
+<ul>
+  <li><strong>A</strong>：高度富裕國家　<strong>I</strong>：所得不平等國家（理論上兩者<em>削弱</em>階級投票）</li>
+  <li><strong>M</strong>：製造業就業率高的國家　<strong>U</strong>：工會強大的國家（理論上兩者<em>強化</em>階級投票）</li>
+</ul>
+<p>全部都是六值模糊集，反映各國二戰後的一般特徵。Ragin 也強調：這裡的重點是示範<strong>操作程序</strong>，不是校準方式或最佳的解釋模型。</p>
+
+<div class="table-wrap">
+  <table class="tbl center">
+    <caption style="caption-side:top;text-align:left;font-weight:700;padding-bottom:.4rem">原書表 2-2　先進工業國家階級投票的模糊集資料</caption>
+    <thead><tr><th>國家</th><th>弱階級投票<br>W</th><th>高度富裕<br>A</th><th>所得不平等<br>I</th><th>高製造業就業<br>M</th><th>強大工會<br>U</th><th>~M</th><th>A·~M</th><th>A + ~M</th></tr></thead>
+    <tbody>
+      <tr><td>澳大利亞</td><td>0.6</td><td>0.8</td><td>0.6</td><td>0.4</td><td>0.6</td><td>0.6</td><td>0.6</td><td>0.8</td></tr>
+      <tr><td>比利時</td><td>0.6</td><td>0.6</td><td>0.2</td><td>0.2</td><td>0.8</td><td>0.8</td><td>0.6</td><td>0.8</td></tr>
+      <tr><td>丹麥</td><td>0.2</td><td>0.6</td><td>0.4</td><td>0.2</td><td>0.8</td><td>0.8</td><td>0.6</td><td>0.8</td></tr>
+      <tr><td>法國</td><td>0.8</td><td>0.6</td><td>0.8</td><td>0.2</td><td>0.2</td><td>0.8</td><td>0.6</td><td>0.8</td></tr>
+      <tr><td>德國</td><td>0.6</td><td>0.6</td><td>0.8</td><td>0.4</td><td>0.4</td><td>0.6</td><td>0.6</td><td>0.6</td></tr>
+      <tr><td>愛爾蘭</td><td>0.8</td><td>0.2</td><td>0.6</td><td>0.8</td><td>0.8</td><td>0.2</td><td>0.2</td><td>0.2</td></tr>
+      <tr><td>義大利</td><td>0.6</td><td>0.4</td><td>0.8</td><td>0.2</td><td>0.6</td><td>0.8</td><td>0.4</td><td>0.8</td></tr>
+      <tr><td>荷蘭</td><td>0.8</td><td>0.6</td><td>0.4</td><td>0.2</td><td>0.4</td><td>0.8</td><td>0.6</td><td>0.8</td></tr>
+      <tr><td>挪威</td><td>0.2</td><td>0.6</td><td>0.4</td><td>0.6</td><td>0.8</td><td>0.4</td><td>0.4</td><td>0.6</td></tr>
+      <tr><td>瑞典</td><td>0.0</td><td>0.8</td><td>0.4</td><td>0.8</td><td>1.0</td><td>0.2</td><td>0.2</td><td>0.8</td></tr>
+      <tr><td>英國</td><td>0.4</td><td>0.6</td><td>0.6</td><td>0.8</td><td>0.6</td><td>0.2</td><td>0.2</td><td>0.6</td></tr>
+      <tr><td>美國</td><td>1.0</td><td>1.0</td><td>0.8</td><td>0.4</td><td>0.2</td><td>0.6</td><td>0.6</td><td>1.0</td></tr>
+    </tbody>
+  </table>
+</div>
+<p style="font-size:.88rem;color:var(--ink-faint)">後三欄是由前面的欄位算出來的。我們已用程式逐格重算，與原書完全一致。</p>
+
+<h3>① 否定（negation，「非」）</h3>
+<div class="formula"><span class="flabel">否定</span>~X = 1 − X</div>
+<p>清晰集的否定是把 1 變 0、0 變 1；模糊集的否定是同一個原理推廣到 0 與 1 之間。例：美國在「高製造業就業」集合的分數是 0.4，所以在「<strong>非</strong>高製造業就業」集合（~M）中是 1 − 0.4 = <strong>0.6</strong>。表 2-2 的 ~M 欄就是 12 國的否定分數。</p>
+
+<h3>② 交集（intersection，邏輯「且」）</h3>
+<div class="formula"><span class="flabel">交集</span>A·B = min(A, B)</div>
+<p>假設研究者想列出「<strong>製造業不發達、但非常富裕</strong>」的國家。傳統做法是把兩個變數各自二分，做成 2×2 表，挑出「非高製造業 × 高度富裕」那一格——那一格其實就是兩個清晰集的<strong>交集</strong>。在模糊集中，案例在組合集合的分數取<strong>各組成集合分數的最小值</strong>。例：美國 ~M = 0.6、A = 1.0，所以 A·~M = min(1.0, 0.6) = <strong>0.6</strong>（偏隸屬）。</p>
+
+<div class="callout info">
+  <div class="ct">ℹ️ 為什麼是取最小值？</div>
+  <p>直覺：一條鏈子的強度取決於<strong>最弱的那一環</strong>。要同時具備「富裕」與「非製造業」兩個特徵，你在組合中的隸屬程度不可能高於你在其中較弱那一項的程度。這也和清晰集一致：只要有一個是 0，交集就是 0。</p>
+</div>
+
+<h3>③ 聯集（union，邏輯「或」）</h3>
+<div class="formula"><span class="flabel">聯集</span>A + B = max(A, B)</div>
+<p>如果研究者猜想「非高製造業」或「高度富裕」可能是通往弱階級投票的<strong>可互相替代</strong>的基礎，就會對兩者的聯集感興趣。模糊聯集取<strong>各組成集合分數的最大值</strong>。例：某國 A = 0.2、~M = 0.8，則 A + ~M = max(0.2, 0.8) = <strong>0.8</strong>。</p>
+
+<div class="callout warn">
+  <div class="ct">⚠️ 初學者常見誤解</div>
+  <p>符號「·」和「+」<strong>不是</strong>乘法和加法！A·~M 不是 0.6 × 1.0，A + ~M 也不是 0.2 + 0.8 = 1.0（那個 1.0 碰巧對，換個例子就錯了：0.6 + 0.8 = 1.4 已經超出 0–1）。在本書中，「·」= 取最小值，「+」= 取最大值，「~」= 用 1 去減。</p>
+</div>
+
+<div class="widget" id="w-ops">
+  <div class="widget-head"><span class="wtag">互動</span> 模糊集運算計算器（使用原書表 2-2 資料）</div>
+  <div class="widget-body">
+    <p style="margin-top:0">選 2–3 個集合（可勾選「非」做否定），選擇交集或聯集，計算 12 國的隸屬分數。點表格任一列可看逐步計算。</p>
+    <div class="controls">
+      <div class="seg" data-op>
+        <button data-v="and" class="on">交集 ·（min）</button>
+        <button data-v="or">聯集 +（max）</button>
+      </div>
+    </div>
+    <div data-terms></div>
+    <div class="table-wrap">
+      <table class="tbl center" data-opstbl><thead></thead><tbody></tbody></table>
+    </div>
+    <div class="result-box" data-opsout></div>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s5">5. 模糊子集關係與 XY 圖 <span class="en">· Fuzzy subset relations</span></h2>
+
+<p>模糊集的最大優點，是它<strong>既保留細緻的實證等級（empirical gradations），又能做集合論分析</strong>。我們可以直接問「已開發國家是否為民主國家的子集合？」而不用退回名義尺度。</p>
+
+<h3>先回顧清晰集怎麼做（原書表 2-3）</h3>
+<p>用清晰集檢驗「某條件組合 ⊆ 結果」很簡單：把具備該條件組合的案例挑出來，看它們的結果是否一致。</p>
+
+<div class="table-wrap">
+  <table class="tbl center">
+    <thead><tr><th></th><th>條件組合缺席</th><th>條件組合存在</th></tr></thead>
+    <tbody>
+      <tr><th>結果存在</th><td class="lo">格 1：與評估無直接關係</td><td class="hi">格 2：支持「條件組合 ⊆ 結果」</td></tr>
+      <tr><th>結果缺席</th><td class="lo">格 3：與評估無直接關係</td><td class="warnc">格 4：應該是空的（或幾乎空的），這裡的案例削弱論點</td></tr>
+    </tbody>
+  </table>
+</div>
+<p>格 4 空著、格 2 有案例，子集合關係就成立。（當然格 4 不一定完全是空的，但在案例導向研究中，研究者應該能解釋落入格 4 的少數案例。）</p>
+
+<h3>模糊集版本：逐案比較分數</h3>
+<p>模糊集不能直接這樣做：每個案例的分數幾乎各不相同，沒辦法簡單「挑出具備條件的案例」。但模糊代數提供了直接的判準：</p>
+
+<div class="callout key">
+  <div class="ct">🔑 模糊子集關係的定義</div>
+  <p>如果<strong>每一個案例</strong>在集合 X 的分數都<strong>小於或等於</strong>它在集合 Y 的分數（X<sub>i</sub> ≤ Y<sub>i</sub>），則 X 是 Y 的模糊子集合：X ⊆ Y。</p>
+  <p>當 X 是條件（或條件組合）、Y 是結果時，這就是<strong>充分性</strong>的型態：條件分數高，結果分數也必須高；但反過來不必成立。</p>
+</div>
+
+<p>原書表 2-4 取出表 2-2 的兩欄：弱階級投票（W）與<strong>非</strong>強大工會（~U = 1 − U）。仔細看：每一國的 W 都 ≥ ~U。</p>
+
+<div class="table-wrap">
+  <table class="tbl center">
+    <caption style="caption-side:top;text-align:left;font-weight:700;padding-bottom:.4rem">原書表 2-4　模糊子集關係示例（~U ≤ W）</caption>
+    <thead><tr><th>國家</th><th>弱階級投票 W</th><th>非強大工會 ~U</th><th>~U ≤ W？</th></tr></thead>
+    <tbody>
+      <tr><td>澳大利亞</td><td>0.6</td><td>0.4</td><td>✔</td></tr>
+      <tr><td>比利時</td><td>0.6</td><td>0.2</td><td>✔</td></tr>
+      <tr><td>丹麥</td><td>0.2</td><td>0.2</td><td>✔（相等）</td></tr>
+      <tr><td>法國</td><td>0.8</td><td>0.8</td><td>✔（相等）</td></tr>
+      <tr><td>德國</td><td>0.6</td><td>0.6</td><td>✔（相等）</td></tr>
+      <tr><td>愛爾蘭</td><td>0.8</td><td>0.2</td><td>✔</td></tr>
+      <tr><td>義大利</td><td>0.6</td><td>0.4</td><td>✔</td></tr>
+      <tr><td>荷蘭</td><td>0.8</td><td>0.6</td><td>✔</td></tr>
+      <tr><td>挪威</td><td>0.2</td><td>0.2</td><td>✔（相等）</td></tr>
+      <tr><td>瑞典</td><td>0.0</td><td>0.0</td><td>✔（相等）</td></tr>
+      <tr><td>英國</td><td>0.4</td><td>0.4</td><td>✔（相等）</td></tr>
+      <tr><td>美國</td><td>1.0</td><td>0.8</td><td>✔</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>把這兩欄畫成 XY 圖（原書圖 2-1：橫軸 ~U、縱軸 W），所有點都落在對角線上或<strong>左上方的三角形</strong>裡：</p>
+<ul>
+  <li><strong>左上三角形的點不是「誤差」</strong>：像愛爾蘭（~U = 0.2、W = 0.8）、比利時（0.2、0.6），它們工會很強卻仍是弱階級投票，代表<strong>還有其他條件或條件組合</strong>也能導致弱階級投票。迴歸分析會把它們當成殘差，集合分析則把它們視為「別的路徑」的線索。</li>
+  <li><strong>右下三角形</strong>對應清晰集的<strong>格 4</strong>：落在那裡的案例才會違反模糊子集關係。圖 2-1 的右下三角形完全是空的。</li>
+</ul>
+
+<div class="widget" id="w-xy">
+  <div class="widget-head"><span class="wtag">互動</span> XY 圖：點在對角線的哪一邊？</div>
+  <div class="widget-body">
+    <p style="margin-top:0">選擇橫軸的條件（縱軸固定為 W 弱階級投票），切換「充分性」或「必要性」的眼光。點選圖上的點或下拉選單可選中一個國家，再用滑桿改動它的分數，看它是否跑到「違反區」。紅點 = 違反目前檢視的子集關係。</p>
+    <div class="controls">
+      <div class="field"><label>橫軸 X</label>
+        <select data-xsel>
+          <option value="nU">~U 非強大工會（圖 2-1）</option>
+          <option value="AnM">A·~M 富裕且非高製造業</option>
+          <option value="nM">~M 非高製造業</option>
+          <option value="A">A 高度富裕</option>
+          <option value="I">I 所得不平等</option>
+          <option value="InU">I·~U 不平等且非強大工會</option>
+          <option value="AornM">A + ~M 富裕或非高製造業</option>
+          <option value="U">U 強大工會</option>
+        </select>
+      </div>
+      <div class="field"><label>檢視</label>
+        <div class="seg" data-rel>
+          <button data-v="suf" class="on">充分性 X ⊆ Y</button>
+          <button data-v="nec">必要性 Y ⊆ X</button>
+        </div>
+      </div>
+    </div>
+    <div class="wgrid">
+      <div><svg class="plot" data-plot aria-label="模糊集 XY 散佈圖"></svg></div>
+      <div>
+        <div class="field"><label>選中的國家</label><select data-csel></select></div>
+        <div class="slider-row"><span class="sl-label">X</span><input type="range" min="0" max="1" step="0.1" data-ex style="flex:1"><output data-exo></output></div>
+        <div class="slider-row"><span class="sl-label">Y</span><input type="range" min="0" max="1" step="0.1" data-ey style="flex:1"><output data-eyo></output></div>
+        <p><button class="btn ghost" type="button" data-reset>還原原書資料</button></p>
+        <div class="stats">
+          <div class="stat"><div class="k">符合子集關係的案例</div><div class="v gold" data-ok>—</div></div>
+          <div class="stat"><div class="k">Pearson r（對稱）</div><div class="v" data-r>—</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="result-box" data-xyout></div>
+  </div>
+</div>
+
+<h3>條件組合也一樣</h3>
+<p>表 2-4 與圖 2-1 只用了單一條件，但同樣的檢驗可以用在<strong>條件組合</strong>上：先用交集（取最小值）算出每個案例在組合中的分數，放在橫軸；結果放縱軸。若點都在左上三角形，就表示該組合是結果的模糊子集合——也就是<strong>充分性檢驗</strong>（Ragin 2000；第 6 章會深入討論組態的隸屬）。在上面的互動圖選「I·~U」就能看到一個組合也完全落在左上方。</p>
+
+<div class="callout tip">
+  <div class="ct">📌 回到第 1 章的三個要點</div>
+  <p>考慮這句話：「在先進工業民主國家中，缺乏強大工會的國家，階級投票就弱。」</p>
+  <p>① 它主張了一個<strong>明確連結</strong>：非強大工會 ⊆ 弱階級投票。<br>
+  ② 它是<strong>非對稱</strong>的：並沒有說工會強大的國家就不會弱階級投票，所以愛爾蘭、比利時並不構成反證。<br>
+  ③ <strong>集合關係可以很強，即使相關不完美</strong>：圖 2-1 中所有案例都在左上三角形，集合關係完美成立；但 Pearson r 只有 0.766（我們重算結果亦為 0.766）。</p>
+</div>
+
+<details class="think">
+  <summary>想一想：為什麼左上方的點會拉低相關係數，卻不影響子集關係？</summary>
+  <div class="ans">
+    <p>相關係數衡量的是「點離一條最適直線有多遠」，愛爾蘭（0.2, 0.8）離任何直線都很遠，所以會拉低 r。但子集關係只問一件事：「有沒有點跑到對角線<strong>下方</strong>？」愛爾蘭在對角線上方，完全合法。這就是第 1 章「格 1 削弱相關、但不削弱充分性」在模糊集中的翻版。</p>
+  </div>
+</details>
+
+<h3>展望</h3>
+<p>現實資料很少像圖 2-1 這麼完美。第 3 章會介紹兩個描述性指標：<strong>一致性（consistency）</strong>——資料與集合關係陳述吻合到什麼程度；以及<strong>覆蓋度（coverage）</strong>——這個關係在實證上有多重要。</p>
+
+<!-- ================================================= -->
+<h2 id="s6">6. 實作：畫出模糊集合關係 <span class="en">· Practical appendix</span></h2>
+
+<p>用簡單的 XY 圖就能找出模糊集合關係：在這種三角形圖中，點<strong>一致地落在對角線上方</strong>（或一致地落在下方），就表示存在某種模糊子集關係。</p>
+
+<div class="sw-tabs">
+  <div class="seg">
+    <button data-tab="fs" class="on">fsQCA 軟體</button>
+    <button data-tab="r">R（QCA 套件）</button>
+  </div>
+  <div class="sw-pane on" data-pane="fs">
+    <div class="steps">
+      <div class="step"><div><h4>建立模糊集資料</h4><p>隸屬分數可以直接賦值，也可以依第 4、5 章的校準程序計算。可在 fsQCA 中直接輸入，或匯入 CSV（Excel）、Tab 分隔檔（SPSS）。第一列是簡單的變數名稱（見第 1 章附錄）。</p></div></div>
+      <div class="step"><div><h4>開啟 XY 圖</h4><p>資料顯示在試算表視窗後，點選 <span class="menu-path">Graphs → XY Plot</span>（舊版還要先點 Fuzzy，新版已省略）。用下拉箭頭指定 X 軸與 Y 軸的變數。</p></div></div>
+      <div class="step"><div><h4>（可選）否定與案例標籤</h4><p>畫圖前可勾選變數名稱旁的「Negate」框來使用否定集（例如把 U 變成 ~U）；也可指定「case Id」變數，方便辨認圖上的點是哪個案例。</p></div></div>
+      <div class="step"><div><h4>繪圖並檢查型態</h4><p>按 <span class="menu-path">Plot</span>，看點是落在對角線上方還是下方。點擊任一點，其資訊會顯示在圖的下方。</p></div></div>
+      <div class="step"><div><h4>角落的兩個數字</h4><p>圖左上角與右下角方框中的數字是<strong>一致性與覆蓋度</strong>，第 3 章會解釋。</p></div></div>
+      <div class="step"><div><h4>補充（非原書附錄）：計算交集、聯集、否定</h4><p>若要新增 A·~M 之類的欄位，可用 <span class="menu-path">Variables → Compute</span>，在運算式中使用 fsQCA 提供的模糊函數，例如 <code class="inline">fuzzyand(A, fuzzynot(M))</code>、<code class="inline">fuzzyor(A, fuzzynot(M))</code>。函數名稱請以你所用版本的 Compute 對話框列出者為準。</p></div></div>
+    </div>
+  </div>
+  <div class="sw-pane" data-pane="r">
+    <p>以下用 R 的 <code class="inline">QCA</code> 套件重現表 2-2、表 2-4 與圖 2-1：</p>
+<pre class="code"><span class="c-fn">library</span>(QCA)
+
+<span class="c-com"># 原書表 2-2：先進工業國家階級投票（六值模糊集）</span>
+cv <span class="c-kw">&lt;-</span> <span class="c-fn">data.frame</span>(
+  W = <span class="c-fn">c</span>(<span class="c-num">.6</span>,<span class="c-num">.6</span>,<span class="c-num">.2</span>,<span class="c-num">.8</span>,<span class="c-num">.6</span>,<span class="c-num">.8</span>,<span class="c-num">.6</span>,<span class="c-num">.8</span>,<span class="c-num">.2</span>,<span class="c-num">0</span>,<span class="c-num">.4</span>,<span class="c-num">1</span>),   <span class="c-com"># 弱階級投票</span>
+  A = <span class="c-fn">c</span>(<span class="c-num">.8</span>,<span class="c-num">.6</span>,<span class="c-num">.6</span>,<span class="c-num">.6</span>,<span class="c-num">.6</span>,<span class="c-num">.2</span>,<span class="c-num">.4</span>,<span class="c-num">.6</span>,<span class="c-num">.6</span>,<span class="c-num">.8</span>,<span class="c-num">.6</span>,<span class="c-num">1</span>),   <span class="c-com"># 高度富裕</span>
+  I = <span class="c-fn">c</span>(<span class="c-num">.6</span>,<span class="c-num">.2</span>,<span class="c-num">.4</span>,<span class="c-num">.8</span>,<span class="c-num">.8</span>,<span class="c-num">.6</span>,<span class="c-num">.8</span>,<span class="c-num">.4</span>,<span class="c-num">.4</span>,<span class="c-num">.4</span>,<span class="c-num">.6</span>,<span class="c-num">.8</span>),  <span class="c-com"># 所得不平等</span>
+  M = <span class="c-fn">c</span>(<span class="c-num">.4</span>,<span class="c-num">.2</span>,<span class="c-num">.2</span>,<span class="c-num">.2</span>,<span class="c-num">.4</span>,<span class="c-num">.8</span>,<span class="c-num">.2</span>,<span class="c-num">.2</span>,<span class="c-num">.6</span>,<span class="c-num">.8</span>,<span class="c-num">.8</span>,<span class="c-num">.4</span>),  <span class="c-com"># 高製造業就業</span>
+  U = <span class="c-fn">c</span>(<span class="c-num">.6</span>,<span class="c-num">.8</span>,<span class="c-num">.8</span>,<span class="c-num">.2</span>,<span class="c-num">.4</span>,<span class="c-num">.8</span>,<span class="c-num">.6</span>,<span class="c-num">.4</span>,<span class="c-num">.8</span>,<span class="c-num">1</span>,<span class="c-num">.6</span>,<span class="c-num">.2</span>),   <span class="c-com"># 強大工會</span>
+  row.names = <span class="c-fn">c</span>(<span class="c-str">"AUS"</span>,<span class="c-str">"BEL"</span>,<span class="c-str">"DNK"</span>,<span class="c-str">"FRA"</span>,<span class="c-str">"DEU"</span>,<span class="c-str">"IRL"</span>,
+                <span class="c-str">"ITA"</span>,<span class="c-str">"NLD"</span>,<span class="c-str">"NOR"</span>,<span class="c-str">"SWE"</span>,<span class="c-str">"GBR"</span>,<span class="c-str">"USA"</span>)
+)
+
+<span class="c-com"># 三種運算：否定 = 1 - x；交集 = fuzzyand()（即 pmin）；聯集 = fuzzyor()（即 pmax）</span>
+cv$notM      <span class="c-kw">&lt;-</span> <span class="c-num">1</span> - cv$M
+cv$A_notM    <span class="c-kw">&lt;-</span> <span class="c-fn">fuzzyand</span>(cv$A, <span class="c-num">1</span> - cv$M)   <span class="c-com"># 原書表 2-2 第 8 欄 A·~M</span>
+cv$A_or_notM <span class="c-kw">&lt;-</span> <span class="c-fn">fuzzyor</span>(cv$A, <span class="c-num">1</span> - cv$M)    <span class="c-com"># 原書表 2-2 第 9 欄 A + ~M</span>
+cv
+
+<span class="c-com"># 表 2-4：~U 是否為 W 的模糊子集合？</span>
+notU <span class="c-kw">&lt;-</span> <span class="c-num">1</span> - cv$U
+<span class="c-fn">all</span>(notU <span class="c-kw">&lt;=</span> cv$W)        <span class="c-com"># TRUE：每個案例都 ~U ≤ W</span>
+<span class="c-fn">cor</span>(notU, cv$W)          <span class="c-com"># 0.766：相關並不完美</span>
+
+<span class="c-com"># 圖 2-1：XY 圖（充分性：點應在對角線上方）</span>
+<span class="c-fn">XYplot</span>(notU, cv$W, relation = <span class="c-str">"sufficiency"</span>)
+
+<span class="c-com"># 條件組合：I·~U</span>
+<span class="c-fn">XYplot</span>(<span class="c-fn">fuzzyand</span>(cv$I, notU), cv$W, relation = <span class="c-str">"sufficiency"</span>)</pre>
+    <p><code class="inline">XYplot()</code> 會在圖上同時印出一致性與覆蓋度（第 3 章的主題）。若想直接取得這些數字，可用 <code class="inline">pof(notU, cv$W, relation = "sufficiency")</code>；R 的完整操作可參考本站主教材〈<a href="../chapters/ch4.html">Ch.4 模糊集 fsQCA</a>〉。</p>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s7">7. 本章重點、名詞與自我測驗 <span class="en">· Review</span></h2>
+
+<ol class="takeaways">
+  <li>模糊集讓案例可以<strong>部分隸屬</strong>於集合（0 到 1 之間），同時保留子集合、交集、聯集等集合論運算。</li>
+  <li>三個<strong>定性錨點</strong>：1 = 完全隸屬、0.5 = 交叉點（最模糊）、0 = 完全不隸屬；&gt; 0.5 偏在內、&lt; 0.5 偏在外。</li>
+  <li>模糊集不是定序量表或一般變數：分數必須以<strong>理論與實質知識</strong>對照集合定義來校準；依最小–最大值或排名機械換算是嚴重錯誤。</li>
+  <li>錨點區分<strong>相關與無關的變異</strong>；換了集合的概念（如「富裕」→「中等收入」），同一指標的隸屬分數就會改變。</li>
+  <li>三種運算：<strong>否定</strong> ~X = 1 − X；<strong>交集</strong> X·Y = min；<strong>聯集</strong> X + Y = max。</li>
+  <li><strong>模糊子集關係</strong>：所有案例 X ≤ Y → X ⊆ Y。XY 圖中點都在對角線上或左上方；右下三角形對應清晰集的格 4。</li>
+  <li>左上方的點不是誤差，而是<strong>其他路徑</strong>的線索；集合關係可以完美成立，即使 r 只有 0.766。</li>
+</ol>
+
+<h3>名詞對照</h3>
+<div class="table-wrap">
+  <table class="tbl gloss">
+    <thead><tr><th>本教材用語</th><th>簡中譯本</th><th>英文</th><th>白話說明</th></tr></thead>
+    <tbody>
+      <tr><td>模糊集</td><td>模糊集</td><td>fuzzy set</td><td>允許案例部分隸屬（0–1）的集合</td></tr>
+      <tr><td>隸屬分數</td><td>隶属分数／隶属度</td><td>membership score</td><td>案例在集合中有「多深」</td></tr>
+      <tr><td>定性錨點</td><td>定性锚点</td><td>qualitative breakpoints / anchors</td><td>完全隸屬、交叉點、完全不隸屬三個有質性意義的點</td></tr>
+      <tr><td>交叉點</td><td>交叉点／最大模糊点</td><td>crossover point</td><td>隸屬 0.5，最難判斷在內或在外</td></tr>
+      <tr><td>校準</td><td>校准</td><td>calibration</td><td>依知識把原始指標轉成隸屬分數</td></tr>
+      <tr><td>定序量表</td><td>定序量表</td><td>ordinal scale</td><td>只有相對排序、不對照外部標準</td></tr>
+      <tr><td>否定</td><td>非集／非运算</td><td>negation (~)</td><td>~X = 1 − X</td></tr>
+      <tr><td>交集（邏輯且）</td><td>交集（逻辑与）</td><td>intersection, logical and (·)</td><td>取最小值</td></tr>
+      <tr><td>聯集（邏輯或）</td><td>并集（逻辑或）</td><td>union, logical or (+)</td><td>取最大值</td></tr>
+      <tr><td>模糊子集關係</td><td>模糊子集关系</td><td>fuzzy subset relation</td><td>每個案例 X ≤ Y</td></tr>
+      <tr><td>實證等級</td><td>实证等级</td><td>empirical gradations</td><td>資料中程度上的細緻差異</td></tr>
+      <tr><td>無關的變異</td><td>不相关的变异</td><td>irrelevant variation</td><td>錨點以外、對隸屬沒有意義的差異</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>自我測驗</h3>
+<p class="quiz-score" data-quiz-score></p>
+
+<div class="quiz" data-answer="2">
+  <p class="q">某國在「民主國家」集合的隸屬分數是 0.3。這代表什麼？</p>
+  <div class="opts">
+    <button class="opt">完全不屬於民主國家</button>
+    <button class="opt">偏屬於民主國家</button>
+    <button class="opt">偏向不屬於，但仍是民主國家集合的弱成員</button>
+    <button class="opt">處於最模糊的交叉點</button>
+  </div>
+  <div class="explain">0.3 在 0 與 0.5 之間：偏在集合外，但不是「完全不隸屬」（那是 0）。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">美國在「高製造業就業」集合（M）的分數是 0.4，它在 ~M 中的分數是？</p>
+  <div class="opts">
+    <button class="opt">0.6</button>
+    <button class="opt">0.4</button>
+    <button class="opt">−0.4</button>
+    <button class="opt">0.0，因為 0.4 &lt; 0.5</button>
+  </div>
+  <div class="explain">否定：~M = 1 − M = 1 − 0.4 = 0.6。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">某國 A = 1.0、~M = 0.6。它在 A·~M 的隸屬分數是？</p>
+  <div class="opts">
+    <button class="opt">1.0</button>
+    <button class="opt">1.6</button>
+    <button class="opt">0.8（平均）</button>
+    <button class="opt">0.6</button>
+  </div>
+  <div class="explain">「·」是交集，取最小值：min(1.0, 0.6) = 0.6。不是相乘，也不是平均。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">某國 A = 0.2、~M = 0.8。它在 A + ~M 的隸屬分數是？</p>
+  <div class="opts">
+    <button class="opt">0.2</button>
+    <button class="opt">0.8</button>
+    <button class="opt">1.0（相加）</button>
+    <button class="opt">0.16（相乘）</button>
+  </div>
+  <div class="explain">「+」是聯集，取最大值：max(0.2, 0.8) = 0.8。</div>
+</div>
+
+<div class="quiz" data-answer="2">
+  <p class="q">「X 是 Y 的模糊子集合」的判準是？</p>
+  <div class="opts">
+    <button class="opt">X 與 Y 的相關係數接近 1</button>
+    <button class="opt">每個案例的 X 都大於 Y</button>
+    <button class="opt">每個案例的 X 都小於或等於 Y</button>
+    <button class="opt">X 的平均數小於 Y 的平均數</button>
+  </div>
+  <div class="explain">模糊子集關係要求逐案 X<sub>i</sub> ≤ Y<sub>i</sub>；在 XY 圖上，所有點都在對角線上或其左上方。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">在圖 2-1 中，愛爾蘭（~U = 0.2、W = 0.8）落在左上方。正確的解讀是？</p>
+  <div class="opts">
+    <button class="opt">它違反「~U ⊆ W」，必須當作反例</button>
+    <button class="opt">它提示還有其他條件或組合也會導致弱階級投票</button>
+    <button class="opt">它是測量誤差，應該刪除</button>
+    <button class="opt">它證明 ~U 是 W 的必要條件</button>
+  </div>
+  <div class="explain">左上方的點符合子集關係。條件分數低、結果分數高，表示有「別條路」通往結果。只有右下方的點才違反充分性型態的子集關係。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">圖 2-1 的 Pearson r = 0.766。從集合論的角度，這些資料對「非強大工會 ⊆ 弱階級投票」來說是？</p>
+  <div class="opts">
+    <button class="opt">支持不足，因為相關不到 0.8</button>
+    <button class="opt">無法判斷，必須先跑迴歸</button>
+    <button class="opt">部分支持，約 77% 的案例符合</button>
+    <button class="opt">完全一致：所有案例都在對角線上或左上方</button>
+  </div>
+  <div class="explain">集合關係是非對稱的：12 國全部 ~U ≤ W，集合關係完美成立。r 不完美是因為左上方的點（愛爾蘭、比利時等）拉低了相關。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">要把一個六級的國家財富定序量表轉成「富裕國家」模糊集，正確的做法是？</p>
+  <div class="opts">
+    <button class="opt">依理論與實質知識，判斷每一級對應的隸屬程度（例如最低兩級都是 0）</button>
+    <button class="opt">直接依序換成 0、0.2、0.4、0.6、0.8、1</button>
+    <button class="opt">依各國排名等距分配 0 到 1</button>
+    <button class="opt">以樣本平均數為交叉點</button>
+  </div>
+  <div class="explain">定序類別只是相對排序；轉成隸屬分數必須看類別的實質內容是否符合集合的定義。機械換算、依排名、或用樣本平均數當交叉點都缺乏理論依據。</div>
+</div>
+
+<p><button class="btn ghost" data-quiz-reset type="button">重新作答</button></p>
+
+<div class="done-box" data-ch="2">
+  <span class="msg"></span>
+  <button class="btn" type="button">標記本章為已讀</button>
+</div>
+
+<nav class="chap-nav">
+  <a class="prev" href="ch1.html"><div class="dir">← 上一章</div><div class="ttl">第 1 章 社會科學研究中的集合關係：基本概念</div></a>
+  <a class="next" href="ch3.html"><div class="dir">下一章 →</div><div class="ttl">第 3 章 評估集合關係：一致性與覆蓋度</div></a>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Charles C. Ragin, <em>Redesigning Social Inquiry: Fuzzy Sets and Beyond</em> (University of Chicago Press, 2008)<br>
+  以學習為目的之概念整理與重新詮釋，非原書譯文 · <a href="index.html">回本書首頁</a></p>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="js/ragin.js"></script>
+<script>
+/* ---------- 共用資料：原書表 2-2 ---------- */
+const CH2 = {
+  countries: ['澳大利亞', '比利時', '丹麥', '法國', '德國', '愛爾蘭', '義大利', '荷蘭', '挪威', '瑞典', '英國', '美國'],
+  W: [.6, .6, .2, .8, .6, .8, .6, .8, .2, 0, .4, 1],
+  A: [.8, .6, .6, .6, .6, .2, .4, .6, .6, .8, .6, 1],
+  I: [.6, .2, .4, .8, .8, .6, .8, .4, .4, .4, .6, .8],
+  M: [.4, .2, .2, .2, .4, .8, .2, .2, .6, .8, .8, .4],
+  U: [.6, .8, .8, .2, .4, .8, .6, .4, .8, 1, .6, .2],
+  names: { W: '弱階級投票', A: '高度富裕', I: '所得不平等', M: '高製造業就業', U: '強大工會' },
+  r2: (v) => Math.round(v * 100) / 100,
+  pearson(x, y) {
+    const n = x.length, mx = x.reduce((s, v) => s + v, 0) / n, my = y.reduce((s, v) => s + v, 0) / n;
+    let sxy = 0, sxx = 0, syy = 0;
+    for (let i = 0; i < n; i++) { sxy += (x[i] - mx) * (y[i] - my); sxx += (x[i] - mx) ** 2; syy += (y[i] - my) ** 2; }
+    return sxx && syy ? sxy / Math.sqrt(sxx * syy) : NaN;
+  },
+};
+
+/* ---------- 不同尺度的記錄方式 ---------- */
+(function () {
+  const root = document.getElementById('w-anchor');
+  const x = root.querySelector('[data-x]'), xo = root.querySelector('[data-xo]');
+  const tb = root.querySelector('[data-scales] tbody'), out = root.querySelector('[data-anchorout]');
+  const mk = root.querySelector('[data-mk]');
+  const schemes = [
+    { name: '清晰集', vals: [[0, '完全不隸屬'], [1, '完全隸屬']] },
+    { name: '三值模糊集', vals: [[0, '完全不隸屬'], [.5, '既非在內也非在外'], [1, '完全隸屬']] },
+    { name: '四值模糊集', vals: [[0, '完全不隸屬'], [.33, '偏不隸屬'], [.67, '偏隸屬'], [1, '完全隸屬']] },
+    { name: '六值模糊集', vals: [[0, '完全不隸屬'], [.2, '大致不隸屬'], [.4, '有點不隸屬'], [.6, '有點隸屬'], [.8, '大致隸屬'], [1, '完全隸屬']] },
+  ];
+  const nearest = (v, vals) => vals.reduce((b, c) => Math.abs(c[0] - v) < Math.abs(b[0] - v) - 1e-9 ? c : b);
+  function contLabel(v) {
+    if (v >= 1) return '完全隸屬';
+    if (v <= 0) return '完全不隸屬';
+    if (Math.abs(v - .5) < 1e-9) return '交叉點（最模糊）';
+    return v > .5 ? '偏隸屬' : '偏不隸屬';
+  }
+  function run() {
+    const v = +x.value;
+    xo.textContent = v.toFixed(2);
+    mk.style.left = (v * 100) + '%';
+    let rows = '';
+    schemes.forEach((s) => {
+      let c;
+      if (s.name === '清晰集' && Math.abs(v - .5) < 1e-9) c = [NaN, '無法歸類（清晰集沒有灰色地帶）'];
+      else c = nearest(v, s.vals);
+      rows += `<tr><td>${s.name}</td><td><strong>${isNaN(c[0]) ? '？' : c[0]}</strong></td><td>${c[1]}</td></tr>`;
+    });
+    rows += `<tr><td>連續模糊集</td><td><strong>${v.toFixed(2)}</strong></td><td>${contLabel(v)}</td></tr>`;
+    tb.innerHTML = rows;
+    let msg = `x = ${v.toFixed(2)}：`;
+    if (v >= 1) msg += '完全隸屬——毫無爭議地在集合內。';
+    else if (v <= 0) msg += '完全不隸屬——毫無爭議地在集合外。';
+    else if (Math.abs(v - .5) < 1e-9) msg += '正好在交叉點。四值方案沒有 0.5，會逼你決定「偏在內」或「偏在外」；清晰集則根本無法記錄它。';
+    else msg += (v > .5 ? '偏在集合內' : '偏在集合外') + `，但不是完全${v > .5 ? '隸屬' : '不隸屬'}。`;
+    if (v > 0 && v < 1 && Math.abs(v - .5) > 1e-9) {
+      msg += `\n清晰集只能記成 ${v > .5 ? 1 : 0}，「${v > .5 ? '不完全' : '仍有一點'}」這層資訊就消失了。`;
+    }
+    if (Math.abs(v - .9) < 1e-9) msg += '\n例：美國在「民主國家」中可記為 0.9——非常接近、但不完全隸屬。';
+    out.textContent = msg;
+  }
+  const btns = root.querySelectorAll('[data-pre] button');
+  btns.forEach((b) => b.addEventListener('click', () => {
+    btns.forEach((o) => o.classList.toggle('on', o === b));
+    x.value = b.dataset.v; run();
+  }));
+  x.addEventListener('input', () => { btns.forEach((o) => o.classList.toggle('on', +o.dataset.v === +x.value)); run(); });
+  run();
+})();
+
+/* ---------- 校準：錯誤做法 vs 錨點 ---------- */
+const CAL = {
+  gnp: [0.8, 2, 5, 9, 14, 20, 28, 35, 48, 75],
+  // 錨點之間線性內插、錨點外截斷（ch2 示意；ch5 改用對數勝算）
+  anchor(x, non, cro, ful) {
+    if (x <= non) return 0;
+    if (x >= ful) return 1;
+    if (x <= cro) return .5 * (x - non) / (cro - non);
+    return .5 + .5 * (x - cro) / (ful - cro);
+  },
+  minmax(x, arr) { const lo = Math.min(...arr), hi = Math.max(...arr); return (x - lo) / (hi - lo); },
+  rank(i, arr) { const s = [...arr].sort((a, b) => a - b); return s.indexOf(arr[i]) / (arr.length - 1); },
+};
+(function () {
+  const root = document.getElementById('w-calib');
+  const sNon = root.querySelector('[data-non]'), sCro = root.querySelector('[data-cro]'), sFul = root.querySelector('[data-ful]');
+  const tb = root.querySelector('[data-caltbl] tbody'), out = root.querySelector('[data-calout]');
+  const labels = 'ABCDEFGHIJ'.split('').map((c) => '國家 ' + c);
+  function run(changed) {
+    let non = +sNon.value, cro = +sCro.value, ful = +sFul.value;
+    // 維持 non < cro < ful
+    if (cro <= non) { if (changed === sNon) { cro = non + .5; sCro.value = cro; } else { non = cro - .5; sNon.value = non; } }
+    if (ful <= cro) { if (changed === sFul) { cro = ful - .5; sCro.value = cro; if (non >= cro) { non = cro - .5; sNon.value = non; } } else { ful = cro + .5; sFul.value = ful; } }
+    non = +sNon.value; cro = +sCro.value; ful = +sFul.value;
+    root.querySelector('[data-nono]').textContent = non;
+    root.querySelector('[data-croo]').textContent = cro;
+    root.querySelector('[data-fulo]').textContent = ful;
+    const g = CAL.gnp;
+    let rows = '';
+    const res = g.map((x, i) => ({ x, mm: CAL.minmax(x, g), rk: CAL.rank(i, g), an: CAL.anchor(x, non, cro, ful) }));
+    res.forEach((r, i) => {
+      const cls = r.an >= 1 ? ' class="hi"' : r.an <= 0 ? ' class="lo"' : '';
+      rows += `<tr><td>${labels[i]}</td><td>${r.x}</td><td>${r.mm.toFixed(2)}</td><td>${r.rk.toFixed(2)}</td><td${cls}><strong>${r.an.toFixed(2)}</strong></td></tr>`;
+    });
+    tb.innerHTML = rows;
+    const full = res.filter((r) => r.an >= 1).length, none = res.filter((r) => r.an <= 0).length;
+    const inSet = res.filter((r) => r.an > .5).length;
+    const mmIn = res.filter((r) => r.mm > .5).length;
+    let msg = `錨點：完全不隸屬 ≤ ${non}、交叉點 = ${cro}、完全隸屬 ≥ ${ful}（千美元）\n`;
+    msg += `→ ${full} 國完全富裕（1）、${none} 國完全不富裕（0）、共 ${inSet} 國偏在「富裕國家」集合內。\n`;
+    msg += `對照「最小–最大等比」：只有 ${mmIn} 國超過 0.5，而且國家 I（48）只得 ${res[8].mm.toFixed(2)}——它明明很富裕，卻被最富的 J（75）「拖累」。\n`;
+    msg += `「依排名」則讓相鄰國家永遠差 0.11，不管它們的 GNP 實際差多少。`;
+    if (res[8].an >= 1 && res[9].an >= 1) msg += `\n在錨點校準下，I 與 J 都是 1：兩者的差距是「無關的變異」。`;
+    out.textContent = msg;
+  }
+  [sNon, sCro, sFul].forEach((s) => s.addEventListener('input', () => run(s)));
+  run();
+})();
+
+/* ---------- 判斷題 ---------- */
+(function () {
+  const root = document.getElementById('w-judge');
+  const box = root.querySelector('[data-judge]'), out = root.querySelector('[data-judgeout]');
+  const items = [
+    { q: '把六級定序量表的類別依序換成 0、0.2、0.4、0.6、0.8、1，就得到六值模糊集。', a: false,
+      why: '定序量表只有相對排序；轉成模糊集要看每個類別的實質內容是否符合集合定義，例如最低兩級可能都是 0。' },
+    { q: '隸屬分數 0.5 是最模糊的點：說案例偏在內或偏在外都一樣有道理。', a: true,
+      why: '0.5 就是交叉點，三個定性錨點之一。' },
+    { q: '在「富裕國家」集合中，兩個極富國家之間的 GNP 差距，應該反映在不同的隸屬分數上。', a: false,
+      why: '兩者都完全隸屬（1）。錨點以外的差異是「無關的變異」。' },
+    { q: '人均 GNP 這個指標不變，但把集合改為「中等收入國家」，各國的隸屬分數就可能完全不同。', a: true,
+      why: '隸屬分數取決於集合的概念與標籤，而不只是指標本身。' },
+    { q: '最窮的國家設 0、最富的設 1，其餘依 GNP 等比例內插，是合理的校準方法。', a: false,
+      why: 'Ragin 明確稱之為嚴重錯誤：0 與 1 應該由理論上的錨點決定，而不是由樣本中的極端值決定。' },
+    { q: '模糊集既是質性的也是量化的。', a: true,
+      why: '它像連續變數一樣表達程度，但每個分數都對照「是否屬於集合」的質性判斷。' },
+    { q: '四值模糊集（0、0.33、0.67、1）沒有 0.5，因此不能算是模糊集。', a: false,
+      why: '它仍是模糊集，只是刻意不給 0.5，要求研究者對每個案例判斷「偏在內」或「偏在外」。' },
+  ];
+  let done = 0, right = 0;
+  items.forEach((it) => {
+    const d = document.createElement('div');
+    d.className = 'judge-item';
+    d.innerHTML = `<p>${it.q}</p><div class="seg"><button type="button" data-v="1">對</button><button type="button" data-v="0">錯</button></div><div class="fb"></div>`;
+    const bs = d.querySelectorAll('button');
+    bs.forEach((b) => b.addEventListener('click', () => {
+      if (d.classList.contains('done')) return;
+      const ok = (b.dataset.v === '1') === it.a;
+      d.classList.add('done', ok ? 'good' : 'badd');
+      b.classList.add('on');
+      bs.forEach((o) => o.disabled = true);
+      d.querySelector('.fb').textContent = (ok ? '✔ 正確。' : `✘ 答案是「${it.a ? '對' : '錯'}」。`) + it.why;
+      done++; if (ok) right++;
+      out.textContent = `已作答 ${done} / ${items.length} 題，答對 ${right} 題。` +
+        (done === items.length ? (right === items.length ? '\n全對！你已經掌握「模糊集 ≠ 一般變數」的核心觀念。' : '\n回頭看看第 3 節「校準要有目的」的段落，再試一次（重新整理頁面）。') : '');
+    }));
+    box.appendChild(d);
+  });
+})();
+
+/* ---------- 模糊集運算計算器 ---------- */
+(function () {
+  const root = document.getElementById('w-ops');
+  const termsBox = root.querySelector('[data-terms]');
+  const thead = root.querySelector('[data-opstbl] thead'), tbody = root.querySelector('[data-opstbl] tbody');
+  const out = root.querySelector('[data-opsout]');
+  const keys = ['A', 'I', 'M', 'U', 'W'];
+  const init = [['A', false], ['M', true], ['', false]];
+  let op = 'and', sel = 11;
+  init.forEach((t, i) => {
+    const row = document.createElement('div');
+    row.className = 'ops-row';
+    const opts = (i === 2 ? '<option value="">（不使用）</option>' : '') +
+      keys.map((k) => `<option value="${k}"${k === t[0] ? ' selected' : ''}>${k} ${CH2.names[k]}</option>`).join('');
+    row.innerHTML = `<strong>集合 ${i + 1}</strong><select data-set="${i}">${opts}</select>` +
+      `<label class="neg"><input type="checkbox" data-neg="${i}"${t[1] ? ' checked' : ''}> 非（~）</label>`;
+    termsBox.appendChild(row);
+  });
+  const sets = [...root.querySelectorAll('[data-set]')], negs = [...root.querySelectorAll('[data-neg]')];
+  function terms() {
+    return sets.map((s, i) => s.value ? { k: s.value, neg: negs[i].checked } : null).filter(Boolean);
+  }
+  const tname = (t) => (t.neg ? '~' : '') + t.k;
+  const tval = (t, c) => CH2.r2(t.neg ? 1 - CH2[t.k][c] : CH2[t.k][c]);
+  function run() {
+    const ts = terms();
+    const sym = op === 'and' ? '·' : ' + ';
+    const expr = ts.map(tname).join(sym);
+    thead.innerHTML = `<tr><th>國家</th>${ts.map((t) => `<th>${tname(t)}</th>`).join('')}<th>${expr}</th></tr>`;
+    const f = op === 'and' ? RG.fz.and : RG.fz.or;
+    const res = CH2.countries.map((c, ci) => {
+      const vs = ts.map((t) => tval(t, ci));
+      return { vs, r: vs.length ? f(...vs) : NaN };
+    });
+    tbody.innerHTML = res.map((o, ci) => {
+      const pickIdx = o.vs.indexOf(o.r);
+      return `<tr class="pick" data-ci="${ci}"><td${ci === sel ? ' class="warnc"' : ''}>${CH2.countries[ci]}</td>` +
+        o.vs.map((v, j) => `<td${j === pickIdx ? ' class="hi"' : ''}>${v.toFixed(1)}</td>`).join('') +
+        `<td><strong>${isNaN(o.r) ? '—' : o.r.toFixed(1)}</strong></td></tr>`;
+    }).join('');
+    tbody.querySelectorAll('tr').forEach((tr) => tr.addEventListener('click', () => { sel = +tr.dataset.ci; run(); }));
+    if (ts.length < 2) { out.textContent = '請至少選兩個集合（集合 1、2 必選）。'; return; }
+    const o = res[sel];
+    const fn = op === 'and' ? 'min' : 'max';
+    let msg = `【${CH2.countries[sel]}】的逐步計算：\n`;
+    ts.forEach((t, j) => {
+      const raw = CH2[t.k][sel];
+      msg += t.neg ? `  ${tname(t)} = 1 − ${raw.toFixed(1)} = ${o.vs[j].toFixed(1)}\n` : `  ${t.k} = ${raw.toFixed(1)}\n`;
+    });
+    msg += `  ${expr} = ${fn}(${o.vs.map((v) => v.toFixed(1)).join(', ')}) = <span class="hl">${o.r.toFixed(1)}</span>`;
+    msg += o.r > .5 ? '（偏隸屬）' : o.r < .5 ? '（偏不隸屬）' : '（交叉點）';
+    const inn = res.map((x, i) => x.r > .5 ? CH2.countries[i] : null).filter(Boolean);
+    msg += `\n\n偏隸屬於「${expr}」的國家（> 0.5）：${inn.length ? inn.join('、') : '沒有'}（${inn.length} / 12）`;
+    msg += op === 'and' ? '\n交集讓集合變「窄」：組合越多條件，分數只會持平或下降。' : '\n聯集讓集合變「寬」：多加一個替代條件，分數只會持平或上升。';
+    const sig = ts.map(tname).join(',');
+    if (sig === 'A,~M') msg += `\n✔ 這正是原書表 2-2 第 ${op === 'and' ? 8 : 9} 欄（${op === 'and' ? 'A·~M' : 'A + ~M'}）。`;
+    out.innerHTML = msg;
+  }
+  root.querySelectorAll('[data-op] button').forEach((b) => b.addEventListener('click', () => {
+    root.querySelectorAll('[data-op] button').forEach((x) => x.classList.toggle('on', x === b));
+    op = b.dataset.v; run();
+  }));
+  sets.concat(negs).forEach((el) => el.addEventListener('change', run));
+  run();
+})();
+
+/* ---------- XY 圖 ---------- */
+const XYDEF = {
+  nU: { lab: '~U 非強大工會', f: (i) => 1 - CH2.U[i] },
+  AnM: { lab: 'A·~M', f: (i) => Math.min(CH2.A[i], 1 - CH2.M[i]) },
+  nM: { lab: '~M 非高製造業', f: (i) => 1 - CH2.M[i] },
+  A: { lab: 'A 高度富裕', f: (i) => CH2.A[i] },
+  I: { lab: 'I 所得不平等', f: (i) => CH2.I[i] },
+  InU: { lab: 'I·~U', f: (i) => Math.min(CH2.I[i], 1 - CH2.U[i]) },
+  AornM: { lab: 'A + ~M', f: (i) => Math.max(CH2.A[i], 1 - CH2.M[i]) },
+  U: { lab: 'U 強大工會', f: (i) => CH2.U[i] },
+};
+(function () {
+  const root = document.getElementById('w-xy');
+  const svg = root.querySelector('[data-plot]');
+  const xsel = root.querySelector('[data-xsel]'), csel = root.querySelector('[data-csel]');
+  const ex = root.querySelector('[data-ex]'), ey = root.querySelector('[data-ey]');
+  const out = root.querySelector('[data-xyout]');
+  let rel = 'suf', X = [], Y = [], sel = 5; // 預設選愛爾蘭
+  CH2.countries.forEach((c, i) => { const o = document.createElement('option'); o.value = i; o.textContent = c; csel.appendChild(o); });
+  function load() {
+    const d = XYDEF[xsel.value];
+    X = CH2.countries.map((_, i) => CH2.r2(d.f(i)));
+    Y = CH2.W.slice();
+  }
+  const viol = (i) => rel === 'suf' ? X[i] > Y[i] + 1e-9 : Y[i] > X[i] + 1e-9;
+  function draw() {
+    const d = XYDEF[xsel.value];
+    const pts = X.map((x, i) => ({ x, y: Y[i], label: CH2.countries[i], cls: i === sel ? 'sel' : viol(i) ? 'off' : '', tag: i === sel ? CH2.countries[i] : null, r: i === sel ? 7 : 5.5 }));
+    RG.xy(svg, pts, { xlab: d.lab + '（X）', ylab: 'W 弱階級投票（Y）', shade: rel });
+    svg.querySelectorAll('circle.pt').forEach((c, i) => {
+      c.style.cursor = 'pointer';
+      c.addEventListener('click', () => { sel = i; sync(); draw(); });
+    });
+    csel.value = sel;
+    ex.value = X[sel]; ey.value = Y[sel];
+    root.querySelector('[data-exo]').textContent = X[sel].toFixed(1);
+    root.querySelector('[data-eyo]').textContent = Y[sel].toFixed(1);
+    const bad = X.map((_, i) => i).filter(viol);
+    const okN = X.length - bad.length;
+    const r = CH2.pearson(X, Y);
+    root.querySelector('[data-ok]').textContent = `${okN} / ${X.length}`;
+    root.querySelector('[data-r]').textContent = RG.fz.fmt(r, 3);
+    const xl = d.lab.split(' ')[0];
+    let msg = rel === 'suf'
+      ? `充分性型態：檢查 ${xl} ⊆ W，也就是每國 X ≤ Y（點應在對角線上或左上方，綠色區域）。\n`
+      : `必要性型態：檢查 W ⊆ ${xl}，也就是每國 Y ≤ X（點應在對角線上或右下方，綠色區域）。\n`;
+    if (!bad.length) msg += `<span class="hl">✔ ${X.length} 國全部符合——${rel === 'suf' ? `${xl} 是 W 的模糊子集合` : `W 是 ${xl} 的模糊子集合`}。</span>`;
+    else msg += `✘ 違反的國家：${bad.map((i) => `${CH2.countries[i]}（X=${X[i].toFixed(1)}, Y=${Y[i].toFixed(1)}）`).join('、')}`;
+    msg += `\nPearson r = ${RG.fz.fmt(r, 3)}。`;
+    if (!bad.length && r < .95) msg += '相關不完美，集合關係卻完全成立——集合關係是非對稱的。';
+    if (bad.length && Math.abs(r) > .5 && r > 0) msg += '相關看起來不錯，但集合關係並不成立：相關與集合關係回答的是不同的問題。';
+    const s = sel, sx = X[s], sy = Y[s];
+    msg += `\n\n選中【${CH2.countries[s]}】X=${sx.toFixed(1)}, Y=${sy.toFixed(1)}：`;
+    if (Math.abs(sx - sy) < 1e-9) msg += '恰在對角線上，同時符合兩種方向。';
+    else if (sy > sx) msg += rel === 'suf' ? '在對角線左上方：條件分數低、結果分數高——提示還有別的路徑通往弱階級投票，不是反例。' : '在對角線左上方：結果分數高於條件，違反必要性型態（有結果、卻不太具備這個條件）。';
+    else msg += rel === 'suf' ? '在對角線右下方：條件分數高、結果分數卻較低——這就是模糊版的「格 4」，違反充分性型態。' : '在對角線右下方：條件分數高於結果，對必要性型態沒有問題。';
+    out.innerHTML = msg;
+  }
+  function sync() { csel.value = sel; }
+  xsel.addEventListener('change', () => { load(); draw(); });
+  csel.addEventListener('change', () => { sel = +csel.value; draw(); });
+  ex.addEventListener('input', () => { X[sel] = CH2.r2(+ex.value); draw(); });
+  ey.addEventListener('input', () => { Y[sel] = CH2.r2(+ey.value); draw(); });
+  root.querySelector('[data-reset]').addEventListener('click', () => { load(); draw(); });
+  root.querySelectorAll('[data-rel] button').forEach((b) => b.addEventListener('click', () => {
+    root.querySelectorAll('[data-rel] button').forEach((x) => x.classList.toggle('on', x === b));
+    rel = b.dataset.v; draw();
+  }));
+  load(); draw();
+})();
+</script>
+</body>
+</html>

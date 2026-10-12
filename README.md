@@ -14,7 +14,26 @@
 | Ch.4 | 模糊集 fsQCA | ✅ 已完成 |
 | Ch.5 | QCA 延伸（mvQCA / tQCA） | ✅ 已完成 |
 
-## 互動元件
+## 延伸教材：《重新設計社會科學研究》（Ragin, 2008）
+
+位於 [`ragin/`](ragin/)，線上網址：<https://gary2686.github.io/QCA-R-Material/ragin/>
+
+根據 Charles C. Ragin《*Redesigning Social Inquiry: Fuzzy Sets and Beyond*》（University of Chicago Press, 2008；中譯本《重新設計社會科學研究》，杜運周等譯，2019）整理的**繁體中文互動教材**，對象為 QCA 初學者。
+
+| 頁面 | 內容 |
+|------|------|
+| `ragin/index.html` | 本書首頁（四篇 11 章導覽、閱讀進度 ✔） |
+| `ragin/ch0.html` | 導讀：兩種研究範式的七組對比 |
+| `ragin/ch1.html`–`ch3.html` | 第一篇 集合關係與相關關係 |
+| `ragin/ch4.html`–`ch5.html` | 第二篇 校準與測量 |
+| `ragin/ch6.html`–`ch7.html` | 第三篇 條件組態與「自」變數 |
+| `ragin/ch8.html`–`ch11.html` | 第四篇 因果複雜性分析與淨效應分析 |
+| `ragin/css/ragin.css`、`ragin/js/ragin.js` | 本書共用樣式與互動（測驗、XY 圖、校準／一致性計算） |
+| `ragin/NOTES.md` | 製作筆記（流程、規格、待辦） |
+
+每章包含：學習目標、白話講解、互動元件、fsQCA／R 實作、本章重點、名詞對照（繁中／簡中譯本／英文）、自我測驗。
+
+## 互動元件（QCA with R）
 
 第 2 章包含四個可即時操作的小工具：
 

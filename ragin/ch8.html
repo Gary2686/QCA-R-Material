@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 8 章 有限多樣性與反事實案例 · 重新設計社會科學研究</title>
+<meta name="description" content="Ragin《重新設計社會科學研究》第 8 章互動教材：有限多樣性、反事實案例、案例匹配、餘項與簡約解、迴歸可加性的隱含假設">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="css/ragin.css">
+<style>
+  .ld-grid { display: flex; flex-wrap: wrap; gap: 3px; margin: .8rem 0; }
+  .ld-grid span { width: 18px; height: 18px; border-radius: 3px; border: 1px solid var(--border); background: var(--bg); }
+  .ld-grid.sm span { width: 11px; height: 11px; border-radius: 2px; gap: 2px; }
+  .ld-grid span.empty { border-style: dashed; border-color: var(--rose); background: var(--rose-soft); }
+  .ld-legend { display: flex; flex-wrap: wrap; gap: .4rem 1rem; font-size: .8rem; color: var(--ink-soft); }
+  .ld-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 2px; vertical-align: -1px; margin-right: .3rem; border: 1px solid var(--border); }
+  table.tbl td.rem { background: var(--rose-soft) !important; }
+  table.tbl td.used { background: var(--gold-soft) !important; font-weight: 700; }
+  table.tbl select { font: inherit; font-size: .82rem; padding: .2rem .3rem; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--ink); max-width: 9.5rem; }
+  .sol-line { display: grid; grid-template-columns: minmax(7.5rem, auto) 1fr; gap: .3rem .8rem; margin: .8rem 0; font-size: .92rem; }
+  .sol-line .k { color: var(--ink-faint); font-weight: 600; }
+  .sol-line .v { font-family: var(--mono); font-weight: 700; color: var(--accent); word-break: break-word; }
+  .sol-line .v.gold { color: var(--gold); }
+  .sol-line .v.rose { color: var(--rose); }
+  @media (max-width: 520px) { .sol-line { grid-template-columns: 1fr; } .sol-line .k { margin-top: .3rem; } }
+  .fnote { font-size: .83rem; color: var(--ink-faint); }
+</style>
+</head>
+<body>
+<div id="readbar"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="logo rg">R</span><span>重新設計社會科學研究<small>Ragin (2008) 互動教材</small></span></a>
+    <nav class="topnav">
+      <a href="index.html">本書首頁</a>
+      <a href="ch0.html">導讀</a>
+      <a href="ch1.html">第一篇</a>
+      <a href="ch4.html">第二篇</a>
+      <a href="ch6.html">第三篇</a>
+      <a href="ch8.html">第四篇</a>
+      <a href="../index.html">QCA with R ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="chapter-head">
+  <div class="part">第四篇　因果複雜性分析與淨效應分析</div>
+  <div class="eyebrow">CHAPTER 8</div>
+  <h1>有限多樣性與反事實案例</h1>
+  <div class="en">Limited Diversity and Counterfactual Cases</div>
+  <div class="src">對應原書第 8 章（中譯本頁 105–114）</div>
+</div>
+
+<p class="lead">想知道「吃早餐會不會讓成績變好」？理想上，你會想找一位和你<strong>其他條件完全相同</strong>、只差在有沒有吃早餐的同學來比較。可惜真實世界很少這麼配合：常吃早餐的人，往往也睡得早、家境穩定、通勤短——好幾個條件<strong>綁在一起出現</strong>，某些組合（例如「睡得很晚卻天天吃早餐」）幾乎找不到人。社會資料天生就有這種「<strong>缺角</strong>」。本章要問：面對那些從來沒被觀察到的條件組合，研究者該怎麼辦？答案是——不管你承不承認，你都在對它們做<strong>反事實</strong>的假設。</p>
+
+<div class="objectives">
+  <div class="ct">🎯 讀完本章，你應該能夠……</div>
+  <ol>
+    <li>說明什麼是<strong>有限多樣性</strong>，以及為什麼它是自然社會資料的常態而非例外。</li>
+    <li>用表 8-1 說明：只要缺一個條件組合，同一份資料就能支持兩種不同的因果解釋。</li>
+    <li>定義<strong>反事實案例</strong>，並說明它與「只差一個條件的匹配案例」之間的關係。</li>
+    <li>寫出檢驗一個組合論證所需的匹配案例（布林式），並說明 <strong>INUS 條件</strong>的意思。</li>
+    <li>區分 QCA 的<strong>複雜解（保守解）</strong>與<strong>簡約解</strong>，並指出簡約解偷偷用了哪些餘項當作簡化假設。</li>
+    <li>解釋為什麼迴歸的<strong>可加性假設</strong>等於默默替所有空白組合「填好了答案」。</li>
+  </ol>
+</div>
+
+<nav class="toc">
+  <strong>本章目錄</strong>
+  <ol>
+    <li><a href="#s1">有限多樣性：社會資料的天生缺角</a></li>
+    <li><a href="#s2">一個最簡單的例子：表 8-1</a></li>
+    <li><a href="#s3">反事實案例與思想實驗</a></li>
+    <li><a href="#s4">案例匹配問題的正式分析</a></li>
+    <li><a href="#s5">反事實案例與 QCA：餘項、複雜解與簡約解</a></li>
+    <li><a href="#s6">與傳統定量研究的對比</a></li>
+    <li><a href="#s7">R 對照：在 QCA 套件中看見餘項</a></li>
+    <li><a href="#s8">本章重點、名詞與自我測驗</a></li>
+  </ol>
+</nav>
+
+<!-- ================================================= -->
+<h2 id="s1">1. 有限多樣性：社會資料的天生缺角 <span class="en">· Limited diversity</span></h2>
+
+<p>如果你有 k 個二分的前因條件，邏輯上就有 2<sup>k</sup> 種組合（第 1 章的真值表）。<strong>有限多樣性（limited diversity）</strong>指的是：在自然發生的社會資料中，這些組合<strong>只有一部分</strong>真的有案例，其他組合則空空如也。Ragin 甚至認為，有限多樣性是社會現象的<strong>標誌性特徵</strong>之一。</p>
+
+<p>為什麼社會世界這麼「不多樣」？原書指出兩股力量：</p>
+<div class="compare">
+  <div class="old">
+    <h4>① 不平等把條件綁在一起</h4>
+    <p>職業聲望、教育與收入通常<strong>同時</strong>高或同時低；國家財富與各種福祉指標的高分也集中在已開發工業國家。財富與權力的不平等，讓「高教育、低收入、低聲望」這類組合變得罕見。</p>
+  </div>
+  <div class="new">
+    <h4>② 歷史把可能性先篩過一輪</h4>
+    <p>西班牙與葡萄牙對中南美洲的殖民，對研究該地區的學者而言是「給定的」歷史與文化；美國非裔人口在南方與北方城市的分布，反映了奴隸制與後來的經濟移民史。有些組合，歷史從來沒有讓它發生。</p>
+  </div>
+</div>
+
+<p>有限多樣性讓分析變得很棘手。假如經驗世界願意把所有組合都端出來，我們就能挑出<strong>只差一個條件</strong>的案例做「結構化、聚焦的比較（structured, focused comparison）」（George, 1979），就像做實驗一樣乾淨。可惜，這種機會很少。</p>
+
+<div class="widget" id="w-ld">
+  <div class="widget-head"><span class="wtag">互動</span> 真值表有多少列是空的？（模擬）</div>
+  <div class="widget-body">
+    <p style="margin-top:0">下面每個小方格是真值表的一列（一種條件組合），顏色越深代表案例越多；<strong>粉紅虛線格</strong>是沒有任何案例的列——也就是<strong>餘項（remainder）</strong>。拖動滑桿看看：條件數增加、條件彼此越「綁在一起」，空白列會怎麼變化？</p>
+    <div class="slider-row"><span class="sl-label">k</span><input type="range" min="2" max="9" value="5" data-k><output data-kout>5</output><span>個前因條件</span></div>
+    <div class="slider-row"><span class="sl-label">N</span><input type="range" min="0" max="6" value="4" data-n><output data-nout>758</output><span>個案例</span></div>
+    <div class="slider-row"><span class="sl-label">ρ</span><input type="range" min="0" max="90" value="70" data-r><output data-rout>0.70</output><span>條件之間的「綁定」程度</span></div>
+    <p style="margin:.4rem 0"><button class="btn ghost" type="button" data-reseed>重新抽樣</button></p>
+    <div class="ld-grid" data-grid></div>
+    <div class="ld-legend"><span><i style="background:var(--accent)"></i>案例多</span><span><i style="background:color-mix(in srgb,var(--accent) 25%,var(--bg))"></i>案例少</span><span><i style="background:var(--rose-soft);border:1px dashed var(--rose)"></i>無案例（餘項）</span></div>
+    <div class="stats">
+      <div class="stat"><div class="k">邏輯上可能的列數</div><div class="v" data-s1>—</div></div>
+      <div class="stat"><div class="k">至少有 1 個案例的列</div><div class="v gold" data-s2>—</div></div>
+      <div class="stat"><div class="k">餘項比例</div><div class="v bad" data-s3>—</div></div>
+      <div class="stat"><div class="k">容納 90% 案例所需列數</div><div class="v" data-s4>—</div></div>
+    </div>
+    <div class="result-box" data-out></div>
+    <p class="fnote">說明：這是用潛在共同因子產生的模擬資料（ρ 越大，各條件越傾向一起出現），不是原書資料；目的只是讓你感受有限多樣性如何隨條件數與相關程度惡化。</p>
+  </div>
+</div>
+
+<div class="callout info">
+  <div class="ct">ℹ️ 大樣本也救不了：原書引用的實證</div>
+  <p>很多人以為「案例夠多，每一列自然會填滿」。Ragin 在章末舉的證據正好相反：</p>
+  <ul>
+    <li>Ragin（2003b）一份 <strong>N = 758</strong> 的個人層次資料，5 個條件的 32 列真值表只填了 <strong>24 列</strong>；而其中 12 列就裝了 <strong>96.7%</strong> 的案例。</li>
+    <li>Sonnett（2004）分析音樂品味（<strong>N = 1,606</strong>），64 列中只有 <strong>22 列（34%）</strong>就容納了 90% 的樣本。</li>
+    <li>Braumoeller（2003）在 <strong>8,328</strong> 筆觀測中也看到「複雜的共變」，並視之為有限多樣性的證據。</li>
+  </ul>
+  <p>原因很簡單：條件之間的相關（不平等與歷史造成的）不會因為樣本變大而消失。只要你的分析<strong>允許組合複雜性</strong>，就幾乎一定會碰上大量餘項。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s2">2. 一個最簡單的例子：表 8-1 <span class="en">· A simple illustration</span></h2>
+
+<p>有限多樣性的麻煩，連最簡單的分析都躲不掉。原書表 8-1 是一份假想的國家層次資料：兩個條件——<strong>強大的工會（U）</strong>、<strong>強大的左翼政黨（L）</strong>——與一個結果：<strong>高福利國家（G）</strong>。</p>
+
+<div class="table-wrap">
+  <table class="tbl center">
+    <caption style="caption-side:top;text-align:left;font-size:.85rem;color:var(--ink-faint);padding-bottom:.4rem">原書表 8-1　有限多樣性影響的簡單例子（假想資料）</caption>
+    <thead><tr><th>強大的工會（U）</th><th>強大的左翼政黨（L）</th><th>高福利國家（G）</th><th>案例數（N）</th></tr></thead>
+    <tbody>
+      <tr><td>是</td><td>是</td><td>是</td><td>6</td></tr>
+      <tr><td>是</td><td>否</td><td>否</td><td>8</td></tr>
+      <tr><td>否</td><td>否</td><td>否</td><td>5</td></tr>
+      <tr><td class="rem">否</td><td class="rem">是</td><td class="rem"><strong>？</strong></td><td class="rem">0</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>四種組合裡只有三種有案例：<strong>「有強大左翼政黨、卻沒有強大工會」</strong>的國家一個也沒有。現在問：是什麼造成高福利國家？同一份資料可以讀出兩種答案。</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>解釋一：單一原因（簡約）</h4>
+    <p>看相關：有強大左翼政黨的國家<strong>全部</strong>是高福利國家（6/6），沒有的<strong>全部</strong>不是（0/13）。L 與 G <strong>完全相關</strong>，而且「解釋了全部變異」，沒有任何例外。</p>
+    <p>結論：<strong>L → G</strong>。常規定量分析會選這個。</p>
+  </div>
+  <div class="new">
+    <h4>解釋二：條件組合（配方）</h4>
+    <p>換個問法：所有高福利國家<strong>共同擁有</strong>什麼條件？答案是兩個——強大左翼政黨<strong>和</strong>強大工會；而且沒有任何非高福利國家同時具備兩者。</p>
+    <p>結論：<strong>L·U → G</strong>。案例導向研究者通常偏好這個。</p>
+  </div>
+</div>
+
+<p>第二種分析方式是「<strong>依結果選案例</strong>」（看所有正面案例的共同點）。只看相關的定量學者幾乎一致譴責這種做法，但它其實是案例導向研究最自然的第一步：深入研究案例的人，往往發現因果關係是<strong>組合性的</strong>，所以更相信「配方」式的解釋。</p>
+
+<div class="widget" id="w-81">
+  <div class="widget-head"><span class="wtag">互動</span> 誰對？取決於那一列「？」</div>
+  <div class="widget-body">
+    <p style="margin-top:0">假設你終於找到（或想像出）「<strong>有強大左翼政黨、沒有強大工會</strong>」的國家。它們會是高福利國家嗎？選一個情境：</p>
+    <div class="controls">
+      <div class="seg" data-pick>
+        <button data-v="none" class="on">找不到這種國家</button>
+        <button data-v="yes">找到了：是高福利國家</button>
+        <button data-v="no">找到了：不是高福利國家</button>
+      </div>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<div class="callout key">
+  <div class="ct">🔑 本章最重要的一句話</div>
+  <p>即使只有兩個條件、四種組合中只缺一種，<strong>單靠證據本身也無法決定</strong>哪個因果解釋正確。最後的選擇必須仰賴<strong>理論與實質知識</strong>——喜歡簡約的人選解釋一，想貼近案例的人選解釋二。在 Ragin 看來，這不該是「品味問題」，而應該被攤開來討論。</p>
+</div>
+
+<p class="fnote">原書註：這種模糊性<strong>不是</strong>因為使用二分條件造成的；用模糊集一樣會遇到（見第 10、11 章）。</p>
+
+<!-- ================================================= -->
+<h2 id="s3">3. 反事實案例與思想實驗 <span class="en">· Counterfactual cases</span></h2>
+
+<p>當某個條件組合<strong>沒有任何經驗案例</strong>，而你又需要知道它的結果時，就只能<strong>想像</strong>它：這個被想像出來的案例叫做<strong>反事實案例（counterfactual case）</strong>；評估它「可能會有什麼結果」，就是<strong>反事實分析（counterfactual analysis）</strong>（Hicks, Misra &amp; Ng, 1995）。聽起來很玄，但它在社會科學裡有悠久的傳統。</p>
+
+<div class="callout tip">
+  <div class="ct">📌 為什麼反事實和案例導向研究特別親近？</div>
+  <p><strong>① 案例少：</strong>像社會革命這類現象，真實案例屈指可數，研究者只好拿真實案例和假想案例比較（Fearon, 1991）。</p>
+  <p><strong>② 解釋是組態式的：</strong>案例導向的解釋強調條件的特定組合，因此反事實案例通常是「<strong>和某個真實案例只差一個條件</strong>」的假想案例——形成一種決定性的、部分靠想像完成的比較。</p>
+</div>
+
+<h3>三個經典的思想實驗</h3>
+<ul>
+  <li><strong>Barrington Moore（1966）</strong>在《民主與專制的社會起源》中，請讀者想像<strong>南方贏得南北戰爭的美國</strong>。這不是文學修辭，而是為了支撐他的論點：與過去決裂的革命（如南北戰爭）是現代民主出現的關鍵要素。</li>
+  <li><strong>Max Weber（1949）</strong>常被視為最早提倡在社會科學中使用思想實驗的學者：透過想像「不真實」的案例，評估事件各個組成部分的因果意義。他的立場本身就是<strong>組態式</strong>的——一個具體結果不是「有利因素與不利因素角力的結果」，而是一整串條件必須<strong>一起作用</strong>才會出現。</li>
+  <li><strong>Tetlock &amp; Belkin（1996）</strong>整理了五種反事實論證風格，以及判斷反事實論證好壞的六個標準。但 Ragin 指出，這些討論都沒有在<strong>組態式因果觀</strong>下把反事實的用法<strong>形式化</strong>——這正是 QCA 能補上的：在 QCA 中，反事實案例被視為<strong>匹配經驗案例的替代品</strong>，並由它的條件組態來界定。</li>
+</ul>
+
+<h3>其實每個用非實驗資料做因果推論的人都在用反事實</h3>
+<p>跨國研究者說「強大左翼政黨是高福利國家的重要原因」，背後的意思是：如果把左翼政黨很弱的國家（例如美國）<strong>只改變這一個特徵</strong>，就會出現更多高福利國家。換句話說，他們的主張隱含了一個假想國家——<strong>和美國在所有相關面向都一樣，只多了一個強大左翼政黨</strong>。</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>實驗者可以……</h4>
+    <ul>
+      <li>把處理（treatment）<strong>隨機分派</strong>給受試者</li>
+      <li>直接「創造」只差一個條件的匹配組</li>
+    </ul>
+  </div>
+  <div class="new">
+    <h4>社會科學家只能……</h4>
+    <ul>
+      <li>接受自然發生的資料：沒辦法替美國「指派」一個左翼政黨</li>
+      <li>面對<strong>選擇過程（selection）</strong>：讓美國沒有左翼政黨的那些因素（觀察到或沒觀察到的），也會扭曲對因果效應的估計</li>
+    </ul>
+  </div>
+</div>
+
+<p>計量經濟學與統計學因此發展出<strong>反事實（潛在結果）框架</strong>（Holland, 1986；Sobel, 1995；Winship &amp; Morgan, 1999 等）：每個案例都有「處理」與「對照」兩種狀態下的結果，但我們只能觀察到其中一個，另一個必須在處理選擇偏誤的前提下用統計方法估計。Ragin 對它有兩點保留：</p>
+<ol>
+  <li>只有在<strong>樣本非常大</strong>、而且每個案例<strong>事前都可能落入處理組或對照組</strong>時才可行。</li>
+  <li>這些程序和傳統統計一樣仍是<strong>線性、可加的</strong>，所以沒有直接處理有限多樣性與案例匹配的問題。</li>
+</ol>
+<p class="fnote">原書註：Winship &amp; Morgan 認為幾乎所有因果效應估計都可以被描述為（至少是思想上的）實驗；但實驗語言隱含「條件必須可被操弄」——依 Holland（1986）的看法，直接談性別這種不可操弄屬性的因果效應是沒有意義的。另外，Braumoeller（2003）曾提議結合布林邏輯與 probit 迴歸來處理有限多樣性（他稱為「維度的詛咒」）。</p>
+
+<details class="think">
+  <summary>想一想：「如果台灣沒有實施全民健保，今天的醫療體系會怎樣？」這是哪一種分析？</summary>
+  <div class="ans">
+    <p>這是一個<strong>反事實思想實驗</strong>：你想像一個除了「沒有全民健保」之外、其他條件都和台灣一樣的假想台灣。這個假想案例就是一個<strong>反事實案例</strong>。要讓它有說服力，你需要理論（健保如何影響就醫行為）與實質知識（其他沒有單一保險人制度的國家長什麼樣），而不是憑空想像。第 9 章會進一步區分哪些反事實「容易」、哪些「困難」。</p>
+  </div>
+</details>
+
+<!-- ================================================= -->
+<h2 id="s4">4. 案例匹配問題的正式分析 <span class="en">· A formal analysis of the matching problem</span></h2>
+
+<p>依照 <strong>Mill</strong> 的看法，最理想的比較是在<strong>只差一個前因條件</strong>的案例之間進行：如果兩個案例其他條件都相同，只有一個條件不同，而結果也不同，那個條件就是產生結果的組合中不可或缺的一部分。問題是——在有限多樣性之下，這樣的案例很難找。而且「哪些條件要匹配」本身就<strong>高度依賴理論</strong>：只有研究者根據理論與知識認定為相關的條件，才需要匹配。</p>
+
+<h3>北歐福利國家的例子</h3>
+<p>假設一位案例導向研究者主張：四個條件<strong>結合起來</strong>產生高福利國家，並以北歐國家為例：</p>
+<ul>
+  <li><strong>H</strong>：社會文化同質性　<strong>C</strong>：統合主義（社團主義）制度　<strong>L</strong>：強大的左翼政黨　<strong>U</strong>：強大的工會　<strong>G</strong>：高福利國家</li>
+</ul>
+<p>符號約定：<code class="inline">·</code> 表示「且」（交集）、<code class="inline">+</code> 表示「或」（不同路徑）、<code class="inline">~</code> 表示「非」、<code class="inline">≤</code> 表示「是……的子集合」，也就是「足以導致」。</p>
+
+<div class="formula"><span class="flabel">北歐案例（研究者的論點）</span>H·C·L·U ≤ G</div>
+
+<p>要支持「<strong>四個條件缺一不可</strong>」，最少需要四種匹配案例：每一種都和北歐國家只差一個條件——缺了那一個條件，而且<strong>沒有出現</strong>高福利國家：</p>
+
+<div class="formula"><span class="flabel">四種匹配案例（理想上應該都不是高福利國家）</span>~H·C·L·U + H·~C·L·U + H·C·~L·U + H·C·L·~U ≤ ~G</div>
+
+<p>如果研究者真的能證明這四種案例都沒有出現高福利國家，論點就大大加強：四個條件每一個都是 <strong>INUS 條件</strong>（Mackie, 1965）——</p>
+
+<div class="callout key">
+  <div class="ct">🔑 INUS 條件，拆開來讀</div>
+  <p><strong>I</strong>nsufficient（本身不充分）but <strong>N</strong>ecessary（但必要的）part of a condition which is itself <strong>U</strong>nnecessary（本身不必要）but <strong>S</strong>ufficient（但充分）。</p>
+  <p>白話：L 單獨不足以造成 G；但在「H·C·L·U」這個配方中少了 L 就不行；而這個配方本身只是通往 G 的<strong>其中一條</strong>路（不必要），但走這條路就足以到達 G（充分）。</p>
+</div>
+<p class="fnote">原書註：這個例子只評估「北歐路徑」的充分性，並未主張它是通往慷慨福利國家的唯一途徑（也就是不評估必要性）。</p>
+
+<div class="widget" id="w-match">
+  <div class="widget-head"><span class="wtag">互動</span> 案例匹配推論練習：北歐配方 H·C·L·U</div>
+  <div class="widget-body">
+    <p style="margin-top:0">對每一種「只差一個條件」的匹配組態，設定你在經驗世界中找到了什麼。下方會告訴你每個條件的地位、目前證據支持的配方（只用真實觀察到的案例做最小化），以及還欠多少個反事實。</p>
+    <div class="controls">
+      <div class="seg" data-preset>
+        <button data-v="ideal">理想情況</button>
+        <button data-v="real" class="on">現實情況</button>
+        <button data-v="mixed">出乎意料</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl center" data-mt>
+        <thead><tr><th>匹配組態</th><th>和北歐只差在</th><th>經驗世界中找到了什麼？</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="k">有經驗案例的匹配</div><div class="v ok" data-m1>—</div></div>
+      <div class="stat"><div class="k">需要反事實的匹配</div><div class="v bad" data-m2>—</div></div>
+      <div class="stat"><div class="k">目前證據支持的配方（保守）</div><div class="v gold" data-m3 style="font-size:1rem">—</div></div>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<p>現實為什麼這麼難？因為有些組合<strong>不太可能</strong>出現，有些甚至在經驗上<strong>不可能</strong>：要找到一個社會文化同質、有強大工會與左翼政黨、卻<strong>沒有</strong>統合主義制度的國家，恐怕非常困難。再者，論證越複雜（深入研究案例後往往如此），需要的匹配案例就越多。所以比較研究者常常找不到合適的經驗匹配，只能<strong>用反事實案例替代</strong>。</p>
+
+<!-- ================================================= -->
+<h2 id="s5">5. 反事實案例與 QCA：餘項、複雜解與簡約解 <span class="en">· Counterfactual cases and QCA</span></h2>
+
+<p>QCA 是少數能<strong>直接</strong>面對有限多樣性的技術之一。傳統技術把條件當成「獨立」變數、效應線性可加；QCA 則一開始就假設因果關係可能是<strong>組態複雜</strong>的，把每個案例看成條件的組態，用真值表來表示與分析。表 8-1 其實就是一張兩個條件、四列的迷你真值表。</p>
+
+<p>在 QCA 的語言裡，表 8-1 那一列「？」就是<strong>餘項（remainder）</strong>：一個沒有經驗案例的條件組合。真值表的解，取決於你怎麼處理餘項。<span class="fnote">（原書說它是表 8-1 的「第 5 行」，是把表頭算成第 1 行；也就是表中第 4 列資料。）</span></p>
+
+<h3>策略一：最保守——把餘項當作「假」</h3>
+<p>不論分析 G 出現或 G 不出現，都<strong>不讓</strong>餘項參與，只用觀察到的列：</p>
+<div class="formula"><span class="flabel">高福利國家出現（G）</span>L·U ≤ G</div>
+<div class="formula"><span class="flabel">高福利國家不出現（~G）</span>~L·U + ~L·~U ≤ ~G<br>~L·(U + ~U) ≤ ~G<br>~L ≤ ~G</div>
+<p>第一式就是表中有 6 國的那一列；第二式合併了「8 國」與「5 國」兩列，因為兩列只差 U，所以 U 可以消去。結論：<strong>L 與 U 的交集</strong>足以產生高福利國家；<strong>缺乏強大左翼政黨</strong>就足以讓高福利國家不出現。這就是今天 QCA 軟體所稱的<strong>複雜解（complex solution）</strong>，也叫<strong>保守解（conservative solution）</strong>。</p>
+
+<h3>策略二：把餘項當作「無關組合」（don't care）</h3>
+<p>「無關（don't care）」一詞來自真值表方法的老家——開關電路設計。意思是：餘項可以當作一個潛在的<strong>簡化假設（simplifying assumption）</strong>，<strong>只有在它能讓解變得更簡約時</strong>，才把它視為結果出現（或不出現）的案例。把餘項 L·~U 加進兩邊看看：</p>
+<div class="formula"><span class="flabel">G：加入餘項後</span>L·U + L·~U ≤ G<br>L·(U + ~U) ≤ G<br><strong>L ≤ G</strong>　← 更簡約了！</div>
+<div class="formula"><span class="flabel">~G：加入餘項後</span>~L·U + ~L·~U + L·~U ≤ ~G<br>~L·(U + ~U) + ~U·(L + ~L) ≤ ~G<br>~L + ~U ≤ ~G　← 反而更複雜</div>
+<p>所以：在 G 的分析中，用餘項會得到更簡約的解（<strong>L</strong>）；在 ~G 的分析中則不划算（原本只要 ~L，現在變成 ~L + ~U），演算法不會採用。這個「L ≤ G」就是<strong>簡約解（parsimonious solution）</strong>——而且它和常規統計分析得到的結果<strong>一模一樣</strong>。</p>
+
+<div class="callout warn">
+  <div class="ct">⚠️ 簡約解不是免費的</div>
+  <p>選擇「L ≤ G」，等於你斷言：<strong>如果真的存在有強大左翼政黨、沒有強大工會的國家，它們會是高福利國家</strong>。這是非常強的假設。依現有知識，很多研究者會覺得它不合理——至少，所有已知的高福利國家都有強大工會；深入的個案研究也可能顯示，強大工會正是建立高福利國家的核心力量。</p>
+  <p>Ragin 的重點不在「左翼政黨本身是否足夠」，而在於：<strong>對沒有經驗案例的組合所做的假設，必須被評估</strong>，不能機械地把餘項嫁接到解上——我們畢竟是<strong>在乎</strong>它們的（玩笑點在 “don't care”）。</p>
+</div>
+
+<div class="widget" id="w-fill">
+  <div class="widget-head"><span class="wtag">互動</span> 填補反事實：你替餘項決定結果，看解怎麼變</div>
+  <div class="widget-body">
+    <p style="margin-top:0">粉紅色列是餘項。替每個餘項選一個假設：<strong>「?」</strong>＝交給演算法（只在能簡化時才用）、<strong>「假設 G=1」</strong>、<strong>「假設 G=0」</strong>。金色標示的是目前的解實際用到的餘項（簡化假設）。</p>
+    <div class="controls">
+      <div class="field"><label>資料</label>
+        <div class="seg" data-preset>
+          <button data-v="t81" class="on">原書表 8-1（L, U）</button>
+          <button data-v="t3">三條件延伸例（L, U, C）</button>
+        </div>
+      </div>
+      <div class="field"><label>一鍵設定所有餘項</label>
+        <div class="seg" data-all>
+          <button data-v="0">全部「G=0」＝保守</button>
+          <button data-v="?">全部「?」＝簡約</button>
+        </div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl center" data-ft><thead></thead><tbody></tbody></table>
+    </div>
+    <div class="sol-line" data-sol></div>
+    <div class="result-box" data-out></div>
+    <p class="fnote" data-note></p>
+  </div>
+</div>
+
+<details class="think">
+  <summary>想一想：在三條件延伸例中，為什麼簡約解只用到一個餘項，而不是三個全用？</summary>
+  <div class="ans">
+    <p>演算法只在餘項能幫忙<strong>合併</strong>時才使用它。唯一的正面列 L·U·C 要簡化，必須找一個和它只差一個條件、又被假設為 G=1 的列。三個餘項中只有 <strong>L·~U·C</strong>（只差 U）能與它合併成 <strong>L·C</strong>；另外兩個餘項（L·~U·~C、~L·~U·C）都和 L·U·C 差了<strong>兩個</strong>條件，無法直接和它合併；它們彼此能合併出的項（如 L·~U、~U·C）也不包含 L·U·C，對解釋正面案例沒有幫助，所以用不上。換句話說，簡約解偷偷做的反事實假設是：「<strong>有左翼政黨與統合主義、但工會不強的國家會是高福利國家</strong>」。這個假設合不合理？這正是第 9 章「容易／困難反事實」要處理的問題。</p>
+  </div>
+</details>
+
+<!-- ================================================= -->
+<h2 id="s6">6. 與傳統定量研究的對比 <span class="en">· Contrast with conventional quantitative research</span></h2>
+
+<p>在傳統定量研究裡，有限多樣性的問題被<strong>掩蓋</strong>了。典型流程是：從各種理論列出一張潛在原因清單，預設每個原因都是結果的<strong>獨立</strong>原因，然後用各變數<strong>淨效應（net effect）</strong>的估計值比較誰是「最佳預測因子」。淨效應的估計建立在一個假設上：<strong>每個原因自己就能影響結果</strong>——原因彼此獨立、效應可以相加。</p>
+
+<div class="callout key">
+  <div class="ct">🔑 可加性 = 一次替所有餘項填好答案</div>
+  <p>一旦你假設 Y = b<sub>0</sub> + b<sub>1</sub>X<sub>1</sub> + b<sub>2</sub>X<sub>2</sub> + …，模型就能對<strong>任何</strong>條件組合算出預測值——包括那些從來沒有被觀察過的組合。這些預測值不是來自資料，而是來自「效應可加」這個<strong>函數形式假設</strong>。傳統定量研究就是靠著假設不切實際的簡單因果關係，<strong>繞過</strong>了有限多樣性。</p>
+</div>
+
+<div class="widget" id="w-reg">
+  <div class="widget-head"><span class="wtag">互動</span> 迴歸如何「預測」從未觀察到的組合</div>
+  <div class="widget-body">
+    <p style="margin-top:0">以線性機率模型（OLS，結果 G = 0/1）擬合觀察到的列。你可以修改每列中「是高福利國家」的案例數，看看模型替<strong>粉紅色的餘項列</strong>填了什麼值。</p>
+    <div class="controls">
+      <div class="seg" data-preset>
+        <button data-v="t81" class="on">原書表 8-1</button>
+        <button data-v="t3">三條件延伸例</button>
+      </div>
+      <label style="font-size:.88rem"><input type="checkbox" data-int> 加入交互作用項 L×U</label>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl center" data-rt><thead></thead><tbody></tbody></table>
+    </div>
+    <div class="sol-line" data-coef></div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<p>以表 8-1 來說，OLS 得到 G = 0 + 1·L + 0·U，對從未出現過的「L=1、U=0」預測值是 <strong>1</strong>——和 QCA 的簡約解（L ≤ G）做了<strong>完全相同的反事實假設</strong>，只是迴歸使用者通常沒意識到自己做了這個假設。若想讓模型「允許組合」而加入交互作用項 L×U，會發現它<strong>無法估計</strong>：在觀察資料裡，L×U 和 L 完全相同（因為 L 只和 U 一起出現）。統計軟體會默默丟掉其中一項——有限多樣性又一次被藏起來了。</p>
+
+<h3>面對大量餘項：三條路</h3>
+<div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th>做法</th><th>怎麼處理缺少的組合</th><th>限制</th></tr></thead>
+    <tbody>
+      <tr><td><strong>① 退回實驗室</strong></td><td>完全不用非實驗資料，用實驗操弄「製造」匹配案例</td><td>能研究的問題範圍受到嚴格限制</td></tr>
+      <tr><td><strong>② 統計估計</strong>（如 Winship &amp; Morgan, 1999）</td><td>以控制選擇過程的統計模型估計看不到的處理／對照結果</td><td>需要大量案例、可操弄的條件，以及關於因果關係的強烈簡化假設</td></tr>
+      <tr><td><strong>③ 反事實分析</strong>（思想實驗）</td><td>依理論與實質知識，明確評估每個餘項的可能結果</td><td>看似不吸引人（處理假想案例），但第 9 章會說明：只要知識充足，許多反事實其實很「容易」</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="compare">
+  <div class="old">
+    <h4>傳統定量研究</h4>
+    <ul>
+      <li>原因彼此獨立、效應可加</li>
+      <li>問題：「哪個變數最重要？」</li>
+      <li>空白組合由函數形式<strong>自動、隱性</strong>地填補</li>
+    </ul>
+  </div>
+  <div class="new">
+    <h4>QCA</h4>
+    <ul>
+      <li>因果可能是組合的；同一結果可有多條路徑</li>
+      <li>問題：「哪些條件組合導致結果？」</li>
+      <li>真值表把所有邏輯可能組合<strong>攤開</strong>，餘項的處理必須<strong>明確</strong>交代</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s7">7. R 對照：在 QCA 套件中看見餘項 <span class="en">· Remainders in R</span></h2>
+
+<p>原書本章沒有軟體附錄。下面用 R 的 <code class="inline">QCA</code> 套件（Duşa）重現表 8-1 的兩種解，方便你把本章概念對應到實際操作。</p>
+
+<div class="sw-tabs">
+  <div class="seg">
+    <button data-tab="r" class="on">R（QCA 套件）</button>
+    <button data-tab="fs">fsQCA 軟體</button>
+  </div>
+  <div class="sw-pane on" data-pane="r">
+<pre class="code"><span class="c-fn">library</span>(QCA)
+<span class="c-com"># 原書表 8-1：6 + 8 + 5 = 19 個國家</span>
+d81 <span class="c-kw">&lt;-</span> <span class="c-fn">data.frame</span>(
+  L = <span class="c-fn">rep</span>(<span class="c-fn">c</span>(<span class="c-num">1</span>, <span class="c-num">0</span>, <span class="c-num">0</span>), <span class="c-fn">c</span>(<span class="c-num">6</span>, <span class="c-num">8</span>, <span class="c-num">5</span>)),   <span class="c-com"># 強大左翼政黨</span>
+  U = <span class="c-fn">rep</span>(<span class="c-fn">c</span>(<span class="c-num">1</span>, <span class="c-num">1</span>, <span class="c-num">0</span>), <span class="c-fn">c</span>(<span class="c-num">6</span>, <span class="c-num">8</span>, <span class="c-num">5</span>)),   <span class="c-com"># 強大工會</span>
+  G = <span class="c-fn">rep</span>(<span class="c-fn">c</span>(<span class="c-num">1</span>, <span class="c-num">0</span>, <span class="c-num">0</span>), <span class="c-fn">c</span>(<span class="c-num">6</span>, <span class="c-num">8</span>, <span class="c-num">5</span>))    <span class="c-com"># 高福利國家</span>
+)
+
+<span class="c-com"># complete = TRUE：連沒有案例的列也印出來，OUT 欄顯示 "?" 就是餘項</span>
+tt <span class="c-kw">&lt;-</span> <span class="c-fn">truthTable</span>(d81, outcome = <span class="c-str">"G"</span>, conditions = <span class="c-fn">c</span>(<span class="c-str">"L"</span>, <span class="c-str">"U"</span>),
+                 incl.cut = <span class="c-num">1</span>, complete = <span class="c-kw">TRUE</span>, show.cases = <span class="c-kw">TRUE</span>)
+tt
+
+<span class="c-com"># 複雜解／保守解：不使用任何餘項（預設 include = ""）</span>
+<span class="c-fn">minimize</span>(tt, details = <span class="c-kw">TRUE</span>)                 <span class="c-com"># → L*U</span>
+
+<span class="c-com"># 簡約解：讓餘項當「無關組合」</span>
+ps <span class="c-kw">&lt;-</span> <span class="c-fn">minimize</span>(tt, include = <span class="c-str">"?"</span>, details = <span class="c-kw">TRUE</span>)
+ps                                               <span class="c-com"># → L</span>
+ps<span class="c-kw">$</span>SA                                            <span class="c-com"># 簡約解用了哪些簡化假設 → L=1, U=0 那一列</span>
+
+<span class="c-com"># 結果的否定（~G）：在 outcome 前加 "~"</span>
+tt0 <span class="c-kw">&lt;-</span> <span class="c-fn">truthTable</span>(d81, outcome = <span class="c-str">"~G"</span>, conditions = <span class="c-fn">c</span>(<span class="c-str">"L"</span>, <span class="c-str">"U"</span>), complete = <span class="c-kw">TRUE</span>)
+<span class="c-fn">minimize</span>(tt0, details = <span class="c-kw">TRUE</span>)                <span class="c-com"># → ~L</span>
+<span class="c-fn">minimize</span>(tt0, include = <span class="c-str">"?"</span>, details = <span class="c-kw">TRUE</span>) <span class="c-com"># 仍是 ~L：用餘項無法再簡化</span></pre>
+    <p>讀輸出時的三個重點：① <code class="inline">truthTable()</code> 中 <code class="inline">OUT = ?</code> 的列就是餘項；② <code class="inline">include = "?"</code> 是讓演算法「可以」使用餘項，它只會挑能簡化的來用；③ 一定要檢查 <code class="inline">$SA</code>（simplifying assumptions），逐一問自己：這些反事實合理嗎？R 輸出中條件的排列順序、大小寫寫法（如 <code class="inline">L*U</code>）可能依版本略有不同。</p>
+  </div>
+  <div class="sw-pane" data-pane="fs">
+    <div class="steps">
+      <div class="step"><div><h4>建立真值表</h4><p><span class="menu-path">Analyze → Truth Table Algorithm</span>，指定結果 G 與條件 L、U。依頻數門檻刪除沒有案例的列後，為其餘各列在結果欄輸入 1 或 0。</p></div></div>
+      <div class="step"><div><h4>執行標準分析</h4><p>按 <span class="menu-path">Standard Analyses</span>。軟體會同時輸出 <strong>Complex solution</strong>（不用餘項）與 <strong>Parsimonious solution</strong>（餘項當無關組合），以及第 9 章會談的 Intermediate solution。</p></div></div>
+      <div class="step"><div><h4>比較兩種解</h4><p>兩者不同的地方，正是餘項（反事實）發揮作用的地方。把簡約解多出來的「簡化」逐一寫成反事實陳述，用理論與案例知識檢查。</p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s8">8. 本章重點、名詞與自我測驗 <span class="en">· Review</span></h2>
+
+<ol class="takeaways">
+  <li><strong>有限多樣性</strong>是自然社會資料的常態：不平等與歷史讓條件綁在一起出現，許多組合沒有案例；大樣本也無法避免。</li>
+  <li>表 8-1 顯示：只缺一個組合，同一份資料就能支持「L → G」或「L·U → G」兩種解釋；證據本身無法裁決，必須靠<strong>理論與實質知識</strong>。</li>
+  <li><strong>反事實案例</strong>是缺乏經驗實例、必須被想像的條件組合；在 QCA 中，它是「只差一個條件的匹配經驗案例」的替代品。</li>
+  <li>要支持一個含 m 個條件的組合論證，理想上需要 m 種匹配案例（各缺一個條件且結果不出現），此時每個條件都是 <strong>INUS 條件</strong>。</li>
+  <li>QCA 中沒有案例的列稱為<strong>餘項</strong>。全部當「假」→ <strong>複雜（保守）解</strong>；當「無關組合」→ <strong>簡約解</strong>，其中被用到的餘項就是<strong>簡化假設</strong>，必須逐一評估其合理性。</li>
+  <li>迴歸的<strong>可加性</strong>假設等於隱性地替所有空白組合填上預測值；表 8-1 中 OLS 的結果與 QCA 簡約解完全相同。</li>
+</ol>
+
+<h3>名詞對照</h3>
+<div class="table-wrap">
+  <table class="tbl gloss">
+    <thead><tr><th>本教材用語</th><th>簡中譯本</th><th>英文</th><th>白話說明</th></tr></thead>
+    <tbody>
+      <tr><td>有限多樣性</td><td>有限多样性</td><td>limited diversity</td><td>邏輯上可能的條件組合中，很多在真實世界沒有案例</td></tr>
+      <tr><td>反事實案例</td><td>反事实案例</td><td>counterfactual case</td><td>沒有經驗實例、必須想像的條件組合</td></tr>
+      <tr><td>思想實驗</td><td>思想实验</td><td>thought experiment</td><td>藉由想像不真實的案例來推論因果</td></tr>
+      <tr><td>匹配案例</td><td>匹配案例</td><td>matching cases</td><td>和目標案例只差一個條件的案例</td></tr>
+      <tr><td>INUS 條件</td><td>INUS 条件</td><td>INUS condition</td><td>不充分但必要的配方成分；配方本身不必要但充分</td></tr>
+      <tr><td>餘項</td><td>余项</td><td>remainder</td><td>真值表中沒有任何案例的列</td></tr>
+      <tr><td>無關組合</td><td>无关的组合</td><td>don't care</td><td>允許演算法視需要把餘項當作結果 1 或 0</td></tr>
+      <tr><td>簡化假設</td><td>简化假设</td><td>simplifying assumption</td><td>為了讓解更簡約而被採用的餘項（反事實）</td></tr>
+      <tr><td>複雜解／保守解</td><td>（较复杂的解）</td><td>complex / conservative solution</td><td>不使用任何餘項所得的解</td></tr>
+      <tr><td>簡約解</td><td>简约的解</td><td>parsimonious solution</td><td>允許使用任何能簡化的餘項所得的解</td></tr>
+      <tr><td>淨效應</td><td>净效应</td><td>net effect</td><td>控制其他變數後，單一變數對結果的獨立影響</td></tr>
+      <tr><td>可加性</td><td>可加的</td><td>additivity</td><td>各原因的效應可以單純相加，彼此不相依</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>自我測驗</h3>
+<p class="quiz-score" data-quiz-score></p>
+
+<div class="quiz" data-answer="1">
+  <p class="q">下列何者最能說明「有限多樣性」？</p>
+  <div class="opts">
+    <button class="opt">樣本數太小，導致統計檢定力不足</button>
+    <button class="opt">邏輯上可能的條件組合中，有許多在經驗資料中沒有任何案例</button>
+    <button class="opt">每個條件只能取 0 或 1 兩個值</button>
+    <button class="opt">案例之間的結果變異太小</button>
+  </div>
+  <div class="explain">有限多樣性指的是條件組合的「缺角」。它來自條件之間的相關（不平等、歷史），即使樣本很大（如 N = 758、1,606）也依然存在。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">在表 8-1 中，哪一個發現能直接裁決「L → G」與「L·U → G」誰對？</p>
+  <div class="opts">
+    <button class="opt">增加 L·U 國家的數量</button>
+    <button class="opt">計算 L 與 G 的相關係數</button>
+    <button class="opt">確認 ~L·~U 國家都不是高福利國家</button>
+    <button class="opt">找到有強大左翼政黨、沒有強大工會的國家，並看它們是否為高福利國家</button>
+  </div>
+  <div class="explain">兩種解釋只在 L·~U 這個組合上給出不同預測。找到這種國家：若是高福利 → L 本身就夠；若不是 → 需要 L 與 U 結合。找不到 → 只能靠反事實推理。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">研究者主張 H·C·L·U ≤ G。若要證明 C 是這個配方中不可或缺的成分，最理想的證據是？</p>
+  <div class="opts">
+    <button class="opt">找到 H·~C·L·U 的國家，且它們不是高福利國家</button>
+    <button class="opt">找到 ~H·~C·~L·~U 的國家，且它們不是高福利國家</button>
+    <button class="opt">找到更多 H·C·L·U 的高福利國家</button>
+    <button class="opt">找到 H·~C·L·U 的國家，且它們是高福利國家</button>
+  </div>
+  <div class="explain">Mill 式的匹配比較：只差 C 一個條件，結果就消失，才顯示 C 是配方的必要成分（INUS）。若 H·~C·L·U 仍是高福利國家，反而表示 C 在這條路徑上可以省略。</div>
+</div>
+
+<div class="quiz" data-answer="2">
+  <p class="q">在 QCA 中，把所有餘項都當作「假」（排除在外）所得到的解稱為？</p>
+  <div class="opts">
+    <button class="opt">簡約解</button>
+    <button class="opt">中間解</button>
+    <button class="opt">複雜解（保守解）</button>
+    <button class="opt">反事實解</button>
+  </div>
+  <div class="explain">不使用任何餘項 → 複雜解，又稱保守解。允許演算法把能簡化的餘項當作無關組合 → 簡約解。中間解是第 9 章的主題。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">表 8-1 的簡約解「L ≤ G」隱含了哪一個反事實假設？</p>
+  <div class="opts">
+    <button class="opt">沒有強大左翼政黨、但有強大工會的國家會是高福利國家</button>
+    <button class="opt">有強大左翼政黨、但沒有強大工會的國家會是高福利國家</button>
+    <button class="opt">沒有任何國家同時擁有強大工會與左翼政黨</button>
+    <button class="opt">強大工會是高福利國家的必要條件</button>
+  </div>
+  <div class="explain">從 L·U 簡化成 L，需要把餘項 L·~U 當作 G=1 的案例。這是一個很強的假設，因為所有已知的高福利國家都有強大工會。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">為什麼說迴歸的可加性假設「掩蓋」了有限多樣性？</p>
+  <div class="opts">
+    <button class="opt">因為迴歸會自動刪除沒有案例的組合</button>
+    <button class="opt">因為迴歸只能處理連續變數</button>
+    <button class="opt">因為迴歸要求每個組合都至少有 30 個案例</button>
+    <button class="opt">因為可加模型可以對任何組合算出預測值，等於默默替所有空白組合填上答案</button>
+  </div>
+  <div class="explain">Y = b0 + b1X1 + b2X2 對從未出現的組合也能給出預測，這些值來自函數形式而非資料。表 8-1 中，OLS 對 L=1、U=0 的預測是 1，和 QCA 簡約解做了一樣的反事實假設。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">在表 8-1 中分析 ~G（高福利國家不出現）時，為什麼演算法不會使用餘項 L·~U？</p>
+  <div class="opts">
+    <button class="opt">因為加入它會讓解從 ~L 變成 ~L + ~U，反而更複雜</button>
+    <button class="opt">因為餘項只能用在結果出現的分析</button>
+    <button class="opt">因為 L·~U 已經被證實是高福利國家</button>
+    <button class="opt">因為 ~G 的分析一律採用保守策略</button>
+  </div>
+  <div class="explain">「無關組合」只有在能讓解更簡約時才被採用。~G 原本就能簡化為 ~L；硬加 L·~U 只會多出 ~U 一項。</div>
+</div>
+
+<p><button class="btn ghost" data-quiz-reset type="button">重新作答</button></p>
+
+<div class="done-box" data-ch="8">
+  <span class="msg"></span>
+  <button class="btn" type="button">標記本章為已讀</button>
+</div>
+
+<nav class="chap-nav">
+  <a class="prev" href="ch7.html"><div class="dir">← 上一章</div><div class="ttl">第 7 章 使用模糊集與真值表進行組態分析</div></a>
+  <a class="next" href="ch9.html"><div class="dir">下一章 →</div><div class="ttl">第 9 章 容易反事實與困難反事實</div></a>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Charles C. Ragin, <em>Redesigning Social Inquiry: Fuzzy Sets and Beyond</em> (University of Chicago Press, 2008)<br>
+  以學習為目的之概念整理與重新詮釋，非原書譯文 · <a href="index.html">回本書首頁</a></p>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="js/ragin.js"></script>
+<script>
+/* ---------- 共用：布林最小化（Quine–McCluskey，含無關組合）與加權最小平方 ---------- */
+const QM = (function () {
+  const bits = (i, k) => { let s = ''; for (let j = k - 1; j >= 0; j--) s += (i >> j) & 1; return s; };
+  const covers = (imp, s) => { for (let j = 0; j < imp.length; j++) if (imp[j] !== '-' && imp[j] !== s[j]) return false; return true; };
+  const lits = (p) => [...p].filter((c) => c !== '-').length;
+  function primes(k, mins) {
+    let cur = [...new Set(mins.map((i) => bits(i, k)))];
+    const pr = new Set();
+    while (cur.length) {
+      const used = new Set(), next = new Set();
+      for (let a = 0; a < cur.length; a++) for (let b = a + 1; b < cur.length; b++) {
+        const x = cur[a], y = cur[b]; let n = 0, d = -1;
+        for (let j = 0; j < k; j++) if (x[j] !== y[j]) { if (x[j] === '-' || y[j] === '-') { n = 9; break; } n++; d = j; }
+        if (n === 1) { next.add(x.slice(0, d) + '-' + x.slice(d + 1)); used.add(x); used.add(y); }
+      }
+      cur.forEach((x) => { if (!used.has(x)) pr.add(x); });
+      cur = [...next];
+    }
+    return [...pr];
+  }
+  // on：結果為 1 的列；dc：可當作「無關組合」的餘項。回傳所有最精簡的解（項數最少，再比文字數）
+  function solve(k, on, dc) {
+    if (!on.length) return [];
+    const onS = on.map((i) => bits(i, k));
+    const rel = primes(k, on.concat(dc || [])).filter((p) => onS.some((s) => covers(p, s)))
+      .sort((a, b) => lits(a) - lits(b) || (a < b ? 1 : -1));
+    const n = rel.length; let best = null, sols = [];
+    for (let size = 1; size <= n && !sols.length; size++) {
+      const idx = [...Array(size).keys()];
+      for (;;) {
+        const set = idx.map((i) => rel[i]);
+        if (onS.every((s) => set.some((p) => covers(p, s)))) {
+          const L = set.reduce((a, p) => a + lits(p), 0);
+          if (best === null || L < best) { best = L; sols = [set]; } else if (L === best) sols.push(set);
+        }
+        let i = size - 1; while (i >= 0 && idx[i] === n - size + i) i--;
+        if (i < 0) break; idx[i]++; for (let j = i + 1; j < size; j++) idx[j] = idx[j - 1] + 1;
+      }
+    }
+    return sols.slice(0, 4);
+  }
+  const term = (imp, names) => { const t = []; for (let j = 0; j < imp.length; j++) if (imp[j] !== '-') t.push((imp[j] === '0' ? '~' : '') + names[j]); return t.length ? t.join('·') : '1（恆真：所有組態都導向結果）'; };
+  const sol = (set, names) => set ? set.map((p) => term(p, names)).join(' + ') : '（無：沒有任何組態導向此結果）';
+  const usedRem = (set, k, rem) => set ? rem.filter((i) => set.some((p) => covers(p, bits(i, k)))) : [];
+  const row = (i, k, names) => term(bits(i, k), names);
+  return { bits, covers, primes, solve, term, sol, usedRem, row };
+})();
+
+const WLS = function (X, y, w) { // 解 (X'WX) b = X'Wy；奇異時回傳 null
+  const p = X[0].length, A = [...Array(p)].map(() => Array(p + 1).fill(0));
+  X.forEach((x, r) => { for (let i = 0; i < p; i++) { for (let j = 0; j < p; j++) A[i][j] += w[r] * x[i] * x[j]; A[i][p] += w[r] * x[i] * y[r]; } });
+  for (let c = 0; c < p; c++) {
+    let m = c; for (let r = c + 1; r < p; r++) if (Math.abs(A[r][c]) > Math.abs(A[m][c])) m = r;
+    if (Math.abs(A[m][c]) < 1e-9) return null;
+    [A[c], A[m]] = [A[m], A[c]];
+    for (let r = 0; r < p; r++) if (r !== c) { const f = A[r][c] / A[c][c]; for (let j = c; j <= p; j++) A[r][j] -= f * A[c][j]; }
+  }
+  return A.map((r, i) => r[p] / r[i]);
+};
+/* ---------- 共用資料：表 8-1 與三條件延伸例（索引：第一個條件為最高位元）---------- */
+const DATA = {
+  t81: { names: ['L', 'U'], full: ['強左翼政黨 L', '強工會 U'],
+    obs: { 3: { g: 6, n: 6 }, 1: { g: 0, n: 8 }, 0: { g: 0, n: 5 } } },
+  t3: { names: ['L', 'U', 'C'], full: ['強左翼政黨 L', '強工會 U', '統合主義 C'],
+    obs: { 7: { g: 5, n: 5 }, 6: { g: 0, n: 3 }, 3: { g: 0, n: 2 }, 2: { g: 0, n: 4 }, 0: { g: 0, n: 6 } } },
+};
+const remsOf = (d) => [...Array(2 ** d.names.length).keys()].filter((i) => !(i in d.obs));
+
+/* ---------- 有限多樣性模擬 ---------- */
+(function () {
+  const root = document.getElementById('w-ld');
+  const kI = root.querySelector('[data-k]'), nI = root.querySelector('[data-n]'), rI = root.querySelector('[data-r]');
+  const grid = root.querySelector('[data-grid]'), out = root.querySelector('[data-out]');
+  const NS = [20, 50, 100, 200, 758, 1606, 5000];
+  const TH = [-0.9, 0.6, -0.3, 1.0, 0.3, -0.6, 0.8, 0.1, -1.1];
+  let seed = 11;
+  const mulberry = (a) => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  function run() {
+    const k = +kI.value, N = NS[+nI.value], rho = +rI.value / 100, rows = 2 ** k;
+    root.querySelector('[data-kout]').textContent = k;
+    root.querySelector('[data-nout]').textContent = N.toLocaleString();
+    root.querySelector('[data-rout]').textContent = rho.toFixed(2);
+    const R = mulberry(seed * 977 + k * 31);
+    const randn = () => { let u = 0; while (!u) u = R(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * R()); };
+    const cnt = new Array(rows).fill(0), s = Math.sqrt(1 - rho * rho);
+    for (let i = 0; i < N; i++) {
+      const z = randn(); let idx = 0;
+      for (let j = 0; j < k; j++) idx = idx * 2 + (rho * z + s * randn() > TH[j] ? 1 : 0);
+      cnt[idx]++;
+    }
+    const mx = Math.max(...cnt);
+    grid.classList.toggle('sm', k >= 7);
+    grid.innerHTML = cnt.map((c, i) => {
+      const lab = [...Array(k)].map((_, j) => ((i >> (k - 1 - j)) & 1)).join('');
+      if (!c) return `<span class="empty" title="組合 ${lab}：0 個案例（餘項）"></span>`;
+      const pct = Math.round(20 + 80 * Math.sqrt(c / mx));
+      return `<span title="組合 ${lab}：${c} 個案例" style="background:color-mix(in srgb, var(--accent) ${pct}%, var(--bg))"></span>`;
+    }).join('');
+    const filled = cnt.filter((c) => c > 0).length;
+    const sorted = [...cnt].sort((a, b) => b - a);
+    let acc = 0, need = 0; while (acc < 0.9 * N) acc += sorted[need++];
+    root.querySelector('[data-s1]').textContent = rows.toLocaleString();
+    root.querySelector('[data-s2]').textContent = filled.toLocaleString();
+    root.querySelector('[data-s3]').textContent = Math.round(100 * (rows - filled) / rows) + '%';
+    root.querySelector('[data-s4]').textContent = need + ' 列';
+    const lines = [`${N.toLocaleString()} 個案例分布在 ${rows.toLocaleString()} 列中：<span class="hl">${rows - filled} 列是餘項</span>（${Math.round(100 * (rows - filled) / rows)}%）。`,
+      `最熱門的 ${need} 列（占全部列數 ${Math.round(100 * need / rows)}%）就裝了 90% 的案例。`];
+    if (N < rows) lines.push(`案例數（${N}）比列數（${rows}）還少——就算案例完全分散，也注定至少有 ${rows - N} 列空白。`);
+    if (rho >= 0.6) lines.push('條件之間綁得很緊：案例集中在「全有」與「全無」附近，混合型組合幾乎消失。這就是不平等與歷史造成的有限多樣性。');
+    else if (rho <= 0.1) lines.push('條件幾乎互相獨立：這是「理想的」多樣性，但真實社會資料很少如此。試著把 ρ 調高看看。');
+    if (N >= 1606 && rows - filled > 0) lines.push('樣本已經很大，空白列仍然存在——大樣本救不了有限多樣性。');
+    if (k === 5 && N === 758 && filled >= 22 && filled <= 26) lines.push('對照：Ragin（2003b）的真實資料（N = 758、5 個條件）填了 24 / 32 列，和這裡的模擬很接近。');
+    out.innerHTML = lines.join('\n');
+  }
+  [kI, nI, rI].forEach((el) => el.addEventListener('input', run));
+  root.querySelector('[data-reseed]').addEventListener('click', () => { seed++; run(); });
+  run();
+})();
+
+/* ---------- 表 8-1：那一列「？」 ---------- */
+(function () {
+  const root = document.getElementById('w-81');
+  const out = root.querySelector('[data-out]');
+  const msg = {
+    none: '情境：世界上沒有「強左翼政黨、弱工會」的國家（目前的真實狀況）。\n' +
+      '→ 資料同時符合「L → G」與「L·U → G」，<span class="hl">證據本身無法裁決</span>。\n' +
+      '你只能想像這種國家（反事實案例），再用理論與實質知識判斷它會不會是高福利國家。\n' +
+      '偏好簡約 → 傾向 L → G；偏好貼近案例 → 傾向 L·U → G。',
+    yes: '情境：找到了 L·~U 的國家，而且它們是高福利國家。\n' +
+      '→ L·U → G 與 L·~U → G 合併：L·(U + ~U) = L\n' +
+      '→ <span class="hl">L ≤ G</span>：強大左翼政黨「本身」就足以產生高福利國家，解釋一勝出。工會在這條路徑上無關緊要。',
+    no: '情境：找到了 L·~U 的國家，但它們都不是高福利國家。\n' +
+      '→ L 單獨並不足夠；少了強大工會，結果就消失。\n' +
+      '→ <span class="hl">L·U ≤ G</span>：是左翼政黨與工會的「組合」產生高福利國家，解釋二勝出。\n' +
+      '此時 L 與 U 都是 INUS 條件。',
+  };
+  const btns = root.querySelectorAll('[data-pick] button');
+  const show = (v) => { btns.forEach((b) => b.classList.toggle('on', b.dataset.v === v)); out.innerHTML = msg[v]; };
+  btns.forEach((b) => b.addEventListener('click', () => show(b.dataset.v)));
+  show('none');
+})();
+
+/* ---------- 案例匹配推論練習 ---------- */
+(function () {
+  const root = document.getElementById('w-match');
+  const names = ['H', 'C', 'L', 'U'];
+  const full = ['社會文化同質性 H', '統合主義制度 C', '強大左翼政黨 L', '強大工會 U'];
+  const tb = root.querySelector('tbody'), out = root.querySelector('[data-out]');
+  const presets = { ideal: ['neg', 'neg', 'neg', 'neg'], real: ['neg', 'none', 'none', 'neg'], mixed: ['pos', 'neg', 'neg', 'none'] };
+  const idx = names.map((_, j) => 15 ^ (1 << (3 - j)));   // 只翻轉第 j 個條件
+  const sels = [];
+  names.forEach((n, j) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="font-family:var(--mono);white-space:nowrap">${QM.row(idx[j], 4, names)}</td><td>缺 ${full[j]}</td>` +
+      `<td><select><option value="none">沒有案例（需反事實）</option><option value="neg">有案例：不是高福利國家</option><option value="pos">有案例：是高福利國家</option></select></td>`;
+    tb.appendChild(tr);
+    const s = tr.querySelector('select'); sels.push(s);
+    s.addEventListener('input', () => { pbtns.forEach((b) => b.classList.remove('on')); run(); });
+  });
+  const pbtns = root.querySelectorAll('[data-preset] button');
+  pbtns.forEach((b) => b.addEventListener('click', () => {
+    pbtns.forEach((x) => x.classList.toggle('on', x === b));
+    presets[b.dataset.v].forEach((v, j) => sels[j].value = v); run();
+  }));
+  function run() {
+    const st = sels.map((s) => s.value);
+    const on = [15].concat(idx.filter((_, j) => st[j] === 'pos'));
+    const sols = QM.solve(4, on, []);
+    const nEmp = st.filter((v) => v !== 'none').length;
+    root.querySelector('[data-m1]').textContent = nEmp + ' / 4';
+    root.querySelector('[data-m2]').textContent = (4 - nEmp) + ' / 4';
+    root.querySelector('[data-m3]').textContent = QM.sol(sols[0], names);
+    sels.forEach((s, j) => {
+      const td = s.parentElement; td.classList.remove('hi', 'warnc', 'rem');
+      td.classList.add(st[j] === 'neg' ? 'hi' : st[j] === 'pos' ? 'warnc' : 'rem');
+    });
+    const lines = names.map((n, j) => st[j] === 'neg' ? `✔ ${n}：缺了它，高福利國家就消失 → ${n} 是配方中不可或缺的成分（INUS 條件）。`
+      : st[j] === 'pos' ? `✘ ${n}：缺了它仍是高福利國家 → 在這條路徑上 ${n} 似乎可以省略。`
+      : `？ ${n}：沒有經驗匹配。要說 ${n} 不可或缺，你得做反事實假設：「若存在 ${QM.row(idx[j], 4, names)} 的國家，它不會是高福利國家。」`);
+    if (st.every((v) => v === 'neg')) lines.push('\n四種匹配都找到、結果都消失：<span class="hl">H、C、L、U 都是 INUS 條件</span>，論點獲得最強支持。');
+    else if (st.includes('pos')) lines.push(`\n有匹配案例在缺少某條件時仍出現結果，所以配方被簡化為：<span class="hl">${QM.sol(sols[0], names)}</span>` + (sols.length > 1 ? '（另有等價寫法）' : '') + '。');
+    else lines.push(`\n目前仍有 ${4 - nEmp} 個條件的地位只能靠反事實判斷——這就是有限多樣性下比較研究的日常。`);
+    out.innerHTML = lines.join('\n');
+  }
+  presets.real.forEach((v, j) => sels[j].value = v); run();
+})();
+
+/* ---------- 填補反事實：複雜解 vs 簡約解 ---------- */
+(function () {
+  const root = document.getElementById('w-fill');
+  const thead = root.querySelector('thead'), tb = root.querySelector('tbody');
+  const solBox = root.querySelector('[data-sol]'), out = root.querySelector('[data-out]'), note = root.querySelector('[data-note]');
+  let key = 't81', assign = {};
+  const pb = root.querySelectorAll('[data-preset] button'), ab = root.querySelectorAll('[data-all] button');
+  function build() {
+    const d = DATA[key], k = d.names.length, rem = remsOf(d);
+    assign = {}; rem.forEach((i) => assign[i] = '0');
+    thead.innerHTML = '<tr><th>#</th>' + d.full.map((f) => `<th>${f}</th>`).join('') + '<th>N</th><th>G</th><th>這一列的角色</th></tr>';
+    tb.innerHTML = '';
+    for (let i = 2 ** k - 1; i >= 0; i--) {
+      const tr = document.createElement('tr'); tr.dataset.i = i;
+      const b = QM.bits(i, k), o = d.obs[i];
+      tr.innerHTML = `<td>${2 ** k - i}</td>` + [...b].map((c) => `<td>${c}</td>`).join('') +
+        (o ? `<td>${o.n}</td><td><strong>${o.g === o.n ? 1 : 0}</strong></td>`
+           : `<td>0</td><td><select data-i="${i}"><option value="?">?（交給演算法）</option><option value="1">假設 G=1</option><option value="0">假設 G=0</option></select></td>`) +
+        '<td data-role style="font-size:.82rem"></td>';
+      if (!o) tr.querySelectorAll('td').forEach((td) => td.classList.add('rem'));
+      tb.appendChild(tr);
+    }
+    tb.querySelectorAll('select').forEach((s) => { s.value = assign[s.dataset.i]; s.addEventListener('input', () => { assign[s.dataset.i] = s.value; run(); }); });
+    run();
+  }
+  function run() {
+    const d = DATA[key], k = d.names.length, n = d.names, rem = remsOf(d);
+    const pos = Object.keys(d.obs).map(Number).filter((i) => d.obs[i].g === d.obs[i].n);
+    const neg = Object.keys(d.obs).map(Number).filter((i) => d.obs[i].g === 0);
+    const q = rem.filter((i) => assign[i] === '?'), r1 = rem.filter((i) => assign[i] === '1'), r0 = rem.filter((i) => assign[i] === '0');
+    const cur = QM.solve(k, pos.concat(r1), q), curN = QM.solve(k, neg.concat(r0), q);
+    const cx = QM.solve(k, pos, []), ps = QM.solve(k, pos, rem), cxN = QM.solve(k, neg, []), psN = QM.solve(k, neg, rem);
+    const alt = (s) => s.length ? s.map((x) => QM.sol(x, n)).join('　或　') : QM.sol(null, n);
+    const usedG = QM.usedRem(cur[0], k, q), usedN = QM.usedRem(curN[0], k, q);
+    solBox.innerHTML =
+      `<div class="k">你的設定 → G</div><div class="v gold">${alt(cur)}</div>` +
+      `<div class="k">複雜解（保守）</div><div class="v">${alt(cx)}</div>` +
+      `<div class="k">簡約解</div><div class="v">${alt(ps)}</div>` +
+      `<div class="k">你的設定 → ~G</div><div class="v rose">${alt(curN)}</div>` +
+      `<div class="k">~G 的複雜／簡約解</div><div class="v">${alt(cxN)}　｜　${alt(psN)}</div>`;
+    tb.querySelectorAll('tr').forEach((tr) => {
+      const i = +tr.dataset.i, role = tr.querySelector('[data-role]');
+      tr.querySelectorAll('td').forEach((td) => td.classList.remove('used'));
+      if (i in d.obs) { role.textContent = '觀察到的案例'; return; }
+      let t;
+      if (assign[i] === '1') t = '你明確假設 G=1';
+      else if (assign[i] === '0') t = '你明確假設 G=0（排除）';
+      else if (usedG.includes(i) && usedN.includes(i)) t = '⚠ G 與 ~G 都用了它（矛盾假設）';
+      else if (usedG.includes(i)) t = '★ 被 G 的解用作簡化假設';
+      else if (usedN.includes(i)) t = '★ 被 ~G 的解用作簡化假設';
+      else t = '未被使用';
+      role.textContent = t;
+      if (assign[i] === '1' || usedG.includes(i)) tr.querySelectorAll('td').forEach((td) => td.classList.add('used'));
+    });
+    const same = (a, b) => a.length && b.length && QM.sol(a[0], n) === QM.sol(b[0], n);
+    const lines = [];
+    if (same(cur, cx) && same(cur, ps)) lines.push('目前的 G 解同時等於複雜解與簡約解：餘項對結論沒有影響。');
+    else if (same(cur, cx)) lines.push('目前的 G 解 = <span class="hl">複雜解</span>：你沒有做任何能改變解的反事實假設。最安全，但也最「囉嗦」。');
+    else if (same(cur, ps)) lines.push('目前的 G 解 = <span class="hl">簡約解</span>：最精簡，但它依賴下列反事實假設，請逐一檢查是否合理。');
+    else lines.push('目前的 G 解介於複雜解與簡約解之間（或不同於兩者）——只採用部分反事實，這正是第 9 章「中間解」的雛形。');
+    const sa = r1.filter((i) => cur[0] && cur[0].some((p) => QM.covers(p, QM.bits(i, k)))).concat(usedG);
+    if (sa.length) lines.push('G 的解所依賴的反事實：' + sa.map((i) => `\n  ・若存在 ${QM.row(i, k, n)} 的國家，它會是高福利國家`).join(''));
+    else lines.push('G 的解沒有依賴任何反事實。');
+    const both = usedG.filter((i) => usedN.includes(i));
+    if (both.length) lines.push(`\n⚠ 矛盾的簡化假設：${both.map((i) => QM.row(i, k, n)).join('、')} 同時被當作 G=1 與 G=0。這在邏輯上不可能，需要研究者介入。`);
+    out.innerHTML = lines.join('\n');
+    note.innerHTML = key === 't81'
+      ? '對照原書：全部「G=0」得 L·U（複雜解）；全部「?」得 L（簡約解）。若你把餘項「假設 G=0」，~G 的解是 ~L + ~U（原書所說「更複雜」的版本）；交給演算法時，~G 不會用它，仍是 ~L。'
+      : '三條件延伸例為本教材自編的假想資料（非原書），用來示範：簡約解只會挑能幫助簡化的餘項，而不是全部用上。';
+  }
+  pb.forEach((b) => b.addEventListener('click', () => { pb.forEach((x) => x.classList.toggle('on', x === b)); key = b.dataset.v; build(); }));
+  ab.forEach((b) => b.addEventListener('click', () => {
+    Object.keys(assign).forEach((i) => assign[i] = b.dataset.v);
+    tb.querySelectorAll('select').forEach((s) => s.value = b.dataset.v); run();
+  }));
+  build();
+})();
+
+/* ---------- 迴歸可加性如何填補空白 ---------- */
+(function () {
+  const root = document.getElementById('w-reg');
+  const thead = root.querySelector('thead'), tb = root.querySelector('tbody');
+  const coefBox = root.querySelector('[data-coef]'), out = root.querySelector('[data-out]'), intI = root.querySelector('[data-int]');
+  let key = 't81', g = {};
+  const pb = root.querySelectorAll('[data-preset] button');
+  function build() {
+    const d = DATA[key], k = d.names.length;
+    g = {}; Object.keys(d.obs).forEach((i) => g[i] = d.obs[i].g);
+    thead.innerHTML = '<tr>' + d.names.map((x) => `<th>${x}</th>`).join('') + '<th>N</th><th>G=1 的案例數</th><th>觀察比例</th><th>模型預測</th></tr>';
+    tb.innerHTML = '';
+    for (let i = 2 ** k - 1; i >= 0; i--) {
+      const o = d.obs[i], tr = document.createElement('tr'); tr.dataset.i = i;
+      tr.innerHTML = [...QM.bits(i, k)].map((c) => `<td>${c}</td>`).join('') +
+        (o ? `<td>${o.n}</td><td><input type="number" min="0" max="${o.n}" value="${o.g}" data-i="${i}"></td><td data-obs></td>`
+           : '<td>0</td><td>—</td><td>（無資料）</td>') + '<td data-pred></td>';
+      if (!o) tr.querySelectorAll('td').forEach((td) => td.classList.add('rem'));
+      tb.appendChild(tr);
+    }
+    tb.querySelectorAll('input').forEach((el) => el.addEventListener('input', () => {
+      const n = DATA[key].obs[el.dataset.i].n;
+      g[el.dataset.i] = Math.min(n, Math.max(0, Math.round(+el.value || 0))); run();
+    }));
+    run();
+  }
+  function run() {
+    const d = DATA[key], k = d.names.length, useInt = intI.checked;
+    const xrow = (i) => { const b = [...QM.bits(i, k)].map(Number); return [1, ...b].concat(useInt ? [b[0] * b[1]] : []); };
+    const obs = Object.keys(d.obs).map(Number);
+    const beta = WLS(obs.map(xrow), obs.map((i) => g[i] / d.obs[i].n), obs.map((i) => d.obs[i].n));
+    const labs = ['截距', ...d.names].concat(useInt ? ['L×U'] : []);
+    tb.querySelectorAll('tr').forEach((tr) => {
+      const i = +tr.dataset.i, pc = tr.querySelector('[data-pred]'), oc = tr.querySelector('[data-obs]');
+      if (oc) oc.textContent = (g[i] / d.obs[i].n).toFixed(2);
+      pc.classList.remove('warnc', 'hi');
+      if (!beta) { pc.textContent = '—'; return; }
+      const p = xrow(i).reduce((s, x, j) => s + x * beta[j], 0);
+      pc.textContent = (Math.abs(p) < 5e-10 ? 0 : p).toFixed(2);
+      if (!(i in d.obs)) pc.classList.add(p > 1.0001 || p < -0.0001 ? 'warnc' : 'hi');
+    });
+    if (!beta) {
+      coefBox.innerHTML = '<div class="k">係數</div><div class="v rose">無法估計（設計矩陣奇異）</div>';
+      out.innerHTML = '加入 L×U 之後，模型<span class="hl">無法估計</span>：在觀察到的案例中，L=1 的國家全都 U=1，所以 L×U 這一欄和 L 一模一樣（完全共線）。\n' +
+        '統計軟體通常會默默丟掉其中一項，然後照常報告結果——資料其實根本無法區分「L 本身」與「L 和 U 的組合」，這正是表 8-1 的困境，只是被藏起來了。';
+      return;
+    }
+    coefBox.innerHTML = beta.map((b, j) => `<div class="k">${labs[j]}</div><div class="v">${(Math.abs(b) < 5e-10 ? 0 : b).toFixed(3)}</div>`).join('');
+    const rem = remsOf(d);
+    const lines = ['迴歸替從未觀察到的組合「填好」的值：'];
+    rem.forEach((i) => {
+      const p = xrow(i).reduce((s, x, j) => s + x * beta[j], 0);
+      lines.push(`  ・${QM.row(i, k, d.names)}：預測 ${(Math.abs(p) < 5e-10 ? 0 : p).toFixed(2)}` +
+        (p > 1.0001 || p < -0.0001 ? '（超出 0–1，連機率都不是）' : p >= 0.5 ? ' → 等於假設它「會是」高福利國家' : ' → 等於假設它「不會是」高福利國家'));
+    });
+    lines.push('\n這些數字<span class="hl">不是資料告訴你的</span>，而是「各條件效應可以相加」這個函數形式推出來的。');
+    if (key === 't81' && g[3] === 6 && g[1] === 0 && g[0] === 0) lines.push('原書資料下：G = 1·L，對 L·~U 預測為 1——和 QCA 簡約解「L ≤ G」做的是同一個反事實假設。');
+    out.innerHTML = lines.join('\n');
+  }
+  pb.forEach((b) => b.addEventListener('click', () => { pb.forEach((x) => x.classList.toggle('on', x === b)); key = b.dataset.v; build(); }));
+  intI.addEventListener('input', run);
+  build();
+})();
+</script>
+</body>
+</html>

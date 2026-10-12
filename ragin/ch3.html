@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 3 章 評估集合關係：一致性與覆蓋度 · 重新設計社會科學研究</title>
+<meta name="description" content="Ragin《重新設計社會科學研究》第 3 章互動教材：清晰集與模糊集的一致性、覆蓋度、必要條件的切題性、原始覆蓋度與唯一覆蓋度">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="css/ragin.css">
+<style>
+  .calc-tbl input[type=number] { width: 4.4rem; }
+  .calc-tbl td.bad { background: var(--bad-soft) !important; color: var(--bad); font-weight: 700; }
+  .calc-tbl .rm { font: inherit; font-size: .8rem; border: 1px solid var(--border); background: var(--bg); color: var(--ink-faint); border-radius: 6px; cursor: pointer; padding: .1rem .45rem; }
+  .plot .cov-line { stroke: var(--accent2); stroke-width: 1.3; stroke-dasharray: 4 3; }
+  .plot .gap-line { stroke: var(--rose); stroke-width: 1.3; stroke-opacity: .55; }
+  .plot .viol { stroke: var(--bad); stroke-width: 1.5; stroke-dasharray: 2 2; }
+  .plot.drag { touch-action: none; cursor: crosshair; }
+  .bar { display: flex; height: 30px; border-radius: 7px; overflow: hidden; border: 1px solid var(--border); background: var(--bg-soft); margin: .4rem 0; }
+  .bar > span { display: flex; align-items: center; justify-content: center; font-size: .75rem; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; transition: width .2s; }
+  .bar .u1 { background: var(--accent); }
+  .bar .ov { background: var(--rose); }
+  .bar .u2 { background: var(--gold); }
+  .bar-legend { display: flex; flex-wrap: wrap; gap: .9rem; font-size: .8rem; color: var(--ink-soft); }
+  .bar-legend i { display: inline-block; width: .8rem; height: .8rem; border-radius: 3px; margin-right: .3rem; vertical-align: -1px; }
+  .cmp3 .stat .k { min-height: 2.2em; }
+  .stat .v.dim { color: var(--ink-faint); text-decoration: line-through; }
+  .fignote { font-size: .82rem; color: var(--ink-faint); text-align: center; margin: .4rem 0 0; }
+  .note-s { font-size: .82rem; color: var(--ink-faint); }
+</style>
+</head>
+<body>
+<div id="readbar"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="logo rg">R</span><span>重新設計社會科學研究<small>Ragin (2008) 互動教材</small></span></a>
+    <nav class="topnav">
+      <a href="index.html">本書首頁</a>
+      <a href="ch0.html">導讀</a>
+      <a href="ch1.html">第一篇</a>
+      <a href="ch4.html">第二篇</a>
+      <a href="ch6.html">第三篇</a>
+      <a href="ch8.html">第四篇</a>
+      <a href="../index.html">QCA with R ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="chapter-head">
+  <div class="part">第一篇　集合關係與相關關係</div>
+  <div class="eyebrow">CHAPTER 3</div>
+  <h1>評估集合關係：一致性與覆蓋度</h1>
+  <div class="en">Measuring Set Relations: Consistency and Coverage</div>
+  <div class="src">對應原書第 3 章（中譯本頁 27–44）</div>
+</div>
+
+<p class="lead">補習班門口的紅榜寫著：「本班學生 100% 考上國立大學！」你應該追問兩件事。第一，<strong>這個「100%」有多可靠</strong>？是 3 個學生全上，還是 200 個學生裡有 170 個上？第二，<strong>這條路有多重要</strong>？全國考上國立大學的人裡，有多少是從這家補習班來的？前一個問題就是本章的<strong>一致性（consistency）</strong>，後一個就是<strong>覆蓋度（coverage）</strong>。這兩個指標是之後所有 QCA 分析都會用到的計量基礎。</p>
+
+<div class="objectives">
+  <div class="ct">🎯 讀完本章，你應該能夠……</div>
+  <ol>
+    <li>說明一致性與覆蓋度各自回答什麼問題，並和相關分析中的「顯著性」與「強度」做類比。</li>
+    <li>用 Σmin(X,Y)/ΣX 計算模糊集<strong>充分性</strong>一致性，並解釋它為什麼比「對角線上方案例比例」好。</li>
+    <li>寫出<strong>必要性</strong>的一致性與覆蓋度公式，並說明為什麼同一個算式在兩種情境中意義不同。</li>
+    <li>用覆蓋度判斷一條路徑的經驗重要性，以及一個必要條件是否「微不足道」。</li>
+    <li>把多條路徑的總覆蓋度分隔成<strong>原始覆蓋度</strong>、<strong>唯一覆蓋度</strong>與重疊部分。</li>
+    <li>記住鐵律：<strong>先確認一致性，才談覆蓋度</strong>。</li>
+  </ol>
+</div>
+
+<nav class="toc">
+  <strong>本章目錄</strong>
+  <ol>
+    <li><a href="#s1">兩把尺：一致性與覆蓋度</a></li>
+    <li><a href="#s2">清晰集的一致性：「接近也算數」</a></li>
+    <li><a href="#s3">模糊集的一致性（充分性）</a></li>
+    <li><a href="#s4">必要條件的一致性</a></li>
+    <li><a href="#s5">覆蓋度：這條路有多重要？</a></li>
+    <li><a href="#s6">必要條件的切題性與評估準則（表 3-4）</a></li>
+    <li><a href="#s7">分隔覆蓋度：原始、唯一與解的覆蓋度</a></li>
+    <li><a href="#s8">實作：在 fsQCA 與 R 計算一致性與覆蓋度</a></li>
+    <li><a href="#s9">本章重點、名詞與自我測驗</a></li>
+  </ol>
+</nav>
+
+<!-- ================================================= -->
+<h2 id="s1">1. 兩把尺：一致性與覆蓋度 <span class="en">· Two measures</span></h2>
+
+<p>第 1、2 章說過，「某個條件組合是通往結果的<em>其中一條</em>路徑」這種主張，在集合語言裡就是「條件組合 ⊆ 結果」。可是真實資料很少完美，我們需要描述性的數字來回答：<strong>證據支持這個集合關係到什麼程度？</strong>Ragin 提出兩把尺：</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>一致性 Consistency</h4>
+    <p><strong>問：</strong>共享某個條件組合的案例，在呈現結果這件事上有多一致？也就是資料離「完美子集合」有多近。</p>
+    <p><strong>類比：</strong>相關分析的<strong>顯著性</strong>——這個關係值不值得認真看待？一致性不夠，理論就沒有得到支持。</p>
+  </div>
+  <div class="new">
+    <h4>覆蓋度 Coverage</h4>
+    <p><strong>問：</strong>這個條件組合「解釋」了多少結果的實例？當通往結果有很多條路時，某一條路的覆蓋度可能很小。</p>
+    <p><strong>類比：</strong>相關分析的<strong>強度</strong>——它衡量<strong>經驗上的切題性（empirical relevance）或重要性</strong>。</p>
+  </div>
+</div>
+
+<p>同樣兩把尺也能用在<strong>必要條件</strong>上（結果 ⊆ 條件）：這時一致性衡量「有結果的案例是否都具備該條件」，覆蓋度則衡量這個必要條件是否<strong>切題</strong>，也就是條件與結果的實例「配對」得多緊密（本章這部分延續 Goertz 等人關於必要條件的研究）。</p>
+
+<div class="callout key">
+  <div class="ct">🔑 一句話記住</div>
+  <p>就像統計上可以「非常顯著但相關很弱」，集合分析也可以<strong>「一致性很高、覆蓋度很低」</strong>。兩者回答不同的問題，缺一不可。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s2">2. 清晰集的一致性：「接近也算數」 <span class="en">· Crisp-set consistency</span></h2>
+
+<p>完美的集合關係在社會科學很少見，通常只出現在小樣本或總體層次的資料中。例外幾乎總是存在——「民主國家彼此不開戰」也有爭議案例。所以我們需要一個數字來表示「有多接近」。</p>
+
+<p>清晰集的一致性非常簡單：<strong>具有該條件（組合）的案例中，呈現結果的比例</strong>。回到第 1 章的第三波民主化：</p>
+<ul>
+  <li>3 個議會制國家，3 個民主化失敗 → 一致性 3/3 = <strong>1.0</strong>；</li>
+  <li>20 個議會制國家，17 個民主化失敗 → 一致性 17/20 = <strong>0.85</strong>。</li>
+</ul>
+<p>直覺上，多數研究者會更相信第二種情況——雖然不是 100%，但 20 個裡有 17 個，至少顯示有值得追究的整體關係。3 個全中則可能只是巧合。Ragin 稱這種精神為「<strong>接近也算數（close counts）</strong>」。</p>
+
+<div class="callout info">
+  <div class="ct">ℹ️ 把案例數考慮進來：機率檢定</div>
+  <p>Ragin（2000）建議可以設定一個<strong>基準值</strong>（例如 0.65 或 0.75），用精確的二項檢定問「觀察到的一致性是否顯著高於基準？」。以 α = 0.05、基準 0.65 為例：3/3 的單尾 p 值為 0.65³ ≈ 0.275，<strong>不顯著</strong>；17/20 的 p 值約 0.044，<strong>顯著</strong>。一般原則是一致性越接近 1.0 越好；<strong>低於 0.75</strong> 時，要主張集合關係存在就相當困難了。</p>
+</div>
+
+<div class="widget" id="w-binom">
+  <div class="widget-head"><span class="wtag">互動</span> 3/3 還是 17/20？一致性的二項檢定</div>
+  <div class="widget-body">
+    <p style="margin-top:0">設定具有條件的案例數 n、其中呈現結果的案例數 k，以及基準值。檢定 H₀：真實一致性 ≤ 基準（單尾，α = 0.05）。</p>
+    <div class="controls">
+      <div class="field"><label>具有條件的案例數 n</label><input type="number" min="1" max="200" value="20" data-n></div>
+      <div class="field"><label>其中呈現結果 k</label><input type="number" min="0" max="200" value="17" data-k></div>
+      <div class="field"><label>基準值</label>
+        <select data-p0><option value="0.65" selected>0.65</option><option value="0.75">0.75</option><option value="0.8">0.80</option></select>
+      </div>
+      <div class="seg" data-pre><button data-v="3,3">3/3</button><button data-v="20,17" class="on">17/20</button><button data-v="40,34">34/40</button></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="k">一致性 k/n</div><div class="v" data-c>—</div></div>
+      <div class="stat"><div class="k">p 值 P(K ≥ k｜基準)</div><div class="v gold" data-p>—</div></div>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s3">3. 模糊集的一致性（充分性） <span class="en">· Fuzzy-set consistency</span></h2>
+
+<p>模糊集讓隸屬度可以落在 0 到 1 之間（例如某國「部分屬於」民主國家）。第 2 章說過，模糊子集合關係的定義是：<strong>每個案例在 X 的隸屬度都 ≤ 它在 Y 的隸屬度</strong>（X<sub>i</sub> ≤ Y<sub>i</sub>）。</p>
+
+<h3>哪些案例「不算」反例？</h3>
+<p>延續議會制的例子。某國在「民主化失敗」的隸屬度 0.90、在「議會制」只有 0.20——這<strong>不違反</strong>「議會制 ⊆ 失敗」，因為失敗還有很多別的路（這就是清晰集中「總統制但也失敗」的模糊版本）。相反地，若某國「議會制」0.80、「失敗」只有 0.30，那就是明確的反例。</p>
+
+<div class="wgrid">
+  <figure class="diagram" style="margin:0">
+    <svg class="plot" data-fig="31" aria-label="模糊子集關係：充分性"></svg>
+    <figcaption>仿原書圖 3-1：X ⊆ Y（充分性）的三角形分布（示意資料）</figcaption>
+  </figure>
+  <div>
+    <p>畫成 XY 圖時，模糊子集關係呈<strong>三角形</strong>：所有點都在主對角線上或其上方。</p>
+    <ul>
+      <li><strong>左上三角</strong>的案例（X 低、Y 高）並不違反「X 是充分但不必要」的主張——它們透過<em>別的路徑</em>得到結果。所以 X 低的時候，Y 可以在很寬的範圍內。</li>
+      <li>X 越高，Y 能落的範圍就越窄（必須 ≥ X），違反子集關係的機會也越多。</li>
+      <li>但在傳統相關分析裡，左上三角的點會被當成「離群值」，因為它們拉低了 X 與 Y 的相關。</li>
+    </ul>
+  </div>
+</div>
+
+<h3>舊方法的問題：每個案例一票</h3>
+<p>Ragin 在《模糊集社會科學》（2000）裡把一致性定義為：<strong>XY 圖中落在對角線上或上方的案例比例</strong>。若 80% 以上的案例在對角線上方，就說 X「幾乎總是」充分。這其實就是把清晰集的模板直接搬過來，問題是它<strong>忽略了隸屬度的強弱</strong>：</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>不一致的案例，被一視同仁</h4>
+    <ul>
+      <li>案例甲：X = 0.25、Y = 0（X 本來就偏「不屬於」）</li>
+      <li>案例乙：X = 1.0、Y = 0.75（X 是完全隸屬的典型案例）</li>
+    </ul>
+    <p>兩者 X 都超過 Y 0.25，舊方法各算「一個不一致」。但乙是這個條件組合更好的代表，它的不一致<strong>對理論更有殺傷力</strong>。</p>
+  </div>
+  <div class="new">
+    <h4>一致的案例，也被一視同仁</h4>
+    <ul>
+      <li>X = 0.9、Y = 1.0（兩者都高）</li>
+      <li>X = 0.1、Y = 0.2（兩者都低）</li>
+      <li>X = 0.15、Y = 0.8（X 低、Y 高）</li>
+    </ul>
+    <p>第一個顯然最能支持論點。想像你拿一個在相關集合裡隸屬度很低的案例去說服同事——白費時間。<strong>X 隸屬度高的案例，提供最切題的一致案例，也提供最切題的不一致案例。</strong></p>
+  </div>
+</div>
+
+<h3>新方法：用隸屬分數本身來算</h3>
+<p>原書表 3-1 是 12 個假想已開發國家在「強勢左派」（X）與「高福利國家」（Y）的隸屬度。這份資料<strong>完全一致</strong>：每一列都 X ≤ Y。</p>
+
+<div class="table-wrap">
+  <table class="tbl center">
+    <thead><tr><th>案例</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th><th>總和</th></tr></thead>
+    <tbody>
+      <tr><th>強勢左派 X</th><td>0.7</td><td>0.1</td><td>0.1</td><td>0.3</td><td>0.9</td><td>0.7</td><td>0.3</td><td>0.3</td><td>0.3</td><td>0.1</td><td>0.0</td><td>0.9</td><td>4.7</td></tr>
+      <tr><th>高福利國家 Y</th><td>0.9</td><td>0.9</td><td>0.1</td><td>0.3</td><td>0.9</td><td>0.7</td><td>0.9</td><td>0.7</td><td>0.7</td><td>0.1</td><td>0.0</td><td>1.0</td><td>7.2</td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="note-s">資料來源：原書表 3-1（假想資料）。原表為直式兩欄，此處轉為橫式。</p>
+
+<p>Ragin 的推導分三步（數字都已用程式重算核對）：</p>
+<div class="steps">
+  <div class="step"><div><h4>第一步：一致案例的 X 總和 ÷ 全部 X 總和</h4><p>表 3-1 全部一致 → 4.7 / 4.7 = <strong>1.0</strong>。現在把案例 1 的 X 從 0.7 改成 1.0（Y 仍是 0.9），它變成不一致。分母變 5.0，分子只剩其他 11 個一致案例的 4.0 → 4.0 / 5.0 = <strong>0.80</strong>。只因一個「差一點點」的案例，就從 1.0 掉到 0.80，跌幅太大了。</p></div></div>
+  <div class="step"><div><h4>第二步：把不一致案例中「仍然一致的部分」加回分子</h4><p>案例 1 的 X = 1.0，其中「到 Y = 0.9 為止」的 0.9 其實是和結果一致的。把 0.9 加回分子：4.9 / 5.0 = <strong>0.98</strong>。這才合理——只有一個案例不一致，而且非常接近一致。</p></div></div>
+  <div class="step"><div><h4>第三步：大不一致會被重罰</h4><p>若案例 1 是 X = 1.0、Y = 只有 0.3，分子只能加回 0.3：4.3 / 5.0 = <strong>0.86</strong>。同樣是「一個不一致案例」，超出得越多，扣得越多。</p></div></div>
+</div>
+
+<p>把第二、三步寫成公式，就是今天 fsQCA 與 R 都在用的充分性一致性（「模糊包含」的計算方式）：</p>
+
+<div class="formula">
+  <span class="flabel">充分性一致性（X ⊆ Y）</span>
+  Consistency(X<sub>i</sub> ≤ Y<sub>i</sub>) =
+  <span class="frac"><span>Σ min(X<sub>i</sub>, Y<sub>i</sub>)</span><span>Σ X<sub>i</sub></span></span>
+</div>
+
+<p>每個案例對分子貢獻 min(X, Y)：一致的案例（X ≤ Y）貢獻整個 X；不一致的案例只貢獻到 Y 為止。所以：全部 X ≤ Y 時等於 1.0；少數案例略為超出時接近 1.0；很多案例大幅超出時，可能掉到 0.5 以下。這個公式套在 0/1 的清晰集資料上，就會還原成「一致案例的簡單比例」，所以<strong>清晰集與模糊集通用</strong>；第 2 節的機率檢定也可以照用。</p>
+
+<div class="widget" id="w-drag">
+  <div class="widget-head"><span class="wtag">互動</span> 拖曳一個案例：三種一致性算法誰最合理？</div>
+  <div class="widget-body">
+    <p style="margin-top:0">其餘 11 個案例固定為表 3-1 的資料（藍點）。<strong>在圖上點擊或拖曳</strong>，移動粉紅色的「案例 1」（或用下方滑桿），比較三種算法。</p>
+    <div class="controls">
+      <div class="seg" data-pre>
+        <button data-v="0.7,0.9" class="on">原始 (0.7, 0.9)</button>
+        <button data-v="1,0.9">小不一致 (1.0, 0.9)</button>
+        <button data-v="1,0.3">大不一致 (1.0, 0.3)</button>
+        <button data-v="0.25,0">甲 (0.25, 0)</button>
+        <button data-v="1,0.75">乙 (1.0, 0.75)</button>
+      </div>
+    </div>
+    <div class="wgrid">
+      <svg class="plot drag" data-plot></svg>
+      <div>
+        <div class="slider-row"><span class="sl-label">X</span><input type="range" min="0" max="1" step="0.05" value="0.7" data-x><output data-xo>0.70</output></div>
+        <div class="slider-row"><span class="sl-label">Y</span><input type="range" min="0" max="1" step="0.05" value="0.9" data-y><output data-yo>0.90</output></div>
+        <div class="stats cmp3">
+          <div class="stat"><div class="k">① 舊法：對角線上方<br>案例比例（2000）</div><div class="v" data-m1>—</div></div>
+          <div class="stat"><div class="k">② 一致案例 X 和<br>÷ ΣX</div><div class="v" data-m2>—</div></div>
+          <div class="stat"><div class="k">③ Σmin(X,Y) ÷ ΣX<br>（現行公式）</div><div class="v gold" data-m3>—</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<details class="think">
+  <summary>想一想：案例甲 (0.25, 0) 和乙 (1.0, 0.75)，用現行公式誰扣分比較多？</summary>
+  <div class="ans">
+    <p>在上面的元件試試看：甲 → 4.0/4.25 ≈ 0.941；乙 → 4.75/5.0 = 0.950。兩者超出的量都是 0.25 個模糊單位，公式扣掉的「絕對量」相同，乙甚至還因為貢獻了 0.75 的一致部分而略高。</p>
+    <p>那 Ragin 說「乙的不一致更嚴重」是什麼意思？重點在<strong>可能的傷害上限</strong>：X 只有 0.25 的案例，最多只能讓分子少 0.25；X = 1.0 的案例若結果很低（例如 Y = 0.3），一口氣可以扣到 0.7。也就是說，現行公式依隸屬分數加權：<strong>X 高的案例分量重，它們的一致或不一致決定了大局</strong>；X 很低的案例，對一致性幾乎沒有影響力。這正是舊法（每案一票）做不到的。</p>
+  </div>
+</details>
+
+<!-- ================================================= -->
+<h2 id="s4">4. 必要條件的一致性 <span class="en">· Consistency of necessity</span></h2>
+
+<p>同一套想法可以用來評估<strong>必要條件</strong>。當結果的實例構成條件實例的子集合（Y ⊆ X）時，必要性得到支持。在模糊集裡，就是看結果的隸屬度是否一致地 ≤ 條件的隸屬度：Y<sub>i</sub> ≤ X<sub>i</sub>。</p>
+
+<div class="wgrid">
+  <figure class="diagram" style="margin:0">
+    <svg class="plot" data-fig="32" aria-label="模糊子集關係：必要性"></svg>
+    <figcaption>仿原書圖 3-2：Y ⊆ X（必要性），點都在對角線下方（示意資料）</figcaption>
+  </figure>
+  <div>
+    <ul>
+      <li>這時所有點都落在對角線上或<strong>下方</strong>。</li>
+      <li><strong>右下角</strong>的案例（X 高、Y 低）不違反必要性：它們有必要條件，但缺了其他某些條件，所以沒有結果——畢竟必要不等於充分。（相關分析又會把它們當離群值。）</li>
+      <li>反過來，X 低的時候 Y 也必須低；在 X 的低端，Y 能落的範圍很窄，違反的機會最多。</li>
+    </ul>
+  </div>
+</div>
+
+<p>因為必要性的不等式（Y ≤ X）剛好和充分性（X ≤ Y）相反，公式只要把分母換成 ΣY：</p>
+
+<div class="formula">
+  <span class="flabel">必要性一致性（Y ⊆ X）</span>
+  Consistency(Y<sub>i</sub> ≤ X<sub>i</sub>) =
+  <span class="frac"><span>Σ min(X<sub>i</sub>, Y<sub>i</sub>)</span><span>Σ Y<sub>i</sub></span></span>
+</div>
+
+<p>所有 Y ≤ X 時等於 1.0；很多 Y 大幅超過 X 時會低於 0.5。</p>
+
+<div class="callout warn">
+  <div class="ct">⚠️ 因果關係不在資料裡</div>
+  <p>無論是必要性或充分性，詮釋都必須建立在<strong>理論與實質知識</strong>上。集合論的一致性只是研究者主張充分性、必要性或其他因果／構成關係時，提供的<em>其中一項</em>支持證據。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s5">5. 覆蓋度：這條路有多重要？ <span class="en">· Coverage of sufficient conditions</span></h2>
+
+<p>考慮到<strong>等效性（equifinality）</strong>與因果複雜性，同一個結果常常可由好幾種條件組合產生，我們把它們看成通往結果的不同「配方」。在清晰集分析中，自然會問：<strong>經由某條路徑得到結果的案例，占全部結果案例的多少？</strong>這個比例就是覆蓋度——某條路徑經驗重要性的直接指標。</p>
+
+<div class="callout tip">
+  <div class="ct">📌 一致性與覆蓋度常常互相拉扯</div>
+  <p>條件組合越複雜（交集越多集合），越容易一致，但覆蓋的人越少。例如：在校成績優異 × 考試高分 × 父母受大學教育 × 父母高收入 × 常春藤畢業的美國成年人，幾乎 100% 不會貧窮——但在所有不貧窮的人裡，這種人少得可憐。這樣的「完美一致」實務上並不令人信服，因為覆蓋度微不足道。</p>
+  <p class="note-s">原書註：覆蓋度只衡量<strong>經驗</strong>重要性，不是<strong>理論</strong>重要性。一條罕見（低覆蓋）的路徑，可能證明了理論上被認為不可能的路其實可行，因而在理論上很關鍵。</p>
+</div>
+
+<div class="callout key">
+  <div class="ct">🔑 鐵律：先一致性，後覆蓋度</div>
+  <p>只有在確認集合關係<strong>一致</strong>之後，計算覆蓋度才有意義。去算一個「不是結果一致子集合」的條件的覆蓋度，是沒有意義的。而且下面會看到，同一個算式在不同情境下意義不同——遵守這個順序，才不會搞混。</p>
+</div>
+
+<h3>清晰集的例子：教育與貧窮（表 3-2、3-3）</h3>
+<p>以下是個人層次的假想交叉表。主張是「受教育程度高 ⊆ 不貧窮」（高教育是避免貧窮的一條路）。</p>
+<ul>
+  <li><strong>一致性</strong>只看「高教育」那一欄：b / (b + d)。</li>
+  <li><strong>覆蓋度</strong>只看「不貧窮」那一列：b / (a + b)——不貧窮的人裡，有多少是經由高教育這條路。</li>
+</ul>
+
+<div class="widget" id="w-cross">
+  <div class="widget-head"><span class="wtag">互動</span> 清晰集 2×2：一致性高，覆蓋度卻可能很低</div>
+  <div class="widget-body">
+    <div class="controls">
+      <div class="seg" data-pre>
+        <button data-v="t32" class="on">表 3-2（初始頻數）</button>
+        <button data-v="t33">表 3-3（修改後頻數）</button>
+        <button data-v="custom">自己輸入</button>
+      </div>
+    </div>
+    <div class="wgrid">
+      <div>
+        <div class="table-wrap" style="margin-top:0">
+          <table class="tbl center">
+            <thead><tr><th></th><th>低／平均教育</th><th>高教育（X）</th></tr></thead>
+            <tbody>
+              <tr><th>不貧窮（Y）</th><td>a<br><input type="number" min="0" data-c="a"></td><td>b<br><input type="number" min="0" data-c="b"></td></tr>
+              <tr><th>貧窮</th><td>c<br><input type="number" min="0" data-c="c"></td><td>d<br><input type="number" min="0" data-c="d"></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="k">充分性一致性 b/(b+d)</div><div class="v gold" data-cons>—</div></div>
+          <div class="stat"><div class="k">充分性覆蓋度 b/(a+b)</div><div class="v" data-cov>—</div></div>
+        </div>
+      </div>
+      <figure class="diagram" style="margin:0">
+        <svg viewBox="0 0 320 230" data-venn style="max-width:340px" aria-label="覆蓋度的維恩圖"></svg>
+        <figcaption>仿原書圖 3-3：大圓 = 不貧窮（a+b），小圓 = 高教育（b+d）；面積大致依頻數比例</figcaption>
+      </figure>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<p>表 3-2：一致性 1474/(1474+55) = <strong>0.964</strong>，覆蓋度 1474/(3046+1474) = <strong>0.326</strong>——高教育這條路涵蓋了將近三分之一的不貧窮者，相當可觀。表 3-3 的總案例數相同（5,200），只是把一些人從 b 移到 a、從 d 移到 c：一致性 147/152 = <strong>0.967</strong>，幾乎不變；覆蓋度卻只剩 147/4520 = <strong>0.0325</strong>。一致性一樣高，但在這組資料裡，高教育並不是避免貧窮的重要途徑。</p>
+
+<h3>從清晰集到模糊集：重疊 ÷ 結果大小</h3>
+<p>把覆蓋度想成維恩圖：子集合（高教育）在物理上「蓋住」目標集合（不貧窮）多大一塊。兩個模糊集的<strong>重疊</strong>大小就是它們交集的總和，也就是一致性公式的分子：</p>
+
+<div class="formula">
+  <span class="flabel">重疊（overlap）</span>
+  Overlap = Σ min(X<sub>i</sub>, Y<sub>i</sub>)
+</div>
+<p>結果集合的「大小」就是它的隸屬度總和 ΣY（對應清晰集的人數）。所以：</p>
+<div class="formula">
+  <span class="flabel">充分性覆蓋度（X ⊆ Y）</span>
+  Coverage(X<sub>i</sub> ≤ Y<sub>i</sub>) =
+  <span class="frac"><span>Σ min(X<sub>i</sub>, Y<sub>i</sub>)</span><span>Σ Y<sub>i</sub></span></span>
+</div>
+
+<p>也就是把一致性公式的分母 ΣX 換成 ΣY。以表 3-1 為例：Σmin = 4.7、ΣY = 7.2 → 覆蓋度 = 4.7 / 7.2 ≈ <strong>0.653</strong>。</p>
+
+<div class="callout warn">
+  <div class="ct">⚠️ 同一個算式，兩種意義</div>
+  <p>Σmin(X,Y)/ΣY 也正是第 4 節「必要性一致性」的公式！差別在情境：</p>
+  <ul style="margin:.3rem 0 0">
+    <li><strong>充分性情境</strong>：已經確認大部分 X ≤ Y，現在要問 X 相對於 Y 有多大 → 讀作「覆蓋度」。</li>
+    <li><strong>必要性情境</strong>：期待大部分 Y ≤ X，要檢查 Y 是不是 X 的一致子集合 → 讀作「一致性」；若遠低於 1.0，表示 Y 不是 X 的一致子集合。</li>
+  </ul>
+</div>
+
+<div class="wgrid">
+  <figure class="diagram" style="margin:0">
+    <svg class="plot" data-fig="34" aria-label="覆蓋度示意圖"></svg>
+    <figcaption>仿原書圖 3-4：覆蓋度的概念（示意資料）</figcaption>
+  </figure>
+  <div>
+    <p><strong>怎麼讀這張圖：</strong>每個點左邊的<span style="color:var(--accent2);font-weight:700">綠色虛線</span>長度是該案例被算為「一致」的部分 min(X,Y)，會加進覆蓋度的分子；虛線端點到對角線之間的<span style="color:var(--rose);font-weight:700">粉紅線段</span>，是 Y 沒有被 X 蓋住的部分。</p>
+    <ul>
+      <li>只有兩個點在對角線下方（違反一致性），子集合關係大致成立。</li>
+      <li>離 Y 軸近、離對角線遠的點（X 遠小於 Y），雖然符合 X ≤ Y，對覆蓋度貢獻很少——特別是當 Y 大於 0.5 時。</li>
+      <li>只有當 X 大致等於 Y（點貼著對角線）時，覆蓋度才會很高。</li>
+    </ul>
+  </div>
+</div>
+
+<details class="think">
+  <summary>想一想：覆蓋度 = 1.0 是不是代表 X 和 Y「完全相關」？</summary>
+  <div class="ans">
+    <p>不是。原書註腳特別區分<strong>集合重合（set coincidence）</strong>與相關：在模糊集 XY 圖上，任何非水平、非垂直的直線都代表完全相關；但只有當所有點都<strong>精確落在主對角線上</strong>時，才是完全的集合重合。集合重合是相關的一個特例。衡量兩個集合重合程度的簡單指標是 Σmin(X,Y) / Σmax(X,Y)。表 3-1 的重合度 = 4.7 / 7.2 ≈ 0.653（因為每列都 X ≤ Y，max 就是 Y）。</p>
+  </div>
+</details>
+
+<!-- ================================================= -->
+<h2 id="s6">6. 必要條件的切題性與評估準則（表 3-4） <span class="en">· Relevance of necessary conditions</span></h2>
+
+<p>覆蓋度也能用在必要條件上。Goertz（2003, 2006）的重點是區分<strong>重要的</strong>和<strong>微不足道（trivial）</strong>的必要條件：</p>
+<ul>
+  <li><strong>微不足道</strong>：在大多數案例中都強烈存在，不管有沒有結果。例如「不滿」可能是社會運動的必要條件，但不滿幾乎無所不在，很少因為「缺乏不滿」而擋下社會運動。</li>
+  <li><strong>重要</strong>：例如「開放、寬容的政治環境（沒有政府壓制）」，因為社會運動常常遭到壓制，這個條件真的會發揮限制作用。</li>
+</ul>
+<p>Ragin 的具體公式和 Goertz 不同，但目標相似：用 <strong>Y 對 X 的覆蓋度</strong>衡量 X 作為必要條件的切題性。</p>
+
+<div class="formula">
+  <span class="flabel">必要性覆蓋度／切題性（Y ⊆ X）</span>
+  Coverage(Y<sub>i</sub> ≤ X<sub>i</sub>) =
+  <span class="frac"><span>Σ min(X<sub>i</sub>, Y<sub>i</sub>)</span><span>Σ X<sub>i</sub></span></span>
+</div>
+
+<p>覆蓋度很小，代表 X 對 Y 的限制效果可以忽略。經典例子：美國幾乎所有海洛因成癮者以前都喝過牛奶，但「喝過牛奶」不是有意義的必要條件——成癮者這個集合，和「喝過牛奶的人」相比實在太小了。反之，若「曾和成癮者往來」的人中有相當比例後來成癮，而且幾乎沒有成癮者事先沒和成癮者往來，那麼覆蓋度很高，「和成癮者往來」就是切題的必要條件。</p>
+
+<div class="widget" id="w-nec">
+  <div class="widget-head"><span class="wtag">互動</span> 切題還是微不足道？必要條件的覆蓋度（仿圖 3-5）</div>
+  <div class="widget-body">
+    <p style="margin-top:0">假設有 50 位成癮者（結果 Y），而且<strong>全部</strong>都具有條件 X（必要性一致性 = 1.0）。改變「具有 X 的總人數」，看覆蓋度如何變化。</p>
+    <div class="controls">
+      <div class="seg" data-pre><button data-v="70" class="on">曾與成癮者往來</button><button data-v="5000">以前喝過牛奶</button></div>
+    </div>
+    <div class="slider-row"><span class="sl-label">X</span><input type="range" min="0" max="1000" value="73" data-s style="width:220px"><output data-so>70</output><span>人具有條件 X</span></div>
+    <div class="wgrid">
+      <figure class="diagram" style="margin:0">
+        <svg viewBox="0 0 260 220" data-svg style="max-width:280px" aria-label="必要條件的維恩圖"></svg>
+      </figure>
+      <div>
+        <div class="stats">
+          <div class="stat"><div class="k">必要性一致性 ΣY∩X / ΣY</div><div class="v ok">1.000</div></div>
+          <div class="stat"><div class="k">必要性覆蓋度 ΣY∩X / ΣX</div><div class="v gold" data-cov>—</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<p>換成模糊集 XY 圖：一個「實證上不相關」的必要條件，幾乎所有案例在 X 都有很高的隸屬度，因此點全擠在圖的<strong>最右邊</strong>——Y 當然 ≤ X，但這個關係沒有告訴我們什麼。</p>
+
+<p>和充分性一樣，<strong>必須先確認 Y 是 X 的一致子集合，才能評估必要條件的切題性</strong>。遵守這條準則，就不會被下面這個對稱性搞混：充分性的一致性 ＝ 必要性覆蓋度的算式；充分性的覆蓋度 ＝ 必要性一致性的算式。原書表 3-4 整理如下：</p>
+
+<div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th>步驟</th><th>X 是 Y 的子集合（充分性）</th><th>Y 是 X 的子集合（必要性）</th></tr></thead>
+    <tbody>
+      <tr><td><strong>步驟 1</strong></td><td>用 Σmin(X,Y) / ΣX 評估<strong>一致性</strong></td><td>用 Σmin(X,Y) / ΣY 評估<strong>一致性</strong></td></tr>
+      <tr><td><strong>步驟 2</strong></td><td>若一致，用 Σmin(X,Y) / ΣY 評估<strong>覆蓋度</strong></td><td>若一致，用 Σmin(X,Y) / ΣX 評估<strong>覆蓋度</strong></td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="note-s">資料來源：原書表 3-4「一致性與覆蓋度的評估準則」。</p>
+
+<div class="widget" id="w-calc">
+  <div class="widget-head"><span class="wtag">互動</span> 一致性／覆蓋度計算器（可編輯資料＋XY 圖）</div>
+  <div class="widget-body">
+    <p style="margin-top:0">選一組預設資料或直接修改 X、Y 的值（0–1）。選擇要檢驗的關係，違反該關係的案例會在表中與圖上標紅，並以虛線連到對角線。</p>
+    <div class="controls">
+      <div class="field"><label>預設資料</label>
+        <select data-preset>
+          <option value="t31">表 3-1（完全一致）</option>
+          <option value="t31a">表 3-1，案例 1 改為 X = 1.0</option>
+          <option value="t31b">表 3-1，案例 1 改為 X = 1.0、Y = 0.3</option>
+          <option value="suf">充分型（仿圖 3-1）</option>
+          <option value="nec">必要型（仿圖 3-2）</option>
+          <option value="low">高一致、低覆蓋</option>
+        </select>
+      </div>
+      <div class="seg" data-rel><button data-v="suf" class="on">檢驗充分性 X ⊆ Y</button><button data-v="nec">檢驗必要性 Y ⊆ X</button></div>
+      <label style="font-size:.85rem"><input type="checkbox" data-lines> 顯示覆蓋度示意線（圖 3-4）</label>
+    </div>
+    <div class="wgrid">
+      <div>
+        <div class="table-wrap" style="margin-top:0;max-height:420px;overflow-y:auto">
+          <table class="tbl center calc-tbl">
+            <thead><tr><th>#</th><th>X</th><th>Y</th><th>min</th><th></th></tr></thead>
+            <tbody data-body></tbody>
+          </table>
+        </div>
+        <button class="btn ghost" type="button" data-add>＋ 新增案例</button>
+      </div>
+      <svg class="plot" data-plot></svg>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="k">充分性一致性 Σmin/ΣX</div><div class="v" data-s1>—</div></div>
+      <div class="stat"><div class="k">充分性覆蓋度 Σmin/ΣY</div><div class="v" data-s2>—</div></div>
+      <div class="stat"><div class="k">必要性一致性 Σmin/ΣY</div><div class="v" data-s3>—</div></div>
+      <div class="stat"><div class="k">必要性覆蓋度 Σmin/ΣX</div><div class="v" data-s4>—</div></div>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s7">7. 分隔覆蓋度：原始、唯一與解的覆蓋度 <span class="en">· Partitioning coverage</span></h2>
+
+<p>當有不只一條路徑對結果充分（等效性）時，各路徑的覆蓋度直接告訴我們它們的<strong>相對</strong>經驗重要性。更進一步，可以仿照多元迴歸「分割解釋變異」的做法，把覆蓋度切成：</p>
+<ul>
+  <li><strong>原始覆蓋度（raw coverage）</strong>：某條路徑單獨計算的覆蓋度（含與其他路徑重疊的部分）。</li>
+  <li><strong>唯一覆蓋度（unique coverage）</strong>：<em>只有</em>這條路徑解釋、其他路徑都沒解釋到的部分。</li>
+  <li><strong>解的覆蓋度（solution coverage）</strong>：所有路徑以邏輯「或」聯集後的覆蓋度（原書稱為「總覆蓋度」或「雙路徑模型的覆蓋度」）。</li>
+</ul>
+<p class="note-s">前提：已經證明每條路徑都是結果的一致子集合。</p>
+
+<h3>清晰集的直覺：Y = A·B + C·D</h3>
+<p>研究者找到兩條路徑：A·B 覆蓋結果的 25%，C·D 覆蓋 30%。但兩者聯集只覆蓋 <strong>35%</strong>，遠小於 25% + 30% = 55%。為什麼？因為兩條路<strong>部分重疊</strong>：有些案例四個條件全有（A·B·C·D），分別計算原始覆蓋度時被算了兩次。用減法就能拆開：</p>
+<ul>
+  <li>A·B 的唯一覆蓋度 = 0.35 − 0.30（C·D 的覆蓋度）= <strong>0.05</strong></li>
+  <li>C·D 的唯一覆蓋度 = 0.35 − 0.25（A·B 的覆蓋度）= <strong>0.10</strong></li>
+  <li>重疊（A·B·C·D）= 0.35 − 0.05 − 0.10 = <strong>0.20</strong></li>
+</ul>
+
+<div class="formula">
+  <span class="flabel">唯一覆蓋度（以兩條路徑為例）</span>
+  Unique(P<sub>1</sub>) = Coverage(P<sub>1</sub> + P<sub>2</sub>) − Coverage(P<sub>2</sub>)
+</div>
+<p>多條路徑時，一般化為：<strong>解的覆蓋度 − 拿掉這條路徑後其餘路徑聯集的覆蓋度</strong>。這和迴歸裡「把 X<sub>1</sub> 從完整模型拿掉，看 R² 減少多少」是同樣的邏輯。不過目的不同：迴歸在處理<em>相關的自變數</em>；集合分析裡條件本來就不是彼此孤立的，要分隔是因為<strong>有些案例同時符合好幾條路徑</strong>。</p>
+
+<h3>模糊集的實例：避免貧窮（表 3-5、3-6）</h3>
+<p>資料來自美國全國青年縱貫調查（NLSY，即《鐘形曲線》資料），樣本為白人男性。結果是「不貧窮」（~P），三個條件是：高測驗分數（T）、高收入父母（I）、受大學教育（C）（校準方式見第 11 章）。fsQCA 得到兩條避免貧窮的路徑：<strong>T·I</strong> 與 <strong>C</strong>。</p>
+<p>模糊集中，聯集（邏輯或）的隸屬度取兩條路徑中的<strong>較大值</strong>：max(T·I, C)，然後用同樣的覆蓋度公式計算。</p>
+
+<div class="table-wrap">
+  <table class="tbl center">
+    <thead><tr><th>路徑</th><th>一致部分總和 Σmin</th><th>結果總和 ΣY</th><th>覆蓋度</th></tr></thead>
+    <tbody>
+      <tr><td>T·I</td><td>307.387</td><td>1385.25</td><td>0.2219</td></tr>
+      <tr><td>C</td><td>548.559</td><td>1385.25</td><td>0.3960</td></tr>
+      <tr><td>T·I + C</td><td>609.709<sup>*</sup></td><td>1385.25</td><td>0.4387</td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="note-s">資料來源：原書表 3-5。<sup>*</sup>核算註：609.709 / 1385.25 = 0.4401，與表中的 0.4387 不符；0.4387 × 1385.25 ≈ 607.71。原書後續所有計算都使用 0.4387，故推測分子應為 607.709，屬誤植。本頁沿用 0.4387。</p>
+
+<div class="table-wrap">
+  <table class="tbl center">
+    <thead><tr><th></th><th>解的覆蓋度</th><th>拿掉該路徑後</th><th>唯一覆蓋度</th></tr></thead>
+    <tbody>
+      <tr><td>T·I</td><td>0.4387</td><td>0.3960（只剩 C）</td><td class="hi">0.0427</td></tr>
+      <tr><td>C</td><td>0.4387</td><td>0.2219（只剩 T·I）</td><td class="hi">0.2168</td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="note-s">資料來源：原書表 3-6。重疊部分 = 0.4387 − (0.0427 + 0.2168) = 0.1792。</p>
+
+<p>解讀：雙路徑模型的覆蓋度（0.4387）只比最好的單一路徑 C（0.3960）高一點。T·I 的覆蓋度幾乎整個落在 C 的範圍裡——也就是說，高分又有高收入父母的人，大多也上了大學（T·I 大部分其實是 T·I·C）。雙路徑模型的覆蓋，大部分是兩條路的重疊。</p>
+
+<div class="widget" id="w-part">
+  <div class="widget-head"><span class="wtag">互動</span> 分隔覆蓋度：兩條路徑的原始／唯一／解的覆蓋度</div>
+  <div class="widget-body">
+    <p style="margin-top:0">調整三塊區域各占結果的比例（%），看原始覆蓋度與唯一覆蓋度如何由它們組成。</p>
+    <div class="controls">
+      <div class="seg" data-pre>
+        <button data-v="5,20,10" class="on">原書清晰集例 A·B + C·D</button>
+        <button data-v="4.27,17.92,21.68">原書模糊集例 T·I + C</button>
+        <button data-v="15,0,25">完全不重疊</button>
+        <button data-v="0,25,10">路徑 1 被巢套</button>
+      </div>
+    </div>
+    <div class="wgrid">
+      <div>
+        <div class="slider-row"><span class="sl-label" style="width:auto;color:var(--accent)">只有路徑 1</span><input type="range" min="0" max="60" step="0.01" data-u1><output data-u1o></output></div>
+        <div class="slider-row"><span class="sl-label" style="width:auto;color:var(--rose)">兩條都符合</span><input type="range" min="0" max="60" step="0.01" data-ov><output data-ovo></output></div>
+        <div class="slider-row"><span class="sl-label" style="width:auto;color:var(--gold)">只有路徑 2</span><input type="range" min="0" max="60" step="0.01" data-u2><output data-u2o></output></div>
+        <div class="bar" data-bar><span class="u1"></span><span class="ov"></span><span class="u2"></span></div>
+        <div class="bar-legend"><span><i style="background:var(--accent)"></i>路徑 1 唯一</span><span><i style="background:var(--rose)"></i>重疊</span><span><i style="background:var(--gold)"></i>路徑 2 唯一</span><span><i style="background:var(--bg-soft);border:1px solid var(--border)"></i>未被解釋</span></div>
+      </div>
+      <figure class="diagram" style="margin:0">
+        <svg viewBox="0 0 300 230" data-svg style="max-width:320px" aria-label="分隔覆蓋度維恩圖"></svg>
+      </figure>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl center">
+        <thead><tr><th></th><th>原始覆蓋度</th><th>唯一覆蓋度</th></tr></thead>
+        <tbody>
+          <tr><td data-n1>路徑 1</td><td data-r1></td><td data-q1></td></tr>
+          <tr><td data-n2>路徑 2</td><td data-r2></td><td data-q2></td></tr>
+          <tr><td><strong>解的覆蓋度</strong></td><td colspan="2" data-sol></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<div class="callout tip">
+  <div class="ct">📌 為什麼一定要報告原始與唯一覆蓋度？</div>
+  <p>在有很多充分組合的分析裡，往往只有<strong>少數幾條</strong>路徑有可觀的覆蓋度。知道所有通往結果的組合固然有用，但評估它們的<strong>相對經驗分量</strong>同樣重要——原始覆蓋度與唯一覆蓋度正好提供這種評估。這兩個數字也會出現在 fsQCA 與 R 的每一份解的報表中。</p>
+</div>
+
+<h3>展望</h3>
+<p>一致性與覆蓋度在後續章節用途很廣。例如第 7 章的「模糊集真值表」演算法，就是用一致性把模糊集資料整理成「清晰」的真值表。</p>
+
+<!-- ================================================= -->
+<h2 id="s8">8. 實作：在 fsQCA 與 R 計算一致性與覆蓋度 <span class="en">· Practical appendix</span></h2>
+
+<p>原書本章沒有獨立的操作附錄，以下是補充的實作說明：如何用軟體算出本章的各項指標，並做必要條件分析。</p>
+
+<div class="sw-tabs">
+  <div class="seg">
+    <button data-tab="fs" class="on">fsQCA 軟體</button>
+    <button data-tab="r">R（QCA 套件）</button>
+  </div>
+  <div class="sw-pane on" data-pane="fs">
+    <div class="steps">
+      <div class="step"><div><h4>準備資料</h4><p>每一欄是一個已校準的集合（0–1），每一列是一個案例。第一列為變數名稱（不可有空格或標點）。可以從 CSV 匯入。</p></div></div>
+      <div class="step"><div><h4>先畫 XY 圖</h4><p><span class="menu-path">Graphs → XY Plot</span>（各版本選單位置略有不同）：X 軸放條件、Y 軸放結果。圖上會同時顯示一致性與覆蓋度，請先看點的分布是三角形（充分）還是倒三角形（必要）。</p></div></div>
+      <div class="step"><div><h4>必要條件分析</h4><p><span class="menu-path">Analyze → Necessary Conditions</span>：選擇結果，逐一加入條件（可加 ~ 取否定）。報表給出 Consistency（= Σmin/ΣY）與 Coverage（= Σmin/ΣX）。一般以一致性 ≥ 0.9 作為必要條件的門檻，再看覆蓋度判斷是否微不足道。</p></div></div>
+      <div class="step"><div><h4>組合變數的一致性</h4><p>想檢查某個條件組合，可用 <span class="menu-path">Variables → Compute</span> 以 <code class="inline">fuzzyand(T, I)</code>、<code class="inline">fuzzyor(…)</code>、<code class="inline">fuzzynot(…)</code> 建立新變數，再放進 XY 圖或必要條件分析。</p></div></div>
+      <div class="step"><div><h4>讀解的報表</h4><p>執行 <span class="menu-path">Analyze → Truth Table Algorithm</span> 並最小化之後，每一條路徑都會列出 <strong>raw coverage</strong>、<strong>unique coverage</strong> 與 <strong>consistency</strong>，最後是 <strong>solution coverage</strong> 與 <strong>solution consistency</strong>。記得先看 consistency 再看 coverage。</p></div></div>
+    </div>
+  </div>
+  <div class="sw-pane" data-pane="r">
+    <p>R 的 <code class="inline">QCA</code> 套件（Duşa）中，<code class="inline">pof()</code> 計算一致性（inclS / inclN）與覆蓋度（covS / covN），<code class="inline">superSubset()</code> 搜尋必要條件，<code class="inline">XYplot()</code> 畫 XY 圖。</p>
+<pre class="code"><span class="c-fn">library</span>(QCA)
+
+<span class="c-com"># 原書表 3-1：強勢左派 (LEFT) 與高福利國家 (WELF)</span>
+d31 <span class="c-kw">&lt;-</span> <span class="c-fn">data.frame</span>(
+  LEFT = <span class="c-fn">c</span>(<span class="c-num">.7</span>,<span class="c-num">.1</span>,<span class="c-num">.1</span>,<span class="c-num">.3</span>,<span class="c-num">.9</span>,<span class="c-num">.7</span>,<span class="c-num">.3</span>,<span class="c-num">.3</span>,<span class="c-num">.3</span>,<span class="c-num">.1</span>,<span class="c-num">0</span>,<span class="c-num">.9</span>),
+  WELF = <span class="c-fn">c</span>(<span class="c-num">.9</span>,<span class="c-num">.9</span>,<span class="c-num">.1</span>,<span class="c-num">.3</span>,<span class="c-num">.9</span>,<span class="c-num">.7</span>,<span class="c-num">.9</span>,<span class="c-num">.7</span>,<span class="c-num">.7</span>,<span class="c-num">.1</span>,<span class="c-num">0</span>,<span class="c-num">1</span>)
+)
+
+<span class="c-com"># 充分性：inclS = Σmin/ΣX = 1.000；covS = Σmin/ΣY ≈ 0.653</span>
+<span class="c-fn">pof</span>(<span class="c-str">"LEFT"</span>, outcome = <span class="c-str">"WELF"</span>, data = d31, relation = <span class="c-str">"sufficiency"</span>)
+
+<span class="c-com"># 必要性：inclN = Σmin/ΣY ≈ 0.653（不夠一致，不必再看 covN）</span>
+<span class="c-fn">pof</span>(<span class="c-str">"LEFT"</span>, outcome = <span class="c-str">"WELF"</span>, data = d31, relation = <span class="c-str">"necessity"</span>)
+
+<span class="c-com"># 手算對照</span>
+<span class="c-fn">with</span>(d31, <span class="c-fn">sum</span>(<span class="c-fn">pmin</span>(LEFT, WELF)) / <span class="c-fn">sum</span>(LEFT))   <span class="c-com"># 1.000</span>
+
+<span class="c-com"># 把案例 1 改成 1.0：一致性降為 0.98</span>
+d31$LEFT[<span class="c-num">1</span>] <span class="c-kw">&lt;-</span> <span class="c-num">1</span>
+<span class="c-fn">pof</span>(<span class="c-str">"LEFT"</span>, outcome = <span class="c-str">"WELF"</span>, data = d31, relation = <span class="c-str">"sufficiency"</span>)
+
+<span class="c-com"># XY 圖（充分性：點應在對角線上方）</span>
+<span class="c-fn">XYplot</span>(<span class="c-str">"LEFT"</span>, <span class="c-str">"WELF"</span>, data = d31, relation = <span class="c-str">"sufficiency"</span>)</pre>
+
+    <p>分隔覆蓋度：建一份符合「A·B 覆蓋 25%、C·D 覆蓋 30%、聯集 35%」的清晰集資料（20 個結果案例 + 10 個非結果案例），用 <code class="inline">pof()</code> 一次取得原始（covS）與唯一（covU）覆蓋度：</p>
+<pre class="code">rows <span class="c-kw">&lt;-</span> <span class="c-fn">rbind</span>(
+  <span class="c-fn">matrix</span>(<span class="c-fn">c</span>(<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">1</span>), <span class="c-num">1</span>,  <span class="c-num">5</span>, byrow = <span class="c-kw">TRUE</span>),  <span class="c-com"># 只有 A·B</span>
+  <span class="c-fn">matrix</span>(<span class="c-fn">c</span>(<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>), <span class="c-num">4</span>,  <span class="c-num">5</span>, byrow = <span class="c-kw">TRUE</span>),  <span class="c-com"># A·B·C·D（重疊）</span>
+  <span class="c-fn">matrix</span>(<span class="c-fn">c</span>(<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>), <span class="c-num">2</span>,  <span class="c-num">5</span>, byrow = <span class="c-kw">TRUE</span>),  <span class="c-com"># 只有 C·D</span>
+  <span class="c-fn">matrix</span>(<span class="c-fn">c</span>(<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">1</span>), <span class="c-num">13</span>, <span class="c-num">5</span>, byrow = <span class="c-kw">TRUE</span>),  <span class="c-com"># 經由其他路徑</span>
+  <span class="c-fn">matrix</span>(<span class="c-fn">c</span>(<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">0</span>), <span class="c-num">10</span>, <span class="c-num">5</span>, byrow = <span class="c-kw">TRUE</span>))  <span class="c-com"># 沒有結果</span>
+dd <span class="c-kw">&lt;-</span> <span class="c-fn">setNames</span>(<span class="c-fn">as.data.frame</span>(rows), <span class="c-fn">c</span>(<span class="c-str">"A"</span>,<span class="c-str">"B"</span>,<span class="c-str">"C"</span>,<span class="c-str">"D"</span>,<span class="c-str">"Y"</span>))
+
+<span class="c-fn">pof</span>(<span class="c-str">"A*B + C*D"</span>, outcome = <span class="c-str">"Y"</span>, data = dd, relation = <span class="c-str">"sufficiency"</span>)
+<span class="c-com"># A*B：covS 0.25、covU 0.05；C*D：covS 0.30、covU 0.10；expression：covS 0.35</span>
+
+<span class="c-com"># 必要條件搜尋：一致性 ≥ 0.9 且覆蓋度 ≥ 0.5 的條件（或其聯集）</span>
+<span class="c-fn">superSubset</span>(dd, outcome = <span class="c-str">"Y"</span>, conditions = <span class="c-fn">c</span>(<span class="c-str">"A"</span>,<span class="c-str">"B"</span>,<span class="c-str">"C"</span>,<span class="c-str">"D"</span>),
+            relation = <span class="c-str">"necessity"</span>, incl.cut = <span class="c-num">0.9</span>, cov.cut = <span class="c-num">0.5</span>)</pre>
+    <p>報表欄位對照：<code class="inline">inclS</code> = 充分性一致性、<code class="inline">covS</code> = 原始覆蓋度、<code class="inline">covU</code> = 唯一覆蓋度；必要性則看 <code class="inline">inclN</code>、<code class="inline">covN</code>（套件另提供 <code class="inline">RoN</code>，是另一種判斷必要條件是否微不足道的指標）。報表中的 <code class="inline">PRI</code> 會在後面章節介紹。完整操作見本站主教材〈<a href="../chapters/ch4.html">Ch.4 模糊集 fsQCA</a>〉。</p>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s9">9. 本章重點、名詞與自我測驗 <span class="en">· Review</span></h2>
+
+<ol class="takeaways">
+  <li><strong>一致性</strong>衡量資料離完美子集合關係有多近（類似顯著性）；<strong>覆蓋度</strong>衡量該條件解釋了多少結果實例（類似強度、經驗切題性）。</li>
+  <li>清晰集一致性 = 具有條件的案例中呈現結果的比例；要考慮案例數（3/3 不如 17/20 可信），低於 0.75 就很難主張集合關係。</li>
+  <li>模糊集充分性一致性 = Σmin(X,Y)/ΣX：用隸屬分數加權，<strong>小不一致小扣、大不一致重扣</strong>，比「對角線上方案例比例」合理。</li>
+  <li>必要性一致性 = Σmin(X,Y)/ΣY；必要性覆蓋度（切題性）= Σmin(X,Y)/ΣX，用來分辨重要與<strong>微不足道</strong>的必要條件。</li>
+  <li>充分性覆蓋度 = Σmin(X,Y)/ΣY。同一算式在充分與必要情境意義不同，所以<strong>必須先確認一致性，才計算覆蓋度</strong>（表 3-4）。</li>
+  <li>多條路徑時要分隔覆蓋度：<strong>原始覆蓋度</strong>含重疊；<strong>唯一覆蓋度</strong> = 解的覆蓋度 − 拿掉該路徑後的覆蓋度；兩者之差反映路徑間的重疊。</li>
+</ol>
+
+<h3>名詞對照</h3>
+<div class="table-wrap">
+  <table class="tbl gloss">
+    <thead><tr><th>本教材用語</th><th>簡中譯本</th><th>英文</th><th>白話說明</th></tr></thead>
+    <tbody>
+      <tr><td>一致性</td><td>一致性</td><td>consistency</td><td>資料多接近完美的子集合關係</td></tr>
+      <tr><td>覆蓋度</td><td>覆盖度</td><td>coverage</td><td>條件（組合）解釋了多少結果實例</td></tr>
+      <tr><td>經驗切題性</td><td>实证相关性／切题性</td><td>empirical relevance</td><td>一個集合關係在經驗上有多重要</td></tr>
+      <tr><td>模糊包含</td><td>模糊包含</td><td>fuzzy inclusion</td><td>以 Σmin/ΣX 計算的模糊子集合程度</td></tr>
+      <tr><td>重疊</td><td>重叠</td><td>overlap</td><td>兩模糊集交集的總和 Σmin(X,Y)</td></tr>
+      <tr><td>微不足道的必要條件</td><td>微不足道的必要条件</td><td>trivial necessary condition</td><td>幾乎所有案例都具備、沒有限制作用的必要條件</td></tr>
+      <tr><td>等效性</td><td>等效性</td><td>equifinality</td><td>多條不同路徑通往同一結果</td></tr>
+      <tr><td>分隔覆蓋度</td><td>分隔／分割覆盖度</td><td>partitioning coverage</td><td>把總覆蓋度拆成各路徑唯一部分與重疊部分</td></tr>
+      <tr><td>原始覆蓋度</td><td>原始覆盖度</td><td>raw coverage</td><td>單一路徑的覆蓋度，含與其他路徑重疊處</td></tr>
+      <tr><td>唯一覆蓋度</td><td>唯一覆盖度</td><td>unique coverage</td><td>只有這條路徑解釋到的部分</td></tr>
+      <tr><td>解的覆蓋度</td><td>总覆盖度</td><td>solution coverage</td><td>所有路徑聯集（取 max）的覆蓋度</td></tr>
+      <tr><td>集合重合</td><td>集合重合</td><td>set coincidence</td><td>兩集合幾乎相同；Σmin/Σmax</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>自我測驗</h3>
+<p class="quiz-score" data-quiz-score></p>
+
+<div class="quiz" data-answer="2">
+  <p class="q">在 Ragin 的類比中，一致性與覆蓋度分別對應相關分析的什麼？</p>
+  <div class="opts">
+    <button class="opt">一致性對應強度，覆蓋度對應顯著性</button>
+    <button class="opt">兩者都對應相關係數</button>
+    <button class="opt">一致性對應顯著性，覆蓋度對應強度</button>
+    <button class="opt">一致性對應樣本數，覆蓋度對應效果量</button>
+  </div>
+  <div class="explain">一致性問「這個關係值不值得認真看待」（類似顯著性）；覆蓋度問「它在經驗上有多重要」（類似強度）。所以也會有「一致性高、覆蓋度低」的情況。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">表 3-1 中，若案例 1 改為 X = 1.0、Y = 0.9，用 Σmin(X,Y)/ΣX 計算的一致性是多少？</p>
+  <div class="opts">
+    <button class="opt">0.98（4.9 / 5.0）</button>
+    <button class="opt">0.80（4.0 / 5.0）</button>
+    <button class="opt">0.917（11 / 12）</button>
+    <button class="opt">0.86（4.3 / 5.0）</button>
+  </div>
+  <div class="explain">ΣX 變成 5.0；不一致案例仍貢獻 min(1.0, 0.9) = 0.9，分子 4.0 + 0.9 = 4.9。0.80 是只算一致案例的舊算法，0.917 是對角線上方案例比例，0.86 是 Y = 0.3 時的結果。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">下列哪一個公式是「必要性一致性」？</p>
+  <div class="opts">
+    <button class="opt">Σmin(X,Y) / ΣX</button>
+    <button class="opt">Σmax(X,Y) / ΣY</button>
+    <button class="opt">Σmin(X,Y) / Σmax(X,Y)</button>
+    <button class="opt">Σmin(X,Y) / ΣY</button>
+  </div>
+  <div class="explain">必要性是 Y ⊆ X，要看 Y 有多少落在 X 裡，所以分母是 ΣY。它和充分性覆蓋度的算式相同，但情境與意義不同。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">表 3-3 中，高教育者的一致性是 0.967，覆蓋度只有 0.0325。最恰當的解讀是？</p>
+  <div class="opts">
+    <button class="opt">高教育不是避免貧窮的充分條件</button>
+    <button class="opt">高教育幾乎總能避免貧窮，但在這組資料裡只是很次要的一條路</button>
+    <button class="opt">一致性太低，應該先提高覆蓋度</button>
+    <button class="opt">兩個數字矛盾，資料一定有錯</button>
+  </div>
+  <div class="explain">一致性高 → 子集合關係成立；覆蓋度低 → 不貧窮的人絕大多數不是經由這條路。兩者並不矛盾，正好說明為什麼兩把尺缺一不可。</div>
+</div>
+
+<div class="quiz" data-answer="2">
+  <p class="q">「幾乎所有海洛因成癮者以前都喝過牛奶」，但喝牛奶不是有意義的必要條件。用本章的指標說，原因是？</p>
+  <div class="opts">
+    <button class="opt">必要性一致性太低</button>
+    <button class="opt">充分性一致性太低</button>
+    <button class="opt">必要性覆蓋度（Σmin/ΣX）極低：X 遠比 Y 大，限制作用可以忽略</button>
+    <button class="opt">唯一覆蓋度為零</button>
+  </div>
+  <div class="explain">一致性其實很高（成癮者幾乎都喝過牛奶），但「喝過牛奶的人」這個集合太大，成癮者只占其中極小部分，所以覆蓋度極低，是微不足道的必要條件。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">兩條路徑的原始覆蓋度分別為 0.25 與 0.30，解的覆蓋度為 0.35。第一條路徑的唯一覆蓋度是？</p>
+  <div class="opts">
+    <button class="opt">0.25</button>
+    <button class="opt">0.05</button>
+    <button class="opt">0.10</button>
+    <button class="opt">0.20</button>
+  </div>
+  <div class="explain">唯一覆蓋度 = 解的覆蓋度 − 拿掉該路徑後的覆蓋度 = 0.35 − 0.30 = 0.05。0.10 是第二條路徑的唯一覆蓋度，0.20 是重疊部分。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">在模糊集中，計算兩條路徑 T·I 與 C「聯集」的隸屬度時，每個案例取什麼值？</p>
+  <div class="opts">
+    <button class="opt">兩者相加</button>
+    <button class="opt">兩者的最小值</button>
+    <button class="opt">兩者的平均</button>
+    <button class="opt">兩者的最大值</button>
+  </div>
+  <div class="explain">邏輯「或」（+）在模糊集中取最大值：max(T·I, C)。接著用同樣的 Σmin(X,Y)/ΣY 計算解的覆蓋度。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">某研究者對一個充分性一致性只有 0.55 的條件，報告它的覆蓋度高達 0.80，並宣稱它是重要路徑。問題在哪？</p>
+  <div class="opts">
+    <button class="opt">一致性不足時，覆蓋度沒有意義；應先確認子集合關係成立</button>
+    <button class="opt">覆蓋度 0.80 太高，一定是算錯</button>
+    <button class="opt">應該改報告唯一覆蓋度</button>
+    <button class="opt">沒有問題，覆蓋度高就代表重要</button>
+  </div>
+  <div class="explain">本章的鐵律：先一致性，後覆蓋度。X 不是 Y 的一致子集合時，「X 蓋住 Y 多少」這個問題根本不成立。</div>
+</div>
+
+<p><button class="btn ghost" data-quiz-reset type="button">重新作答</button></p>
+
+<div class="done-box" data-ch="3">
+  <span class="msg"></span>
+  <button class="btn" type="button">標記本章為已讀</button>
+</div>
+
+<nav class="chap-nav">
+  <a class="prev" href="ch2.html"><div class="dir">← 上一章</div><div class="ttl">第 2 章 模糊集與模糊集合關係</div></a>
+  <a class="next" href="ch4.html"><div class="dir">下一章 →</div><div class="ttl">第 4 章 為什麼要校準</div></a>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Charles C. Ragin, <em>Redesigning Social Inquiry: Fuzzy Sets and Beyond</em> (University of Chicago Press, 2008)<br>
+  以學習為目的之概念整理與重新詮釋，非原書譯文 · <a href="index.html">回本書首頁</a></p>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="js/ragin.js"></script>
+<script>
+/* ---------- 共用：一致性／覆蓋度 ---------- */
+const CH3 = (function () {
+  const sumMin = (X, Y) => X.reduce((s, x, i) => s + Math.min(x, Y[i]), 0);
+  const sum = (a) => a.reduce((s, v) => s + v, 0);
+  function measures(X, Y) {
+    const m = sumMin(X, Y), sx = sum(X), sy = sum(Y);
+    return { m, sx, sy, consSuf: sx ? m / sx : NaN, covSuf: sy ? m / sy : NaN, consNec: sy ? m / sy : NaN, covNec: sx ? m / sx : NaN };
+  }
+  // 舊法：對角線上或上方案例比例
+  const oldProp = (X, Y) => X.filter((x, i) => x <= Y[i] + 1e-9).length / X.length;
+  // 中間法：只加一致案例的 X
+  const consOnly = (X, Y) => { const sx = sum(X); return sx ? X.reduce((s, x, i) => s + (x <= Y[i] + 1e-9 ? x : 0), 0) / sx : NaN; };
+  // 二項檢定 P(K >= k | n, p)
+  function binomUpper(n, k, p) {
+    let s = 0;
+    for (let j = k; j <= n; j++) {
+      let lc = 0; for (let t = 1; t <= j; t++) lc += Math.log(n - j + t) - Math.log(t);
+      s += Math.exp(lc + j * Math.log(p) + (n - j) * Math.log(1 - p));
+    }
+    return Math.min(1, s);
+  }
+  // 兩圓交集面積
+  function lens(r1, r2, d) {
+    if (d >= r1 + r2) return 0;
+    if (d <= Math.abs(r1 - r2)) return Math.PI * Math.min(r1, r2) ** 2;
+    const a = r1 * r1 * Math.acos((d * d + r1 * r1 - r2 * r2) / (2 * d * r1));
+    const b = r2 * r2 * Math.acos((d * d + r2 * r2 - r1 * r1) / (2 * d * r2));
+    const c = 0.5 * Math.sqrt((-d + r1 + r2) * (d + r1 - r2) * (d - r1 + r2) * (d + r1 + r2));
+    return a + b - c;
+  }
+  function distFor(r1, r2, target) {
+    let lo = Math.abs(r1 - r2), hi = r1 + r2;
+    if (target >= Math.PI * Math.min(r1, r2) ** 2 - 1e-9) return lo;
+    if (target <= 0) return hi;
+    for (let i = 0; i < 60; i++) { const mid = (lo + hi) / 2; if (lens(r1, r2, mid) > target) lo = mid; else hi = mid; }
+    return (lo + hi) / 2;
+  }
+  // 固定亂數，畫示意圖用
+  function rng(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
+  return { sumMin, sum, measures, oldProp, consOnly, binomUpper, lens, distFor, rng };
+})();
+const T31 = { X: [.7, .1, .1, .3, .9, .7, .3, .3, .3, .1, 0, .9], Y: [.9, .9, .1, .3, .9, .7, .9, .7, .7, .1, 0, 1.0] };
+const f3 = (v) => RG.fz.fmt(v, 3);
+
+/* ---------- 示意圖：圖 3-1、3-2、3-4 ---------- */
+(function () {
+  const r = CH3.rng(20080);
+  const pts31 = [], pts32 = [];
+  for (let i = 0; i < 80; i++) {
+    const x = 0.04 + r() * 0.84; const y = Math.min(1, x + r() * (1 - x)); pts31.push({ x, y, r: 3.5 });
+    const x2 = 0.15 + r() * 0.83; const y2 = r() * x2 * 0.95; pts32.push({ x: x2, y: y2, r: 3.5 });
+  }
+  RG.xy(document.querySelector('[data-fig="31"]'), pts31, { xlab: '條件中的隸屬度（X）', ylab: '結果中的隸屬度（Y）', shade: 'suf' });
+  RG.xy(document.querySelector('[data-fig="32"]'), pts32, { xlab: '條件中的隸屬度（X）', ylab: '結果中的隸屬度（Y）', shade: 'nec' });
+  // 圖 3-4：多數點在對角線上方，兩點在下方
+  const p34 = [[0, 0], [.08, .1], [.05, .2], [.12, .27], [.2, .32], [.3, .35], [.25, .42], [.32, .48], [.08, .52], [.18, .55],
+    [.45, .6], [.28, .63], [.07, .7], [.4, .75], [.5, .8], [.15, .87], [.8, .9], [.55, .95], [.95, 1], [.85, .42], [.75, .3]];
+  const svg = document.querySelector('[data-fig="34"]');
+  const g = RG.xy(svg, [], { xlab: '條件（X）', ylab: '結果（Y）' });
+  p34.forEach(([x, y]) => {
+    if (x <= y) {
+      g.el('line', { class: 'cov-line', x1: g.sx(0), y1: g.sy(y), x2: g.sx(x), y2: g.sy(y) });
+      if (y - x > .01) g.el('line', { class: 'gap-line', x1: g.sx(x), y1: g.sy(y), x2: g.sx(y), y2: g.sy(y) });
+    }
+    g.el('circle', { class: 'pt' + (x > y ? ' off' : ''), cx: g.sx(x), cy: g.sy(y), r: 4.5 });
+  });
+})();
+
+/* ---------- 二項檢定 ---------- */
+(function () {
+  const root = document.getElementById('w-binom');
+  const nI = root.querySelector('[data-n]'), kI = root.querySelector('[data-k]'), pI = root.querySelector('[data-p0]');
+  const btns = root.querySelectorAll('[data-pre] button');
+  function run() {
+    const n = Math.max(1, Math.min(200, Math.round(+nI.value || 1)));
+    const k = Math.max(0, Math.min(n, Math.round(+kI.value || 0)));
+    const p0 = +pI.value, c = k / n, p = CH3.binomUpper(n, k, p0);
+    root.querySelector('[data-c]').textContent = f3(c);
+    root.querySelector('[data-p]').textContent = p < .001 ? '< 0.001' : f3(p);
+    let msg = `${n} 個具有條件的案例中，${k} 個呈現結果 → 一致性 = ${k}/${n} = ${f3(c)}\n`;
+    msg += p < .05 ? `<span class="hl">p = ${f3(p)} < 0.05：顯著高於基準 ${p0}。</span>可以比較放心地說「幾乎總是」充分。`
+      : `p = ${f3(p)} ≥ 0.05：<span class="hl">無法</span>說它顯著高於基準 ${p0}。`;
+    if (c === 1 && p >= .05) msg += '\n即使 100% 一致，案例太少時也可能只是巧合——這就是 3/3 的問題。';
+    if (c < .75) msg += '\n一致性低於 0.75，要主張集合關係存在相當困難。';
+    root.querySelector('[data-out]').innerHTML = msg;
+  }
+  btns.forEach((b) => b.addEventListener('click', () => {
+    btns.forEach((x) => x.classList.toggle('on', x === b));
+    const [n, k] = b.dataset.v.split(','); nI.value = n; kI.value = k; run();
+  }));
+  [nI, kI, pI].forEach((el) => el.addEventListener('input', () => { btns.forEach((x) => x.classList.remove('on')); run(); }));
+  run();
+})();
+
+/* ---------- 拖曳一個案例 ---------- */
+(function () {
+  const root = document.getElementById('w-drag');
+  const svg = root.querySelector('[data-plot]');
+  const xs = root.querySelector('[data-x]'), ys = root.querySelector('[data-y]');
+  const btns = root.querySelectorAll('[data-pre] button');
+  const baseX = T31.X.slice(1), baseY = T31.Y.slice(1);
+  let cx = .7, cy = .9, g = null;
+  function draw() {
+    const X = [cx, ...baseX], Y = [cy, ...baseY];
+    const pts = baseX.map((x, i) => ({ x, y: baseY[i], label: `案例 ${i + 2}` }));
+    pts.push({ x: cx, y: cy, cls: 'sel', r: 7, tag: '案例 1', label: '案例 1' });
+    g = RG.xy(svg, pts, { xlab: '強勢左派（X）', ylab: '高福利國家（Y）', shade: 'suf' });
+    if (cx > cy) g.el('line', { class: 'viol', x1: g.sx(cx), y1: g.sy(cy), x2: g.sx(cx), y2: g.sy(cx) });
+    const m1 = CH3.oldProp(X, Y), m2 = CH3.consOnly(X, Y), M = CH3.measures(X, Y);
+    root.querySelector('[data-m1]').textContent = f3(m1);
+    root.querySelector('[data-m2]').textContent = f3(m2);
+    root.querySelector('[data-m3]').textContent = f3(M.consSuf);
+    xs.value = cx; ys.value = cy;
+    root.querySelector('[data-xo]').textContent = cx.toFixed(2);
+    root.querySelector('[data-yo]').textContent = cy.toFixed(2);
+    let msg = `案例 1：X = ${cx.toFixed(2)}，Y = ${cy.toFixed(2)}　→　ΣX = ${M.sx.toFixed(2)}，Σmin = ${M.m.toFixed(2)}\n`;
+    if (cx <= cy + 1e-9) {
+      msg += '案例 1 在對角線上或上方（一致），三種算法都給 1.000。';
+    } else {
+      const gap = cx - cy;
+      msg += `案例 1 落在對角線下方，超出 ${gap.toFixed(2)} 個模糊單位。\n`;
+      msg += `① 舊法只數「幾個案例不一致」：不論超出多少，永遠是 11/12 = 0.917。\n`;
+      msg += `② 整個 X = ${cx.toFixed(2)} 都被丟掉，即使只差一點點也重罰。\n`;
+      msg += `<span class="hl">③ 只扣掉超出的 ${gap.toFixed(2)}，保留一致的 ${cy.toFixed(2)}：${M.m.toFixed(2)} / ${M.sx.toFixed(2)} = ${f3(M.consSuf)}</span>\n`;
+      msg += gap <= .15 ? '→ 小不一致，小扣分：一致性仍接近 1。' : gap >= .5 ? '→ 大不一致，重罰！這種案例會嚴重動搖充分性主張。' : '→ 中度不一致：扣分與超出的量成正比。';
+    }
+    root.querySelector('[data-out]').innerHTML = msg;
+  }
+  const snap = (v) => Math.max(0, Math.min(1, Math.round(v * 20) / 20));
+  function fromEvent(e) {
+    const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    const ctm = svg.getScreenCTM(); if (!ctm || !g) return;
+    const p = pt.matrixTransform(ctm.inverse());
+    const pw = 400 - 48 - 16, ph = 400 - 16 - 44;
+    cx = snap((p.x - 48) / pw); cy = snap(1 - (p.y - 16) / ph);
+    btns.forEach((x) => x.classList.remove('on')); draw();
+  }
+  let dragging = false;
+  svg.addEventListener('pointerdown', (e) => { dragging = true; try { svg.setPointerCapture(e.pointerId); } catch (err) {} fromEvent(e); });
+  svg.addEventListener('pointermove', (e) => { if (dragging) fromEvent(e); });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach((t) => svg.addEventListener(t, () => { dragging = false; }));
+  xs.addEventListener('input', () => { cx = +xs.value; btns.forEach((x) => x.classList.remove('on')); draw(); });
+  ys.addEventListener('input', () => { cy = +ys.value; btns.forEach((x) => x.classList.remove('on')); draw(); });
+  btns.forEach((b) => b.addEventListener('click', () => {
+    btns.forEach((x) => x.classList.toggle('on', x === b));
+    [cx, cy] = b.dataset.v.split(',').map(Number); draw();
+  }));
+  draw();
+})();
+
+/* ---------- 清晰集 2x2 覆蓋度 ---------- */
+(function () {
+  const root = document.getElementById('w-cross');
+  const presets = { t32: { a: 3046, b: 1474, c: 625, d: 55 }, t33: { a: 4373, b: 147, c: 675, d: 5 } };
+  const ins = {}; root.querySelectorAll('input[data-c]').forEach((el) => { ins[el.dataset.c] = el; });
+  const btns = root.querySelectorAll('[data-pre] button');
+  const venn = root.querySelector('[data-venn]');
+  function drawVenn(a, b, c, d) {
+    const nY = a + b, nX = b + d, R = 82;
+    const big = Math.max(nY, nX, 1);
+    const rY = R * Math.sqrt(nY / big), rX = Math.max(3, R * Math.sqrt(nX / big));
+    const K = Math.PI * R * R / big;   // 每一個案例對應的面積
+    const dist = nX && nY ? CH3.distFor(rY, rX, b * K) : rY + rX;
+    const cyY = 125, cxY = 185, cxX = cxY - dist;
+    venn.innerHTML =
+      `<rect x="4" y="4" width="312" height="222" rx="8" fill="var(--bg-soft)" stroke="var(--border)"/>` +
+      `<text x="14" y="22" font-size="11" fill="var(--ink-faint)">c = ${c.toLocaleString()}（低教育且貧窮）</text>` +
+      (nY ? `<circle cx="${cxY}" cy="${cyY}" r="${rY}" fill="var(--accent)" fill-opacity=".14" stroke="var(--accent)" stroke-width="1.5"/>` : '') +
+      (nX ? `<circle cx="${cxX}" cy="${cyY}" r="${rX}" fill="var(--gold)" fill-opacity=".3" stroke="var(--gold)" stroke-width="1.5"/>` : '') +
+      `<text x="${cxY + rY * 0.45}" y="${cyY - rY * 0.55}" font-size="11" fill="var(--accent)" font-weight="700" text-anchor="middle">a = ${a.toLocaleString()}</text>` +
+      `<text x="${cxX}" y="${cyY + 4}" font-size="11" fill="var(--ink)" font-weight="700" text-anchor="middle">b = ${b.toLocaleString()}</text>` +
+      `<text x="${Math.max(30, cxX - rX - 4)}" y="${cyY + rX + 14}" font-size="11" fill="var(--gold)" font-weight="700" text-anchor="middle">d = ${d.toLocaleString()}</text>`;
+  }
+  function calc() {
+    const v = {}; ['a', 'b', 'c', 'd'].forEach((k) => { v[k] = Math.max(0, Math.round(+ins[k].value || 0)); });
+    const cons = (v.b + v.d) ? v.b / (v.b + v.d) : NaN, cov = (v.a + v.b) ? v.b / (v.a + v.b) : NaN;
+    root.querySelector('[data-cons]').textContent = f3(cons);
+    root.querySelector('[data-cov]').textContent = cov < .1 ? RG.fz.fmt(cov, 4) : f3(cov);
+    drawVenn(v.a, v.b, v.c, v.d);
+    let msg = `一致性：高教育者 ${v.b + v.d} 人中，${v.b} 人不貧窮 → ${f3(cons)}\n`;
+    msg += `覆蓋度：不貧窮者 ${v.a + v.b} 人中，${v.b} 人來自高教育這條路 → ${RG.fz.fmt(cov, 4)}\n`;
+    if (!(cons >= .75)) msg += '<span class="hl">一致性不足：「高教育 ⊆ 不貧窮」不成立，此時覆蓋度沒有意義。</span>';
+    else if (cov < .1) msg += '<span class="hl">一致性高、覆蓋度極低：</span>這條路幾乎保證避免貧窮，但只有極少數不貧窮者是走這條路的——經驗上不重要。';
+    else if (cov < .5) msg += '<span class="hl">一致性高、覆蓋度中等：</span>這是一條實質的路徑，但還有其他路通往不貧窮。';
+    else msg += '<span class="hl">一致性高、覆蓋度高：</span>這條路解釋了大部分的不貧窮者。';
+    root.querySelector('[data-out]').innerHTML = msg;
+  }
+  function set(p) { Object.keys(p).forEach((k) => { ins[k].value = p[k]; }); calc(); }
+  btns.forEach((b) => b.addEventListener('click', () => {
+    btns.forEach((x) => x.classList.toggle('on', x === b));
+    if (presets[b.dataset.v]) set(presets[b.dataset.v]);
+  }));
+  Object.values(ins).forEach((el) => el.addEventListener('input', () => { btns.forEach((x) => x.classList.toggle('on', x.dataset.v === 'custom')); calc(); }));
+  set(presets.t32);
+})();
+
+/* ---------- 必要條件的切題性 ---------- */
+(function () {
+  const root = document.getElementById('w-nec');
+  const s = root.querySelector('[data-s]'), svg = root.querySelector('[data-svg]');
+  const btns = root.querySelectorAll('[data-pre] button');
+  const NY = 50;
+  // 滑桿 0–1000 對應 X 人數 50–5000（對數尺度）
+  const toN = (v) => Math.round(NY * Math.pow(100, v / 1000));
+  const toV = (n) => Math.round(1000 * Math.log(n / NY) / Math.log(100));
+  function run() {
+    const nX = toN(+s.value), cov = NY / nX;
+    root.querySelector('[data-so]').textContent = nX.toLocaleString();
+    root.querySelector('[data-cov]').textContent = f3(cov);
+    const R = 95, rY = Math.max(2.5, R * Math.sqrt(NY / nX));
+    svg.innerHTML =
+      `<circle cx="125" cy="110" r="${R}" fill="var(--accent)" fill-opacity=".12" stroke="var(--accent)" stroke-width="1.8"/>` +
+      `<text x="125" y="${110 - R + 18}" font-size="12" text-anchor="middle" fill="var(--accent)" font-weight="700">必要條件 X（${nX.toLocaleString()} 人）</text>` +
+      `<circle cx="${125 + (R - rY) * 0.35}" cy="${110 + (R - rY) * 0.35}" r="${rY}" fill="var(--gold)" fill-opacity=".45" stroke="var(--gold)" stroke-width="1.5"/>` +
+      `<text x="125" y="${215}" font-size="11" text-anchor="middle" fill="var(--gold)" font-weight="700">結果 Y（${NY} 位成癮者）</text>`;
+    let msg = `Y 完全落在 X 裡（一致性 1.0）。覆蓋度 = ${NY} / ${nX.toLocaleString()} = ${f3(cov)}\n`;
+    msg += cov >= .5 ? '<span class="hl">切題的必要條件：</span>具有 X 的人有相當比例出現結果，X 確實在「篩選」誰會有結果——缺了它，結果就很難出現。'
+      : cov >= .1 ? '<span class="hl">中等切題：</span>X 有一定的限制作用，但多數具有 X 的人並沒有結果。'
+      : '<span class="hl">微不足道的必要條件：</span>X 幾乎人人都有，它從來沒有真正擋下誰——就像「喝過牛奶」之於海洛因成癮。在模糊集 XY 圖上，這類案例會全擠在最右邊。';
+    root.querySelector('[data-out]').innerHTML = msg;
+  }
+  btns.forEach((b) => b.addEventListener('click', () => { btns.forEach((x) => x.classList.toggle('on', x === b)); s.value = toV(+b.dataset.v); run(); }));
+  s.addEventListener('input', () => { btns.forEach((x) => x.classList.remove('on')); run(); });
+  s.value = toV(70); run();
+})();
+
+/* ---------- 計算器 ---------- */
+(function () {
+  const root = document.getElementById('w-calc');
+  const body = root.querySelector('[data-body]'), svg = root.querySelector('[data-plot]');
+  const sel = root.querySelector('[data-preset]'), linesCb = root.querySelector('[data-lines]');
+  const relBtns = root.querySelectorAll('[data-rel] button');
+  const P = {
+    t31: [T31.X, T31.Y],
+    t31a: [[1, ...T31.X.slice(1)], T31.Y],
+    t31b: [[1, ...T31.X.slice(1)], [.3, ...T31.Y.slice(1)]],
+    suf: [[.05, .1, .15, .2, .3, .35, .45, .5, .6, .7, .8, .85], [.7, .2, .9, .55, .95, .45, .8, .65, .75, .95, .9, .95]],
+    nec: [[.2, .3, .35, .45, .5, .6, .65, .75, .8, .9, .95, .95], [.05, .25, .1, .4, .2, .55, .1, .7, .3, .85, .05, .6]],
+    low: [[.1, .1, 0, .2, .1, 0, .3, .1, 0, .2], [.8, .9, .7, .9, .6, .8, .9, .7, .8, .95]],
+  };
+  let rows = [], rel = 'suf';
+  const clamp = (v) => Math.max(0, Math.min(1, isFinite(v) ? v : 0));
+  function build() {
+    body.innerHTML = '';
+    rows.forEach((r, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${i + 1}</td><td><input type="number" min="0" max="1" step="0.05" value="${r[0]}" data-i="${i}" data-k="0"></td>` +
+        `<td><input type="number" min="0" max="1" step="0.05" value="${r[1]}" data-i="${i}" data-k="1"></td><td data-min="${i}"></td>` +
+        `<td><button type="button" class="rm" data-rm="${i}" aria-label="刪除">✕</button></td>`;
+      body.appendChild(tr);
+    });
+    calc();
+  }
+  body.addEventListener('input', (e) => {
+    const el = e.target; if (!el.dataset.k) return;
+    rows[+el.dataset.i][+el.dataset.k] = clamp(parseFloat(el.value)); calc();
+  });
+  body.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-rm]'); if (!b || rows.length <= 2) return;
+    rows.splice(+b.dataset.rm, 1); build();
+  });
+  root.querySelector('[data-add]').addEventListener('click', () => { if (rows.length < 20) { rows.push([0.5, 0.5]); build(); } });
+  function calc() {
+    const X = rows.map((r) => r[0]), Y = rows.map((r) => r[1]);
+    const M = CH3.measures(X, Y);
+    const bad = (x, y) => rel === 'suf' ? x > y + 1e-9 : y > x + 1e-9;
+    rows.forEach((r, i) => {
+      const td = body.querySelector(`[data-min="${i}"]`);
+      td.textContent = Math.min(r[0], r[1]).toFixed(2);
+      td.classList.toggle('bad', bad(r[0], r[1]));
+    });
+    const g = RG.xy(svg, rows.map((r, i) => ({ x: r[0], y: r[1], cls: bad(r[0], r[1]) ? 'off' : '', label: `案例 ${i + 1}` })),
+      { xlab: '條件 X', ylab: '結果 Y', shade: rel });
+    rows.forEach((r) => {
+      // 違反的案例：垂直虛線連到對角線，長度 = 超出的量
+      if (bad(r[0], r[1])) g.el('line', { class: 'viol', x1: g.sx(r[0]), y1: g.sy(r[1]), x2: g.sx(r[0]), y2: g.sy(r[0]) });
+      if (linesCb.checked && rel === 'suf') {
+        const m = Math.min(r[0], r[1]);
+        g.el('line', { class: 'cov-line', x1: g.sx(0), y1: g.sy(r[1]), x2: g.sx(m), y2: g.sy(r[1]) });
+        if (r[1] - m > .01) g.el('line', { class: 'gap-line', x1: g.sx(m), y1: g.sy(r[1]), x2: g.sx(r[1]), y2: g.sy(r[1]) });
+      }
+    });
+    const nBad = rows.filter((r) => bad(r[0], r[1])).length;
+    const cons = rel === 'suf' ? M.consSuf : M.consNec, cov = rel === 'suf' ? M.covSuf : M.covNec;
+    const ok = cons >= .75;
+    const ids = rel === 'suf' ? ['s1', 's2'] : ['s3', 's4'];
+    ['s1', 's2', 's3', 's4'].forEach((k) => {
+      const el = root.querySelector(`[data-${k}]`);
+      const v = { s1: M.consSuf, s2: M.covSuf, s3: M.consNec, s4: M.covNec }[k];
+      el.textContent = f3(v);
+      el.className = 'v' + (k === ids[0] ? (ok ? ' ok' : ' bad') : k === ids[1] ? (ok ? ' gold' : ' dim') : '');
+    });
+    const name = rel === 'suf' ? '充分性（X ⊆ Y）' : '必要性（Y ⊆ X）';
+    let msg = `Σmin(X,Y) = ${M.m.toFixed(2)}　ΣX = ${M.sx.toFixed(2)}　ΣY = ${M.sy.toFixed(2)}\n`;
+    msg += `檢驗${name}：${nBad} 個案例違反（標紅）。\n`;
+    msg += `步驟 1 一致性 = ${M.m.toFixed(2)} / ${(rel === 'suf' ? M.sx : M.sy).toFixed(2)} = ${f3(cons)} → `;
+    if (!ok) msg += `<span class="hl">一致性不足（< 0.75），停在這裡：不計算覆蓋度。</span>`;
+    else {
+      msg += cons >= .9 ? '高度一致。' : '尚可，但需謹慎。';
+      msg += `\n步驟 2 覆蓋度 = ${M.m.toFixed(2)} / ${(rel === 'suf' ? M.sy : M.sx).toFixed(2)} = <span class="hl">${f3(cov)}</span> → `;
+      msg += rel === 'suf'
+        ? (cov < .3 ? '這條路只解釋了結果的一小部分（點多半遠離對角線、靠近 Y 軸）。' : cov < .7 ? '解釋了相當部分的結果，但還有其他路徑。' : '覆蓋了大部分結果，點貼近對角線。')
+        : (cov < .3 ? '微不足道的必要條件：X 普遍存在，幾乎沒有限制作用。' : cov < .7 ? '有一定切題性的必要條件。' : '切題的必要條件：X 與 Y 的實例配對緊密。');
+    }
+    root.querySelector('[data-out]').innerHTML = msg;
+  }
+  function load(k) { rows = P[k][0].map((x, i) => [x, P[k][1][i]]); build(); }
+  sel.addEventListener('input', () => {
+    rel = sel.value === 'nec' ? 'nec' : 'suf';
+    relBtns.forEach((b) => b.classList.toggle('on', b.dataset.v === rel));
+    load(sel.value);
+  });
+  relBtns.forEach((b) => b.addEventListener('click', () => { rel = b.dataset.v; relBtns.forEach((x) => x.classList.toggle('on', x === b)); calc(); }));
+  linesCb.addEventListener('change', calc);
+  load('t31');
+})();
+
+/* ---------- 分隔覆蓋度 ---------- */
+(function () {
+  const root = document.getElementById('w-part');
+  const u1 = root.querySelector('[data-u1]'), ov = root.querySelector('[data-ov]'), u2 = root.querySelector('[data-u2]');
+  const btns = root.querySelectorAll('[data-pre] button'), svg = root.querySelector('[data-svg]');
+  let names = ['A·B', 'C·D'];
+  const pc = (v) => (v / 100).toFixed(4).replace(/0+$/, '').replace(/\.$/, '');
+  function run(changed) {
+    let a = +u1.value, o = +ov.value, b = +u2.value;
+    if (a + o + b > 100) { const ex = a + o + b - 100; if (changed) changed.value = +changed.value - ex; a = +u1.value; o = +ov.value; b = +u2.value; }
+    root.querySelector('[data-u1o]').textContent = a.toFixed(1) + '%';
+    root.querySelector('[data-ovo]').textContent = o.toFixed(1) + '%';
+    root.querySelector('[data-u2o]').textContent = b.toFixed(1) + '%';
+    const r1 = a + o, r2 = o + b, sol = a + o + b;
+    const spans = root.querySelectorAll('[data-bar] span');
+    [a, o, b].forEach((v, i) => { spans[i].style.width = v + '%'; spans[i].textContent = v >= 6 ? v.toFixed(1) + '%' : ''; });
+    root.querySelector('[data-n1]').textContent = '路徑 1：' + names[0];
+    root.querySelector('[data-n2]').textContent = '路徑 2：' + names[1];
+    root.querySelector('[data-r1]').textContent = pc(r1);
+    root.querySelector('[data-r2]').textContent = pc(r2);
+    root.querySelector('[data-q1]').textContent = pc(a);
+    root.querySelector('[data-q2]').textContent = pc(b);
+    root.querySelector('[data-sol]').textContent = pc(sol);
+    svg.innerHTML =
+      `<circle cx="150" cy="115" r="108" fill="var(--bg-soft)" stroke="var(--ink-faint)" stroke-width="1.3"/>` +
+      `<text x="150" y="26" font-size="11" text-anchor="middle" fill="var(--ink-soft)" font-weight="700">結果 Y（未解釋 ${(100 - sol).toFixed(1)}%）</text>` +
+      `<circle cx="118" cy="122" r="58" fill="var(--accent)" fill-opacity=".22" stroke="var(--accent)" stroke-width="1.5"/>` +
+      `<circle cx="182" cy="122" r="58" fill="var(--gold)" fill-opacity=".22" stroke="var(--gold)" stroke-width="1.5"/>` +
+      `<text x="96" y="118" font-size="11" text-anchor="middle" fill="var(--accent)" font-weight="700">${names[0]}</text>` +
+      `<text x="96" y="134" font-size="12" text-anchor="middle" fill="var(--ink)">${a.toFixed(1)}%</text>` +
+      `<text x="150" y="118" font-size="11" text-anchor="middle" fill="var(--rose)" font-weight="700">重疊</text>` +
+      `<text x="150" y="134" font-size="12" text-anchor="middle" fill="var(--ink)">${o.toFixed(1)}%</text>` +
+      `<text x="204" y="118" font-size="11" text-anchor="middle" fill="var(--gold)" font-weight="700">${names[1]}</text>` +
+      `<text x="204" y="134" font-size="12" text-anchor="middle" fill="var(--ink)">${b.toFixed(1)}%</text>`;
+    let msg = `原始覆蓋度：${names[0]} = ${pc(a)} + ${pc(o)} = ${pc(r1)}；${names[1]} = ${pc(o)} + ${pc(b)} = ${pc(r2)}\n`;
+    msg += `解的覆蓋度（聯集）= ${pc(sol)}，比兩個原始覆蓋度相加（${pc(r1 + r2)}）少了 ${pc(o)}——重疊被重複計算了。\n`;
+    msg += `唯一覆蓋度：${names[0]} = ${pc(sol)} − ${pc(r2)} = <span class="hl">${pc(a)}</span>；${names[1]} = ${pc(sol)} − ${pc(r1)} = <span class="hl">${pc(b)}</span>\n`;
+    if (o === 0) msg += '兩條路徑完全不重疊：唯一覆蓋度 = 原始覆蓋度，解的覆蓋度 = 兩者之和。';
+    else if (a === 0 || b === 0) msg += `有一條路徑的唯一覆蓋度為 0：它完全被另一條路徑「包住」，拿掉它，解的覆蓋度不會下降。`;
+    else if (o > a + b) msg += '重疊比兩條路徑的唯一部分加起來還大：很多案例同時符合兩條路——就像原書中 T·I 大多也是 T·I·C。';
+    else msg += '兩條路徑都各自有獨特的貢獻。';
+    root.querySelector('[data-out]').innerHTML = msg;
+  }
+  function set(v) { [u1.value, ov.value, u2.value] = v.split(','); run(); }
+  btns.forEach((b, i) => b.addEventListener('click', () => {
+    btns.forEach((x) => x.classList.toggle('on', x === b));
+    names = i === 1 ? ['T·I', 'C'] : ['A·B', 'C·D'];
+    set(b.dataset.v);
+  }));
+  [u1, ov, u2].forEach((el) => el.addEventListener('input', () => { btns.forEach((x) => x.classList.remove('on')); run(el); }));
+  set('5,20,10');
+})();
+</script>
+</body>
+</html>

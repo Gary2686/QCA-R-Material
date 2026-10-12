@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 11 章 淨效應與組態：實證示範 · 重新設計社會科學研究</title>
+<meta name="description" content="Ragin《重新設計社會科學研究》第 11 章互動教材：以貝爾曲線（NLSY）資料對照邏輯斯迴歸的淨效應分析與 fsQCA 組態分析，含校準、真值表、中間解、核心條件與全書回顧">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="css/ragin.css">
+<style>
+  .cfg th, .cfg td { text-align: center; }
+  .cfg td:first-child, .cfg th:first-child { text-align: left; white-space: nowrap; }
+  .cfg .core { font-size: 1.3em; line-height: 1; }
+  .cfg .peri { font-size: .85em; line-height: 1; }
+  .cfg tr.grp td { background: var(--bg-soft); font-weight: 700; font-size: .82rem; color: var(--ink-soft); }
+  .cfg tr.on td.pcol, .cfg td.pcol.on { background: var(--gold-soft); }
+  .cbar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; background: var(--bg-soft); border: 1px solid var(--border); margin: .2rem 0 .6rem; }
+  .cbar .u { background: var(--gold); }
+  .cbar .s { background: var(--accent); opacity: .45; }
+  .legend { font-size: .82rem; color: var(--ink-faint); display: flex; flex-wrap: wrap; gap: .4rem 1rem; margin: .3rem 0 .6rem; }
+  .legend i { display: inline-block; width: .9rem; height: .7rem; border-radius: 3px; vertical-align: -1px; margin-right: .3rem; }
+  .famgrid { display: grid; grid-template-columns: auto 1fr 1fr; gap: .5rem; align-items: stretch; margin: .6rem 0; }
+  .famgrid .hd { font-size: .8rem; font-weight: 700; color: var(--ink-soft); display: flex; align-items: center; justify-content: center; text-align: center; }
+  .famgrid .cell { border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-card); padding: .6rem .7rem; font-family: var(--mono); font-size: .82rem; cursor: pointer; min-width: 0; word-break: break-word; }
+  .famgrid .cell.on { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-soft); }
+  .famgrid .cell .fam { font-family: var(--sans); font-weight: 700; font-size: .78rem; color: var(--ink-faint); display: block; margin-bottom: .25rem; }
+  .famgrid mark { background: var(--gold-soft); color: var(--gold); font-weight: 700; padding: 0 .15rem; border-radius: 3px; }
+  @media (max-width: 520px) { .famgrid { grid-template-columns: 1fr; } .famgrid .hd { display: none; } }
+  .scroll-y { max-height: 340px; overflow-y: auto; }
+  .tbl tr.dim td { color: var(--ink-faint); }
+  .tbl tr.pos td { background: var(--accent2-soft); }
+  .tbl tr.me td { outline: 2px solid var(--rose); outline-offset: -2px; }
+  .rv-row { display: grid; grid-template-columns: 1.6rem 1fr 1fr; gap: .5rem; align-items: center; padding: .45rem 0; border-bottom: 1px dashed var(--border); }
+  .rv-row .no { font-family: var(--mono); font-weight: 700; color: var(--gold); }
+  .rv-row select { width: 100%; min-width: 0; font-size: .85rem; padding: .35rem; border-radius: 7px; border: 1px solid var(--border); background: var(--bg); color: var(--ink); }
+  .rv-row .ex { grid-column: 2 / -1; font-size: .86rem; color: var(--ink-soft); display: none; }
+  .rv-row.show .ex { display: block; }
+  .rv-row.ok select { border-color: var(--ok); background: var(--ok-soft); }
+  .rv-row.ng select { border-color: var(--bad); background: var(--bad-soft); }
+  @media (max-width: 520px) { .rv-row { grid-template-columns: 1.6rem 1fr; } .rv-row select { grid-column: 2; } }
+</style>
+</head>
+<body>
+<div id="readbar"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="logo rg">R</span><span>重新設計社會科學研究<small>Ragin (2008) 互動教材</small></span></a>
+    <nav class="topnav">
+      <a href="index.html">本書首頁</a>
+      <a href="ch0.html">導讀</a>
+      <a href="ch1.html">第一篇</a>
+      <a href="ch4.html">第二篇</a>
+      <a href="ch6.html">第三篇</a>
+      <a href="ch8.html">第四篇</a>
+      <a href="../index.html">QCA with R ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="chapter-head">
+  <div class="part">第四篇　因果複雜性分析與淨效應分析</div>
+  <div class="eyebrow">CHAPTER 11</div>
+  <h1>淨效應與組態：實證示範</h1>
+  <div class="en">Net Effects versus Configurations: An Empirical Demonstration</div>
+  <div class="src">對應原書第 11 章（中譯本頁 137–153）</div>
+</div>
+
+<p class="lead">「聰明比家世重要嗎？」這是 1994 年暢銷又爭議的《貝爾曲線》想回答的問題。答案取決於你怎麼問：問「<strong>每個變數單獨的淨效應有多大</strong>」，你會得到一張係數表；問「<strong>哪些條件組合在一起，能讓人避開貧窮</strong>」，你會得到幾條「配方」。本章是全書的壓軸：Ragin 與 Peer Fiss 用<strong>同一份資料</strong>把兩種做法並排跑一次，讓你親眼看到它們回答的是不同的問題。</p>
+
+<div class="objectives">
+  <div class="ct">🎯 讀完本章，你應該能夠……</div>
+  <ol>
+    <li>說明《貝爾曲線》的邏輯斯迴歸發現，以及為什麼它的結論會隨模型設定而改變（<strong>設定依賴</strong>）。</li>
+    <li>用原書的錨點，把所得、AFQT 百分位數、教育年數<strong>校準</strong>成模糊集，並解釋「高」與「不低」為何要分開成兩個集合。</li>
+    <li>說明大樣本 fsQCA 如何用<strong>頻數門檻</strong>與<strong>一致性門檻</strong>把 256 列的真值表縮成可分析的形式。</li>
+    <li>讀懂<strong>組態圖</strong>：分辨核心／補充條件，並解讀一致性、原始覆蓋度與唯一覆蓋度。</li>
+    <li>用「同一個條件在不同配方中的角色」說明<strong>脈絡依賴</strong>，並比較兩種分析各自回答的問題。</li>
+    <li>回顧全書「從相關到集合」的七組轉變。</li>
+  </ol>
+</div>
+
+<nav class="toc">
+  <strong>本章目錄</strong>
+  <ol>
+    <li><a href="#s1">兩種分析邏輯與《貝爾曲線》爭議</a></li>
+    <li><a href="#s2">淨效應分析：從貝爾曲線到「設定依賴」</a></li>
+    <li><a href="#s3">fsQCA 第一步：校準與雙重編碼</a></li>
+    <li><a href="#s4">真值表：有限多樣性與兩道門檻</a></li>
+    <li><a href="#s5">解：簡約解、中間解與核心條件</a></li>
+    <li><a href="#s6">討論：兩種分析各自回答了什麼</a></li>
+    <li><a href="#s7">實用附錄：模糊集分析中的校準（fsQCA／R）</a></li>
+    <li><a href="#s8">全書回顧：從相關到集合的七組轉變</a></li>
+    <li><a href="#s9">本章重點、名詞與自我測驗</a></li>
+  </ol>
+</nav>
+
+<!-- ================================================= -->
+<h2 id="s1">1. 兩種分析邏輯與《貝爾曲線》爭議 <span class="en">· Two logics, one data set</span></h2>
+
+<p>前一章從理論面批評了「淨效應思維」。本章換成<strong>實證示範</strong>：拿一份大樣本、與政策高度相關的資料，分別做傳統的淨效應分析與本書提倡的組態分析，再比較兩者的發現。</p>
+
+<p>資料來自美國的<strong>全國青年縱貫調查（National Longitudinal Survey of Youth, NLSY）</strong>。它因為 Herrnstein 與 Murray（1994）的《貝爾曲線》（<em>The Bell Curve</em>）而聲名大噪，常被直接稱為「貝爾曲線資料」。</p>
+
+<div class="callout info">
+  <div class="ct">ℹ️ 背景：《貝爾曲線》在吵什麼？</div>
+  <p>Herrnstein 與 Murray 主張：在現代社會，<strong>認知能力</strong>（他們以軍方的 <strong>AFQT</strong> 測驗分數衡量，並認為它主要是天生的）已成為決定生活機會最重要的因素，比父母的社經地位（SES）還重要；理由是工作性質改變，勞動市場越來越獎勵高認知能力。這個結論引起極大爭議——批評者指出 AFQT 其實大量反映<strong>學校教育與文化資本</strong>，而且他們的迴歸模型控制的變數太少。本章不是要裁決 IQ 之爭，而是借這場辯論示範<strong>兩種方法如何得出不同類型的結論</strong>。</p>
+</div>
+
+<div class="compare">
+  <div class="old">
+    <h4>淨效應分析（net-effects）</h4>
+    <ul>
+      <li>焦點：每個前因變數對結果的<strong>獨立</strong>影響</li>
+      <li>問題：「控制其他變數後，AFQT 還剩多少效果？」</li>
+      <li>工具：邏輯斯迴歸（logistic regression）</li>
+    </ul>
+  </div>
+  <div class="new">
+    <h4>組態分析（configurational）</h4>
+    <ul>
+      <li>焦點：前因條件的<strong>組合</strong>與結果之間的明確連結</li>
+      <li>問題：「哪些條件組合，是『避免貧窮』的一致子集合？」</li>
+      <li>工具：模糊集質性比較分析（fsQCA）</li>
+    </ul>
+  </div>
+</div>
+
+<div class="callout key">
+  <div class="ct">🔑 fsQCA 的定位：互補，不是取代</div>
+  <p>Ragin 強調，組態分析不是要取代淨效應分析，而是<strong>互補</strong>的技術。fsQCA 最好被理解為以集合論為基礎的<strong>探索與詮釋工具</strong>——雖然可以加入機率判準，但它本身<strong>不是推論統計</strong>。它的出發點是另一套關於「社會科學想發現什麼」的假定：像質性研究那樣，把每個案例看成一個<strong>組態</strong>，關心案例的各個面向如何搭配在一起。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s2">2. 淨效應分析：從貝爾曲線到「設定依賴」 <span class="en">· Net-effects analysis of the Bell Curve data</span></h2>
+
+<h3>2.1 貝爾曲線模型：只控制兩個變數</h3>
+<p>Herrnstein 與 Murray 的模型很精簡：結果是二分的「是否處於貧窮」（本章編碼為<strong>避免貧窮 = 1</strong>），自變數是 AFQT 分數，只控制<strong>受訪者年齡</strong>與<strong>父母 SES</strong>。AFQT 與父母 SES 都做了 z 標準化，方便比較大小。以下結果限於資料完整的<strong>黑人男性</strong>樣本（本章所有分析，包括 fsQCA，都用同一群人）。</p>
+
+<div class="table-wrap">
+  <table class="tbl center">
+    <thead><tr><th style="text-align:left">原書表 11-1　貝爾曲線模型</th><th>B</th><th>S.E.</th><th>Sig.</th><th>Exp(B)</th></tr></thead>
+    <tbody>
+      <tr><td style="text-align:left">AFQT（z 分數）</td><td>0.651</td><td>0.139</td><td>0.000</td><td>1.917</td></tr>
+      <tr><td style="text-align:left">父母 SES（z 分數）</td><td>0.376</td><td>0.117</td><td>0.001</td><td>1.457</td></tr>
+      <tr><td style="text-align:left">年齡</td><td>0.040</td><td>0.050</td><td>0.630<sup>*</sup></td><td>1.040</td></tr>
+      <tr><td style="text-align:left">常數項</td><td>1.123</td><td>0.859</td><td>0.191</td><td>3.074</td></tr>
+    </tbody>
+  </table>
+</div>
+<p style="font-size:.85rem;color:var(--ink-faint)">卡方值 53.973，自由度 3。結果：避免貧窮（1）／貧窮（0）；黑人男性樣本。<br>* 小註：依 B／S.E. = 0.8 推算的 Wald 檢定 p 值約為 0.42，與表上 0.630 不一致，可能是原書誤植；但兩者結論相同——年齡不顯著。</p>
+
+<p>讀法：AFQT 的 B（0.651）幾乎是父母 SES（0.376）的兩倍——「控制家世之後，聰明的效果仍然顯著而且更大」，正是貝爾曲線的招牌發現。</p>
+
+<h3>2.2 反方：把控制變數加到 15 個以上</h3>
+<p>1996 年，加州大學柏克萊分校的團隊（Fischer、Hout、Sánchez Jankowski、Lucas、Swidler、Voss）在《<em>Inequality by Design</em>》中反駁：貝爾曲線模型嚴重<strong>設定不足（underspecified）</strong>。他們逐步加入鄰里、學校等十幾個競爭變數，AFQT 的效果就大幅縮小。不過他們也被反批：<strong>什麼都放進去</strong>的模型同樣有問題（過度設定）。</p>
+
+<h3>2.3 折衷模型：五個自變數</h3>
+<p>Ragin 跑了一個介於兩個極端之間的模型：AFQT、父母所得、教育年數（三者皆 z 標準化）、婚姻狀況、是否有子女。</p>
+
+<div class="table-wrap">
+  <table class="tbl center">
+    <thead><tr><th style="text-align:left">原書表 11-2　五變數模型</th><th>B</th><th>S.E.</th><th>Sig.</th><th>Exp(B)</th></tr></thead>
+    <tbody>
+      <tr><td style="text-align:left">AFQT（z 分數）</td><td>0.391</td><td>0.154</td><td>0.011</td><td>1.479</td></tr>
+      <tr><td style="text-align:left">父母所得（z 分數）</td><td>0.357</td><td>0.154</td><td>0.020</td><td>1.429</td></tr>
+      <tr><td style="text-align:left">教育年數（z 分數）</td><td class="hi">0.635</td><td>0.139</td><td>0.000</td><td>1.887</td></tr>
+      <tr><td style="text-align:left">已婚（1／0）</td><td class="hi">1.658</td><td>0.346</td><td>0.000</td><td>5.251</td></tr>
+      <tr><td style="text-align:left">有子女（1／0）</td><td>−0.524</td><td>0.282</td><td>0.063</td><td>0.592</td></tr>
+      <tr><td style="text-align:left">常數項</td><td>1.970</td><td>0.880</td><td>0.025</td><td>7.173</td></tr>
+    </tbody>
+  </table>
+</div>
+<p style="font-size:.85rem;color:var(--ink-faint)">卡方值 104.729，自由度 5；黑人男性樣本。Exp(B) 即勝算比（odds ratio），已用 e<sup>B</sup> 驗算。</p>
+
+<ul>
+  <li>AFQT 仍有獨立效果，但 B 從 0.651 降到 0.391——<strong>沒有貝爾曲線說的那麼強</strong>。</li>
+  <li>貝爾曲線沒放進去的<strong>教育年數</strong>（0.635）與<strong>婚姻</strong>（1.658）反而更突出。</li>
+</ul>
+
+<div class="callout warn">
+  <div class="ct">⚠️ 初學者常見誤讀：Exp(B) = 5.251 不是「機率高 5 倍」</div>
+  <p>它的意思是：其他變數固定時，已婚者避免貧窮的<strong>勝算（odds = p／(1−p)）</strong>是未婚者的 5.25 倍。若未婚者避免貧窮的機率已有 80%（勝算 4），已婚者勝算變成 21、機率約 95.5%——機率只多了 15 個百分點，絕不是「5 倍」。</p>
+</div>
+
+<div class="widget" id="w-logit">
+  <div class="widget-head"><span class="wtag">互動</span> 淨效應計算器：用表 11-2 的方程式預測一個人</div>
+  <div class="widget-body">
+    <p style="margin-top:0">拖動滑桿設定一個人的條件（z 分數：0 = 樣本平均，+1 = 高於平均一個標準差），看模型怎麼「把效果加起來」。</p>
+    <div class="slider-row"><span class="sl-label" style="width:auto">AFQT</span><input type="range" min="-2" max="2" step="0.1" value="0" data-v="afqt"><output data-o="afqt">0.0</output></div>
+    <div class="slider-row"><span class="sl-label" style="width:auto">父母所得</span><input type="range" min="-2" max="2" step="0.1" value="0" data-v="inc"><output data-o="inc">0.0</output></div>
+    <div class="slider-row"><span class="sl-label" style="width:auto">教育</span><input type="range" min="-2" max="2" step="0.1" value="0" data-v="edu"><output data-o="edu">0.0</output></div>
+    <div class="controls" style="margin-top:.6rem">
+      <div class="field"><label>婚姻</label><div class="seg" data-mar><button data-v="0" class="on">未婚</button><button data-v="1">已婚</button></div></div>
+      <div class="field"><label>子女</label><div class="seg" data-kid><button data-v="0" class="on">無子女</button><button data-v="1">有子女</button></div></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="k">對數勝算 logit</div><div class="v" data-logit>—</div></div>
+      <div class="stat"><div class="k">預測：避免貧窮的機率</div><div class="v gold" data-p>—</div></div>
+      <div class="stat"><div class="k">AFQT +1 SD 時機率增加</div><div class="v" data-da>—</div></div>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<div class="callout key">
+  <div class="ct">🔑 設定依賴（specification dependence）</div>
+  <p>同一個 AFQT，在兩個模型中的效果差了快一半；而教育的效果大小，又取決於你是否「接受」它是一個獨立的競爭變數（而不是 AFQT 的衍生物）。<strong>淨效應永遠依賴於「模型裡還放了誰」</strong>——只要加進幾個合理的競爭變數，AFQT 的估計值就大幅縮水，這已足以對貝爾曲線構成實質質疑。這正是第 10 章所說淨效應思維的局限。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s3">3. fsQCA 第一步：校準與雙重編碼 <span class="en">· Calibrating the sets</span></h2>
+
+<p>集合分析評估的是「條件（組合）的隸屬度是否<strong>一致地小於或等於</strong>結果的隸屬度」。因此<strong>校準</strong>決定一切：嚴重的錯誤校準會扭曲甚至摧毀集合關係。相對地，傳統變數只要「有意義地變動」就能放進迴歸，研究者常常不在乎它的單位（第 4 章）。</p>
+
+<p>校準要靠<strong>實質知識</strong>（第 5 章），而且分數必須有<strong>表面效度</strong>：例如「父母高收入」的隸屬度 0.25，就應該代表「介於完全不隸屬（0）與交叉點（0.5）中間」這個明確的意思。最重要的是三個質性錨點：<strong>完全隸屬、交叉點、完全不隸屬</strong>。</p>
+
+<h3>3.1 雙重編碼：「高」與「不低」是兩回事</h3>
+<p>本章把三個區間變數各校準成<strong>兩個</strong>集合：父母所得 → 父母高收入、父母低收入；AFQT → 高 AFQT、低 AFQT；教育 → 大學教育、高中教育。為什麼？因為兩個目標概念<strong>不對稱</strong>：完全不屬於「父母高收入」（0）不等於完全屬於「父母低收入」（1）——中間收入的人兩邊都不屬於。</p>
+
+<div class="callout tip">
+  <div class="ct">📌 雙重編碼的理論價值</div>
+  <p>它讓我們能問一個迴歸問不出來的問題：<strong>好的生活機會，是跟「擁有高 AFQT」有關，還是跟「沒有低 AFQT」有關？</strong>貝爾曲線主張關鍵是「高」認知能力；如果結果顯示關鍵其實是「不低」，意義就完全不同（見第 5 節）。另外，「變數」的語言不能直接搬進集合論：一個人不能「隸屬於 AFQT」，只能隸屬於「高 AFQT 分數者」這個<strong>經過定義與命名</strong>的集合。</p>
+</div>
+
+<p>總計本章用了 <strong>8 個前因條件</strong>：2 個清晰集（已婚、有子女）＋ 6 個模糊集（父母高收入、父母低收入、高 AFQT、低 AFQT、大學教育、高中教育）。結果是模糊集「<strong>避免貧窮</strong>」。各集合的錨點如下（理由詳見第 7 節附錄）：</p>
+
+<div class="table-wrap">
+  <table class="tbl center">
+    <thead><tr><th style="text-align:left">集合</th><th>原始量尺</th><th>完全不隸屬<br><small>(0.05)</small></th><th>交叉點<br><small>(0.5)</small></th><th>完全隸屬<br><small>(0.95)</small></th></tr></thead>
+    <tbody>
+      <tr><td style="text-align:left"><strong>避免貧窮</strong>（結果）</td><td>家庭所得 ÷ 貧窮線</td><td>1.0</td><td>2.0</td><td>3.0</td></tr>
+      <tr><td style="text-align:left">父母低收入</td><td>父母所得 ÷ 貧窮線</td><td>3.0</td><td>2.0</td><td>1.0</td></tr>
+      <tr><td style="text-align:left">父母高收入</td><td>父母所得 ÷ 貧窮線</td><td>3.0</td><td>5.5</td><td>8.0</td></tr>
+      <tr><td style="text-align:left">低 AFQT</td><td>AFQT 百分位數</td><td>30</td><td>20</td><td>10</td></tr>
+      <tr><td style="text-align:left">高 AFQT</td><td>AFQT 百分位數</td><td>65</td><td>80</td><td>93</td></tr>
+      <tr><td style="text-align:left">高中教育</td><td>教育年數</td><td colspan="3">≤6 年 = 0；7=0.15、8=0.30、9=0.45、10=0.60、11=0.75；≥12 年 = 1</td></tr>
+      <tr><td style="text-align:left">大學教育</td><td>教育年數</td><td colspan="3">≤12 年 = 0；13=0.2、14=0.4、15=0.6；≥16 年 = 1</td></tr>
+      <tr><td style="text-align:left">已婚／有子女</td><td>清晰集</td><td colspan="3">1990 年已婚 = 1；有至少一個孩子 = 1</td></tr>
+    </tbody>
+  </table>
+</div>
+<p style="font-size:.85rem;color:var(--ink-faint)">前五個集合用直接校準法（完全隸屬 ↔ log odds +3、交叉點 ↔ 0、完全不隸屬 ↔ −3）；兩個教育集合是依學歷意義直接指定分數。</p>
+
+<div class="widget" id="w-cal">
+  <div class="widget-head"><span class="wtag">互動</span> 校準示範：輸入一個人的原始資料，看他在 9 個集合中的隸屬度</div>
+  <div class="widget-body">
+    <div class="controls">
+      <div class="field"><label>快速載入範例</label>
+        <select data-preset style="min-width:260px">
+          <option value="">— 自行調整 —</option>
+          <option value="a">甲：高中畢業、已婚無子、AFQT 40</option>
+          <option value="b">乙：大學畢業、未婚無子、AFQT 55</option>
+          <option value="c">丙：高中畢業、未婚有子、AFQT 15</option>
+          <option value="d">丁：父母富裕、高中畢業、已婚有子、AFQT 70</option>
+        </select>
+      </div>
+    </div>
+    <div class="slider-row"><span class="sl-label" style="width:7.5rem">家庭所得／貧窮線</span><input type="range" min="0" max="6" step="0.1" value="2.4" data-v="pov"><output data-o="pov"></output></div>
+    <div class="slider-row"><span class="sl-label" style="width:7.5rem">父母所得／貧窮線</span><input type="range" min="0" max="12" step="0.1" value="2.5" data-v="par"><output data-o="par"></output></div>
+    <div class="slider-row"><span class="sl-label" style="width:7.5rem">AFQT 百分位數</span><input type="range" min="1" max="99" step="1" value="40" data-v="afqt"><output data-o="afqt"></output></div>
+    <div class="slider-row"><span class="sl-label" style="width:7.5rem">教育年數</span><input type="range" min="6" max="20" step="1" value="12" data-v="edu"><output data-o="edu"></output></div>
+    <div class="controls" style="margin-top:.6rem">
+      <div class="field"><label>1990 年婚姻</label><div class="seg" data-mar><button data-v="0">未婚</button><button data-v="1" class="on">已婚</button></div></div>
+      <div class="field"><label>子女</label><div class="seg" data-kid><button data-v="0" class="on">無子女</button><button data-v="1">有子女</button></div></div>
+    </div>
+    <div class="table-wrap"><table class="tbl center" data-mtab><thead><tr><th style="text-align:left">集合</th><th>隸屬度</th><th>偏屬於？</th></tr></thead><tbody></tbody></table></div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<details class="think">
+  <summary>想一想：AFQT 第 50 百分位的人，「高 AFQT」與「低 AFQT」隸屬度各是多少？這代表什麼？</summary>
+  <div class="ans">
+    <p>兩者都接近 0（高 AFQT ≈ 0.002、低 AFQT ≈ 0.000）。他<strong>既不高、也不低</strong>，因此在「非低 AFQT（~low_AFQT）」中的隸屬度 ≈ 1。若只建一個「AFQT 高低」的集合，這種「中等」的人就會被硬推到某一邊——雙重編碼正是為了保留這個中間地帶。</p>
+  </div>
+</details>
+
+<!-- ================================================= -->
+<h2 id="s4">4. 真值表：有限多樣性與兩道門檻 <span class="en">· Truth table, limited diversity, and thresholds</span></h2>
+
+<h3>4.1 256 個角落，只有少數有人住</h3>
+<p>8 個條件 → 2<sup>8</sup> = <strong>256</strong> 種邏輯上可能的組合，也就是 8 維向量空間的 256 個「角落」（扇形區域）。一個案例在所有組合中<strong>最多只有一個</strong>隸屬度大於 0.5（第 7 章），所以只要數每個角落有幾個「隸屬度 &gt; 0.5」的案例，就能看出案例怎麼分布。</p>
+
+<ul>
+  <li>256 個組合中很多根本不可能（例如同時強隸屬於父母高收入與父母低收入），實際可能的只有 <strong>108</strong> 個。</li>
+  <li>原書表 11-3 列出至少有 4 個案例的 <strong>42</strong> 個組合；另有 19 列只有 1～3 個案例；其他列沒有任何案例。</li>
+  <li>前 2 大角落就占了 25% 的案例、前 7 大約 50%、前 14 大近 70%。由累積比例反推，樣本約 <strong>774</strong> 人（118 ÷ 774 = 0.152）。</li>
+</ul>
+
+<div class="callout warn">
+  <div class="ct">⚠️ 大樣本救不了有限多樣性</div>
+  <p>案例數多的前 14 個角落，甚至比 5 維空間（每個區間變數只轉成一個集合，2<sup>5</sup> = 32）的角落數還少。<strong>自然發生的社會資料，多樣性本來就非常有限</strong>；樣本再大也一樣，只是迴歸把這個問題藏起來了（第 6 節）。</p>
+</div>
+
+<h3>4.2 第一道門檻：頻數</h3>
+<p>案例極少的組合應該先濾掉：根據幾個人下結論並不明智，而且稀少的角落可能只是測量或編碼誤差造成的。本章採用<strong>至少 10 個案例</strong>的門檻，因為它保留了 80% 以上的案例（23 列、共 632 人，81.7%）。案例數 4～9 的列被當作<strong>餘項（remainders）</strong>處理。</p>
+
+<h3>4.3 第二道門檻：一致性</h3>
+<p>接著評估這 23 個組合各自是否為「避免貧窮」的子集合（充分性）。計算時用<strong>全部案例</strong>，包括在該組合中隸屬度低於 0.5 的人：</p>
+<div class="formula"><span class="flabel">充分性一致性（第 3 章）</span>一致性(X<sub>i</sub> ≤ Y<sub>i</sub>) = <span class="frac"><span>Σ min(X<sub>i</sub>, Y<sub>i</sub>)</span><span>Σ X<sub>i</sub></span></span></div>
+<p>例如某人在組合中隸屬度 0.4、在結果中只有 0.2：他兩邊都「偏不隸屬」，卻仍會<strong>拉低</strong>該組合的一致性（因為 0.4 &gt; 0.2）。一致性等於 1 表示所有 X ≤ Y；一般而言低於 0.75 就已明顯偏離子集合關係。</p>
+
+<div class="widget" id="w-tt">
+  <div class="widget-head"><span class="wtag">互動</span> 從 256 列到 7 列：調整兩道門檻（原書表 11-3、表 11-4）</div>
+  <div class="widget-body">
+    <div class="slider-row"><span class="sl-label" style="width:5.5rem">頻數門檻 ≥</span><input type="range" min="4" max="30" step="1" value="10" data-n><output data-no>10</output></div>
+    <div class="result-box" data-nout style="margin-bottom:1rem"></div>
+    <div class="slider-row"><span class="sl-label" style="width:5.5rem">一致性門檻 ≥</span><input type="range" min="0.70" max="0.95" step="0.005" value="0.80" data-c><output data-co>0.80</output></div>
+    <p style="font-size:.85rem;color:var(--ink-faint);margin:.3rem 0">下表為原書表 11-4 的 23 列（n ≥ 10）。1 = 存在、0 = 缺席；綠底為目前編碼為「結果 = 1」的列；灰字為低於頻數門檻而成為餘項的列。</p>
+    <div class="table-wrap scroll-y">
+      <table class="tbl center" data-t4>
+        <thead><tr><th>已婚</th><th>子女</th><th>父高</th><th>父低</th><th>高A</th><th>低A</th><th>高中</th><th>大學</th><th>n</th><th>一致性</th><th>結果</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="result-box" data-cout></div>
+  </div>
+</div>
+
+<p>原書以 <strong>0.80</strong> 為一致性門檻：7 個組合（一致性 0.830～0.986）編碼為 1，其餘 16 個（0.340～0.792）編碼為 0。注意 0.830 與 0.792 之間有一個明顯的<strong>斷點</strong>——好的門檻通常選在這種自然缺口，而不是硬套一個數字。編碼完成後，表 11-4 就成為一張可以做布林最小化的真值表（第 7 章）。</p>
+
+<!-- ================================================= -->
+<h2 id="s5">5. 解：簡約解、中間解與核心條件 <span class="en">· Solutions and causal recipes</span></h2>
+
+<p>以下用 <code class="inline">~</code> 表示「非」、<code class="inline">·</code> 表示交集（且）、<code class="inline">+</code> 表示聯集（或）。條件名稱：married（已婚）、children（有子女）、high_income／low_income（父母高／低收入）、high_AFQT／low_AFQT、high_school、college。</p>
+
+<h3>5.1 簡約解：3 條配方，但用了「困難」的反事實</h3>
+<div class="formula"><span class="flabel">簡約解（parsimonious solution）</span>married·~children + high_income·~low_AFQT + college·~low_AFQT</div>
+<p>白話：① 已婚且無子女；② 父母高收入且 AFQT 不低；③ 有大學學歷且 AFQT 不低。很簡潔，但它<strong>任意</strong>使用了邏輯餘項。例如第一條配方暗中包含「已婚、無子女、<strong>沒讀完高中</strong>」的組合——這種人太少、無法實證評估，簡約解卻直接假定他們也能避免貧窮。依現有知識，這是一個<strong>困難的反事實</strong>（第 8、9 章）。</p>
+
+<h3>5.2 中間解：只納入「容易」的反事實</h3>
+<p>若研究者逐一評估反事實的合理性，只納入簡單的反事實（例如「接受高中教育有助於避免貧窮」「父母非低收入有助於避免貧窮」「已婚有助於避免貧窮」），就得到<strong>中間解</strong>。它是簡約解的<strong>子集合</strong>、複雜解的<strong>超集合</strong>：</p>
+<div class="formula" style="text-align:left"><span class="flabel" style="text-align:center">中間解（intermediate solution）：5 條配方</span>
+① married·~children·high_school +<br>
+② married·high_income·~low_AFQT·high_school +<br>
+③ ~children·high_income·~low_AFQT·high_school +<br>
+④ ~children·~low_AFQT·college +<br>
+⑤ married·~low_income·~low_AFQT·college</div>
+
+<p><strong>核心 vs. 補充條件：</strong>出現在簡約解中的條件是<strong>核心條件（core）</strong>——它們能在達到頻數門檻的組合中，把「一致的子集合」與「非子集合」區分開來，任何結果呈現都必須包含它們。中間解多出來的是<strong>補充（貢獻）條件（contributing / peripheral）</strong>：它們確實出現在一致的案例裡，只有接受困難的反事實（例如假設高中輟學但已婚無子者也能脫貧）才能把它們刪掉。</p>
+
+<div class="table-wrap">
+  <table class="tbl cfg" data-cfg>
+    <thead><tr><th>原書表 11-5</th><th class="pcol">①</th><th class="pcol">②</th><th class="pcol">③</th><th class="pcol">④</th><th class="pcol">⑤</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+<p class="legend"><span><span class="core">●</span> 核心條件存在</span><span><span class="core">⊖</span> 核心條件缺席</span><span><span class="peri">•</span> 補充條件存在</span><span><span class="peri">⊖</span> 補充條件缺席</span><span>空白 = 不在乎（don't care）</span></p>
+
+<div class="widget" id="w-paths">
+  <div class="widget-head"><span class="wtag">互動</span> 配方探索：點選一條配方，看它的參數與白話意義</div>
+  <div class="widget-body">
+    <div class="controls"><div class="seg" data-pick>
+      <button data-v="0" class="on">配方 ①</button><button data-v="1">配方 ②</button><button data-v="2">配方 ③</button><button data-v="3">配方 ④</button><button data-v="4">配方 ⑤</button>
+    </div></div>
+    <div class="stats">
+      <div class="stat"><div class="k">一致性</div><div class="v gold" data-cons>—</div></div>
+      <div class="stat"><div class="k">原始覆蓋度</div><div class="v" data-raw>—</div></div>
+      <div class="stat"><div class="k">唯一覆蓋度</div><div class="v" data-uniq>—</div></div>
+    </div>
+    <div data-bars></div>
+    <p class="legend"><span><i style="background:var(--gold)"></i>唯一覆蓋（只有這條配方解釋到）</span><span><i style="background:var(--accent);opacity:.45"></i>與其他配方重疊的覆蓋</span><span>（長條滿格 = 0.20）</span></p>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<div class="callout info">
+  <div class="ct">ℹ️ 覆蓋度的加總關係</div>
+  <p>原始覆蓋度 − 唯一覆蓋度 = 與其他配方<strong>重疊</strong>的部分。五條配方唯一覆蓋度加總只有 0.22，原始覆蓋度加總卻是 0.64——表示許多案例同時符合好幾條配方。原書未報告整體解的覆蓋度與一致性；可確定的是整體解覆蓋度至少 0.22（各唯一覆蓋互不重疊）、也至少不低於最大的原始覆蓋度 0.16。覆蓋度不高（每條約一到兩成）也提醒我們：仍有許多避免貧窮的人走的是這五條以外、案例較少的路。</p>
+</div>
+
+<h3>5.3 五條配方的共同點</h3>
+<ul>
+  <li><strong>全部</strong>都含某種教育資格（high_school 或 college），以及有利的家庭組成（married、~children 或兩者）。</li>
+  <li><strong>4 條</strong>（②～⑤）含「AFQT 不低」（~low_AFQT）。</li>
+  <li><strong>3 條</strong>（②③⑤）含與父母收入有關的條件（high_income 或 ~low_income）。<span style="font-size:.85rem;color:var(--ink-faint)">小註：原書此處與討論一節都寫「4 條」，簡中譯本譯者已指出應為 3 條；依表 11-5 核對確為 3 條。</span></li>
+</ul>
+
+<h3>5.4 依家庭狀況重組：同一個條件，角色不同</h3>
+<p>把五條配方依「婚姻 × 子女」四種家庭狀況重新整理（原書表 11-6），脈絡依賴就一目了然：家庭狀況越不利，需要的資源越多。</p>
+
+<div class="widget" id="w-fam">
+  <div class="widget-head"><span class="wtag">互動</span> 家庭情境 × 條件角色（原書表 11-6）</div>
+  <div class="widget-body">
+    <div class="controls"><div class="field"><label>標示一個條件，看它在各情境中的角色</label>
+      <div class="seg" data-cond>
+        <button data-v="low_AFQT" class="on">~low_AFQT</button><button data-v="high_income">high_income</button><button data-v="low_income">~low_income</button><button data-v="college">college</button><button data-v="high_school">high_school</button>
+      </div></div></div>
+    <div class="famgrid" data-grid>
+      <div></div><div class="hd">無子女</div><div class="hd">有子女</div>
+      <div class="hd">已婚</div><div class="cell" data-f="m0"></div><div class="cell" data-f="m1"></div>
+      <div class="hd">未婚</div><div class="cell" data-f="u0"></div><div class="cell" data-f="u1"></div>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<h3>5.5 對 AFQT 解釋的挑戰</h3>
+<p>Herrnstein 與 Murray 描繪的世界是：好職位留給認知天賦高的人，一般人機會很少。若此說為真，<strong>高 AFQT（high_AFQT）</strong>應該常出現在配方中——但它<strong>一次也沒出現</strong>。真正重要的是 AFQT「<strong>不低</strong>」。換言之，認知能力的門檻比貝爾曲線想像的低得多：在今天的世界，一般的認知能力仍然足夠。（若接受批評者的看法，把 AFQT 視為<strong>文化資本</strong>的指標，結論則是：避免貧窮需要至少<strong>適度</strong>的文化資本。）</p>
+
+<!-- ================================================= -->
+<h2 id="s6">6. 討論：兩種分析各自回答了什麼 <span class="en">· Discussion</span></h2>
+
+<p>Ragin 提醒，這些是初步結果；示範的主要目的，是在<strong>同一份資料</strong>上對照兩種分析。</p>
+
+<div class="widget" id="w-compare">
+  <div class="widget-head"><span class="wtag">互動</span> 並排比較：迴歸係數表 vs. 組態解</div>
+  <div class="widget-body">
+    <div class="controls"><div class="seg" data-pick>
+      <button data-v="net" class="on">淨效應分析</button><button data-v="cfg">組態分析</button><button data-v="both">逐項對照</button>
+    </div></div>
+    <div data-pane="net">
+      <div class="table-wrap"><table class="tbl center"><thead><tr><th style="text-align:left">變數</th><th>B</th><th>Exp(B)</th><th>結論</th></tr></thead><tbody>
+        <tr><td style="text-align:left">婚姻</td><td>1.658</td><td>5.251</td><td>🥇 最大</td></tr>
+        <tr><td style="text-align:left">教育（z）</td><td>0.635</td><td>1.887</td><td>🥈</td></tr>
+        <tr><td style="text-align:left">AFQT（z）</td><td>0.391</td><td>1.479</td><td>適度、未被淘汰</td></tr>
+        <tr><td style="text-align:left">父母所得（z）</td><td>0.357</td><td>1.429</td><td>適度</td></tr>
+        <tr><td style="text-align:left">有子女</td><td>−0.524</td><td>0.592</td><td>不顯著（p = 0.063）</td></tr>
+      </tbody></table></div>
+      <div class="result-box">它回答的問題：「在其他變數固定下，每個變數<span class="hl">單獨</span>能解釋多少結果的變異？」
+結果像一場<span class="hl">比賽</span>：教育與婚姻勝出，AFQT 有適度淨效應，沒被淘汰。
+它沒回答：條件如何組合？不同家庭狀況的人是否需要不同的資源？</div>
+    </div>
+    <div data-pane="cfg" hidden>
+      <div class="table-wrap"><table class="tbl"><thead><tr><th>家庭狀況</th><th>避免貧窮的配方</th></tr></thead><tbody>
+        <tr><td>已婚、無子女</td><td><code class="inline">high_school</code></td></tr>
+        <tr><td>未婚、無子女</td><td><code class="inline">~low_AFQT·(college + high_school·high_income)</code></td></tr>
+        <tr><td>已婚、有子女</td><td><code class="inline">~low_AFQT·(college·~low_income + high_school·high_income)</code></td></tr>
+        <tr><td>未婚、有子女</td><td>{∅}（沒有任何配方）</td></tr>
+      </tbody></table></div>
+      <div class="result-box">它回答的問題：「哪些條件<span class="hl">組合</span>，是避免貧窮的一致子集合？」
+結果是幾條<span class="hl">配方</span>：每條都含教育＋有利家庭組成；AFQT 只需「不低」，而且必須與其他資源搭配。
+它沒回答：每個條件「平均」貢獻多少機率（它本來就不認為有這種與脈絡無關的量）。</div>
+    </div>
+    <div data-pane="both" hidden>
+      <div class="table-wrap"><table class="tbl"><thead><tr><th>面向</th><th>淨效應分析</th><th>組態分析</th></tr></thead><tbody>
+        <tr><td><strong>結果呈現</strong></td><td>分開的變數、各自一個係數</td><td>條件的組合（配方）</td></tr>
+        <tr><td><strong>條件效果</strong></td><td>假定在任何脈絡下都相同（可加、線性）</td><td>依脈絡而定：同一條件在不同配方中角色不同</td></tr>
+        <tr><td><strong>組合問題</strong></td><td>需要交互作用項；5 個自變數的飽和模型要估 32 個係數，共線性極端、也無法解釋</td><td>直接以真值表檢視組合</td></tr>
+        <tr><td><strong>有限多樣性</strong></td><td>以可加與線性假定<span style="color:var(--bad)">隱蔽地</span>外推到所有 32 個角落——不論有無案例</td><td>無法迴避：餘項必須明確處理（簡約／中間解）</td></tr>
+        <tr><td><strong>對 AFQT 的結論</strong></td><td>有適度的獨立效果</td><td>「不低」才是關鍵，且單靠它不足以避免貧窮</td></tr>
+      </tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<h3>6.1 淨效應：一場變數之間的比賽</h3>
+<p>迴歸結果以<strong>分開的變數</strong>呈現，提供的是「誰能解釋最多變異」的競爭性結論：教育與婚姻贏了，AFQT 因為還有適度淨效應而沒被淘汰（比較表 11-1 與 11-2）。它<strong>完全沒談到組合</strong>。要檢驗組合，就得估計複雜的交互作用模型——5 個自變數的飽和交互模型需要在一條方程式中估計 <strong>32 個係數</strong>（2<sup>5</sup>）；就算估得出來（極端共線性使這幾乎不可能），也無從解釋。</p>
+
+<h3>6.2 迴歸如何「偷偷」解決有限多樣性</h3>
+<p>可加與線性的假定，讓迴歸能估計 5 個自變數所構成向量空間的<strong>全部 32 個角落</strong>的結果機率——<strong>不論那些角落有沒有案例</strong>。想知道空間中任何一點的預測值，把座標代進方程式就好。於是淨效應方法不只假定每個變數的效果不受其他變數影響，還假定線性關係可以<strong>延伸到觀察範圍之外</strong>，以間接、隱蔽的方式把有限多樣性問題「迴避」掉。（回到第 2 節的計算器：任何滑桿組合它都會給你一個數字。）</p>
+<p>組態分析則<strong>無法迴避</strong>：表 11-3 直接攤開自然資料的多樣性有多貧乏，而且大樣本也沒能補救。</p>
+
+<h3>6.3 「出生時選高 AFQT 還是富裕父母？」是個錯誤的問題</h3>
+<p>Herrnstein 與 Murray 曾說：如果出生時能在高 AFQT 與父母高 SES 之間二選一，選高 AFQT 比較划算。模糊集結果顯示，真正的選擇是關於<strong>條件的組合（配方）</strong>，而不是單一變數：單是「AFQT 不低」本身並不能保護人免於貧窮，它必須與教育、家庭組成、父母資源等<strong>搭配</strong>。</p>
+
+<!-- ================================================= -->
+<h2 id="s7">7. 實用附錄：模糊集分析中的校準 <span class="en">· Practical appendix: calibration</span></h2>
+
+<p>校準是模糊集分析的核心，兩大原則：① <strong>仔細定義與命名</strong>目標集合；② 分數必須依據<strong>實質知識與既有文獻</strong>，反映<strong>外部標準</strong>。有人把校準的主觀性當成缺點（liability），Ragin 認為它其實是<strong>優點（strength）</strong>：它逼研究者認真面對集合的定義，並承認實質知識本來就是分析的前提。</p>
+
+<div class="steps">
+  <div class="step"><div><h4>避免貧窮（結果）</h4><p>以 NLSY 依家庭人數調整的官方貧窮線為基準（與 Herrnstein &amp; Murray、Fischer 等相同）。二分法會把「剛好高於貧窮線」與「舒適的中上階層」歸為同一類；模糊集改用「家庭所得 ÷ 貧窮線」的比值：3.0 倍 → 0.95、2.0 倍 → 0.5、1.0 倍 → 0.05（直接校準法）。</p></div></div>
+  <div class="step"><div><h4>高中與大學教育</h4><p>NLSY 以「完成的最高年級」衡量，可直接對應學歷（12 年 = 高中、16 年 = 大學）。高中集合：≥12 年 = 1、≤6 年（只受小學教育）= 0，7～11 年依序 0.15、0.30、0.45、0.60、0.75。大學集合：≥16 年 = 1、≤12 年 = 0，13、14、15 年分別為 0.2、0.4、0.6。</p></div></div>
+  <div class="step"><div><h4>父母所得（兩個集合）</h4><p>以 1978、1979 年家庭淨所得平均（1990 年美元，與 Fischer 等相同）除以 1979 年經家庭人數調整的貧窮線。<strong>父母低收入</strong>：1.0 倍 → 0.95、2.0 倍 → 0.5、3.0 倍 → 0.05。<strong>父母高收入</strong>：3.0 倍 → 0.05、5.5 倍 → 0.5、8.0 倍 → 0.95（完全隸屬約為父母所得中位數的 3 倍、交叉點約為 2 倍）。</p></div></div>
+  <div class="step"><div><h4>AFQT（兩個集合，依軍方的實際決策）</h4><p>美國國防部把 AFQT 百分位分為五類：I（93–99）、II（65–92）高於平均；III（31–64）約平均；IV（10–30）低於平均；V（1–9）明顯低於平均。第 V 類不得入伍；第 IV 類須至少高中畢業才可入伍，且比例不得超過 20%。據此：<strong>低 AFQT</strong>：第 10 百分位 → 0.95、第 20 → 0.5、第 30 → 0.05。<strong>高 AFQT</strong>：第 93（第 I 類下界）→ 0.95、第 80 → 0.5、第 65（第 II 類下界）→ 0.05。</p></div></div>
+  <div class="step"><div><h4>家庭組成（兩個清晰集）</h4><p>已婚：1990 年已婚 = 1。有子女：有孩子 = 1（不用子女數，因為從「沒有孩子」到「成為父母」的轉變，比第二、第三個孩子重大得多）。四種組合在資料中都很常見；最有利的是已婚無子女，最不利的是未婚有子女。</p></div></div>
+</div>
+
+<div class="sw-tabs">
+  <div class="seg">
+    <button data-tab="fs" class="on">fsQCA 軟體</button>
+    <button data-tab="r">R（QCA 套件）</button>
+  </div>
+  <div class="sw-pane on" data-pane="fs">
+    <div class="steps">
+      <div class="step"><div><h4>校準</h4><p><span class="menu-path">Variables → Compute</span>，以函數 <code class="inline">calibrate(x, 完全隸屬, 交叉點, 完全不隸屬)</code> 建立新變數，例如 <code class="inline">calibrate(povratio, 3, 2, 1)</code>；反向集合把錨點倒過來寫，例如父母低收入 <code class="inline">calibrate(parratio, 1, 2, 3)</code>。教育集合用 <span class="menu-path">Variables → Recode</span> 依上表逐值指定。</p></div></div>
+      <div class="step"><div><h4>建立真值表</h4><p><span class="menu-path">Analyze → Truth Table Algorithm</span>，結果選避免貧窮，條件選 8 個集合。</p></div></div>
+      <div class="step"><div><h4>頻數門檻</h4><p>依 number 欄排序，點選第一列 n &lt; 10 的列，<span class="menu-path">Edit → Delete current row to last row</span>，這些列成為餘項。</p></div></div>
+      <div class="step"><div><h4>一致性門檻</h4><p>依 consistency 排序，在 0.830 與 0.792 的斷點處切開：一致性 ≥ 0.80 的列在結果欄輸入 1，其餘輸入 0。</p></div></div>
+      <div class="step"><div><h4>Standard Analyses 與中間解</h4><p>按 <span class="menu-path">Standard Analyses</span>，軟體會產生複雜解、簡約解，並跳出對話框讓你為每個條件指定方向期待（存在／缺席／皆可），據此產生中間解。最後把簡約解條件標為核心、其餘標為補充，整理成組態圖（表 11-5）。</p></div></div>
+    </div>
+  </div>
+  <div class="sw-pane" data-pane="r">
+    <p>原始 NLSY 資料不隨附，下面先產生<strong>說明用的假資料</strong>（欄位與原書相同，但數值是模擬的，跑出來的結果不會等於原書），重點是看完整流程與參數寫法。</p>
+<pre class="code"><span class="c-fn">library</span>(QCA)
+<span class="c-com"># ---- 0. 說明用假資料（774 人；非原始 NLSY）----</span>
+<span class="c-fn">set.seed</span>(<span class="c-num">2008</span>)
+n <span class="c-kw">&lt;-</span> <span class="c-num">774</span>
+nlsy <span class="c-kw">&lt;-</span> <span class="c-fn">data.frame</span>(
+  povratio = <span class="c-fn">round</span>(<span class="c-fn">rlnorm</span>(n, <span class="c-fn">log</span>(<span class="c-num">2.3</span>), <span class="c-num">0.6</span>), <span class="c-num">2</span>),  <span class="c-com"># 家庭所得 ÷ 貧窮線</span>
+  parratio = <span class="c-fn">round</span>(<span class="c-fn">rlnorm</span>(n, <span class="c-fn">log</span>(<span class="c-num">2.2</span>), <span class="c-num">0.7</span>), <span class="c-num">2</span>),  <span class="c-com"># 父母所得 ÷ 貧窮線</span>
+  afqt     = <span class="c-fn">sample</span>(<span class="c-num">1</span>:<span class="c-num">99</span>, n, replace = <span class="c-kw">TRUE</span>),             <span class="c-com"># AFQT 百分位數</span>
+  edu      = <span class="c-fn">sample</span>(<span class="c-num">8</span>:<span class="c-num">18</span>, n, replace = <span class="c-kw">TRUE</span>,
+                    prob = <span class="c-fn">c</span>(<span class="c-num">2</span>,<span class="c-num">3</span>,<span class="c-num">5</span>,<span class="c-num">8</span>,<span class="c-num">30</span>,<span class="c-num">12</span>,<span class="c-num">10</span>,<span class="c-num">6</span>,<span class="c-num">14</span>,<span class="c-num">5</span>,<span class="c-num">5</span>)),  <span class="c-com"># 教育年數</span>
+  MARRIED  = <span class="c-fn">rbinom</span>(n, <span class="c-num">1</span>, <span class="c-num">0.45</span>),
+  CHILD    = <span class="c-fn">rbinom</span>(n, <span class="c-num">1</span>, <span class="c-num">0.50</span>)
+)
+
+<span class="c-com"># ---- 1. 直接校準：thresholds 用 e(完全不隸屬)、c(交叉點)、i(完全隸屬) ----</span>
+<span class="c-com">#     e &lt; i 為遞增集合；e &gt; i 為遞減集合（如「低」收入、「低」AFQT）</span>
+nlsy$AVOIDPOV <span class="c-kw">&lt;-</span> <span class="c-fn">calibrate</span>(nlsy$povratio, type = <span class="c-str">"fuzzy"</span>, thresholds = <span class="c-fn">c</span>(e = <span class="c-num">1</span>, c = <span class="c-num">2</span>, i = <span class="c-num">3</span>))
+nlsy$LOWINC   <span class="c-kw">&lt;-</span> <span class="c-fn">calibrate</span>(nlsy$parratio, type = <span class="c-str">"fuzzy"</span>, thresholds = <span class="c-fn">c</span>(e = <span class="c-num">3</span>, c = <span class="c-num">2</span>, i = <span class="c-num">1</span>))
+nlsy$HIINC    <span class="c-kw">&lt;-</span> <span class="c-fn">calibrate</span>(nlsy$parratio, type = <span class="c-str">"fuzzy"</span>, thresholds = <span class="c-fn">c</span>(e = <span class="c-num">3</span>, c = <span class="c-num">5.5</span>, i = <span class="c-num">8</span>))
+nlsy$LOWAFQT  <span class="c-kw">&lt;-</span> <span class="c-fn">calibrate</span>(nlsy$afqt, type = <span class="c-str">"fuzzy"</span>, thresholds = <span class="c-fn">c</span>(e = <span class="c-num">30</span>, c = <span class="c-num">20</span>, i = <span class="c-num">10</span>))
+nlsy$HIAFQT   <span class="c-kw">&lt;-</span> <span class="c-fn">calibrate</span>(nlsy$afqt, type = <span class="c-str">"fuzzy"</span>, thresholds = <span class="c-fn">c</span>(e = <span class="c-num">65</span>, c = <span class="c-num">80</span>, i = <span class="c-num">93</span>))
+
+<span class="c-com"># 教育：依學歷意義直接指定（非 logistic 函數）</span>
+nlsy$HS  <span class="c-kw">&lt;-</span> <span class="c-fn">ifelse</span>(nlsy$edu &gt;= <span class="c-num">12</span>, <span class="c-num">1</span>, <span class="c-fn">ifelse</span>(nlsy$edu &lt;= <span class="c-num">6</span>, <span class="c-num">0</span>,
+              <span class="c-fn">c</span>(<span class="c-num">.15</span>, <span class="c-num">.30</span>, <span class="c-num">.45</span>, <span class="c-num">.60</span>, <span class="c-num">.75</span>)[<span class="c-fn">pmin</span>(<span class="c-fn">pmax</span>(nlsy$edu - <span class="c-num">6</span>, <span class="c-num">1</span>), <span class="c-num">5</span>)]))
+nlsy$COL <span class="c-kw">&lt;-</span> <span class="c-fn">ifelse</span>(nlsy$edu &gt;= <span class="c-num">16</span>, <span class="c-num">1</span>, <span class="c-fn">ifelse</span>(nlsy$edu &lt;= <span class="c-num">12</span>, <span class="c-num">0</span>,
+              <span class="c-fn">c</span>(<span class="c-num">.2</span>, <span class="c-num">.4</span>, <span class="c-num">.6</span>)[<span class="c-fn">pmin</span>(<span class="c-fn">pmax</span>(nlsy$edu - <span class="c-num">12</span>, <span class="c-num">1</span>), <span class="c-num">3</span>)]))
+
+<span class="c-com"># 隸屬度剛好 0.5 的案例無法歸入任何一列（QCA 會警告），Ragin 建議避免；示範做法：微調為 0.501</span>
+fzsets <span class="c-kw">&lt;-</span> <span class="c-fn">c</span>(<span class="c-str">"AVOIDPOV"</span>, <span class="c-str">"LOWINC"</span>, <span class="c-str">"HIINC"</span>, <span class="c-str">"LOWAFQT"</span>, <span class="c-str">"HIAFQT"</span>)
+nlsy[fzsets] <span class="c-kw">&lt;-</span> <span class="c-fn">lapply</span>(nlsy[fzsets], <span class="c-kw">function</span>(x) <span class="c-fn">ifelse</span>(x == <span class="c-num">0.5</span>, <span class="c-num">0.501</span>, x))
+
+<span class="c-com"># ---- 2. 真值表：頻數門檻 10、一致性門檻 0.80 ----</span>
+conds <span class="c-kw">&lt;-</span> <span class="c-fn">c</span>(<span class="c-str">"MARRIED"</span>, <span class="c-str">"CHILD"</span>, <span class="c-str">"HIINC"</span>, <span class="c-str">"LOWINC"</span>, <span class="c-str">"HIAFQT"</span>, <span class="c-str">"LOWAFQT"</span>, <span class="c-str">"HS"</span>, <span class="c-str">"COL"</span>)
+tt <span class="c-kw">&lt;-</span> <span class="c-fn">truthTable</span>(nlsy, outcome = <span class="c-str">"AVOIDPOV"</span>, conditions = conds,
+                 n.cut = <span class="c-num">10</span>, incl.cut = <span class="c-num">0.80</span>, sort.by = <span class="c-fn">c</span>(<span class="c-str">"incl"</span>, <span class="c-str">"n"</span>))
+tt
+
+<span class="c-com"># ---- 3. 三種解 ----</span>
+sol_c <span class="c-kw">&lt;-</span> <span class="c-fn">minimize</span>(tt, details = <span class="c-kw">TRUE</span>)                   <span class="c-com"># 複雜解：不用餘項</span>
+sol_p <span class="c-kw">&lt;-</span> <span class="c-fn">minimize</span>(tt, include = <span class="c-str">"?"</span>, details = <span class="c-kw">TRUE</span>)    <span class="c-com"># 簡約解：任意餘項</span>
+<span class="c-com"># 中間解：只納入符合方向期待的「容易」反事實（以下方向為示意）</span>
+sol_i <span class="c-kw">&lt;-</span> <span class="c-fn">minimize</span>(tt, include = <span class="c-str">"?"</span>, details = <span class="c-kw">TRUE</span>,
+                  dir.exp = <span class="c-str">"MARRIED, ~CHILD, HIINC, ~LOWINC, HIAFQT, ~LOWAFQT, HS, COL"</span>)
+sol_i   <span class="c-com"># 每條配方的 inclS（一致性）、covS（原始覆蓋度）、covU（唯一覆蓋度）</span>
+
+<span class="c-com"># ---- 4. 直接評估原書的中間解 ----</span>
+<span class="c-fn">pof</span>(<span class="c-str">"MARRIED*~CHILD*HS + MARRIED*HIINC*~LOWAFQT*HS + ~CHILD*HIINC*~LOWAFQT*HS +
+     ~CHILD*~LOWAFQT*COL + MARRIED*~LOWINC*~LOWAFQT*COL"</span>,
+    outcome = <span class="c-str">"AVOIDPOV"</span>, data = nlsy, relation = <span class="c-str">"sufficiency"</span>)</pre>
+    <p>小提醒：<code class="inline">calibrate()</code> 預設 <code class="inline">logistic = TRUE</code>、<code class="inline">idm = 0.95</code>，正好對應本書「完全隸屬 ↔ 0.95」的直接校準法。想看完整的 R 操作，可參考本站主教材〈<a href="../index.html">QCA with R</a>〉。</p>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s8">8. 全書回顧：從相關到集合的七組轉變 <span class="en">· Looking back</span></h2>
+
+<p>Ragin 在中文版序言中，把全書歸結為傳統範式與替代範式之間的<strong>七組對比</strong>（導讀章已介紹）。第 11 章正好把它們全部在同一份資料上演示了一次。來做最後一個練習：替每一個「傳統」要素配上它在替代範式中的對應，再看看本章如何體現它。</p>
+
+<div class="widget" id="w-review">
+  <div class="widget-head"><span class="wtag">練習</span> 總結配對：七組轉變在本章中的樣子</div>
+  <div class="widget-body">
+    <div data-rows></div>
+    <p style="margin:.9rem 0 0"><button class="btn" type="button" data-check>檢查答案</button> <button class="btn ghost" type="button" data-show>直接看解答</button></p>
+    <div class="result-box" data-out>選好所有配對後按「檢查答案」。</div>
+  </div>
+</div>
+
+<div class="callout tip">
+  <div class="ct">📌 帶走一句話</div>
+  <p>社會科學理論多半是<strong>非對稱的集合陳述</strong>；把它們改寫成「變數之間的相關」再拿去檢驗，往往會檢驗錯東西。從校準、真值表到配方，這本書提供的是一套<strong>讓理論、案例與資料持續對話</strong>的工具——它與迴歸互補，而不是取而代之。</p>
+</div>
+
+<h3>延伸學習資源</h3>
+<ul>
+  <li>本站主教材〈<a href="../index.html">QCA with R</a>〉：從清晰集、模糊集到真值表與最小化的 R 實作。</li>
+  <li><a href="https://compasss.org" target="_blank" rel="noopener">COMPASSS</a>：組態比較方法的國際社群網站，有工作論文、書目與軟體連結。</li>
+  <li>Fiss, P. C. (2011). Building better causal theories: A fuzzy set approach to typologies in organization research. <em>Academy of Management Journal</em>——本章「核心／補充條件」組態圖的系統化說明。</li>
+  <li>Schneider, C. Q., &amp; Wagemann, C. (2012). <em>Set-Theoretic Methods for the Social Sciences</em>. Cambridge University Press——QCA 進階教科書。</li>
+  <li>Duşa, A. (2019). <em>QCA with R: A Comprehensive Resource</em>. Springer——QCA 套件作者撰寫的完整手冊。</li>
+</ul>
+
+<!-- ================================================= -->
+<h2 id="s9">9. 本章重點、名詞與自我測驗 <span class="en">· Review</span></h2>
+
+<ol class="takeaways">
+  <li>淨效應分析的結論<strong>依賴設定</strong>：AFQT 的 B 從貝爾曲線模型的 0.651 降到五變數模型的 0.391，教育與婚姻反而勝出。</li>
+  <li>fsQCA 的成敗取決於<strong>校準</strong>；把一個區間變數<strong>雙重編碼</strong>成「高」與「低」兩個集合，才能區分「高」與「不低」。</li>
+  <li>8 個條件有 256 個角落，但案例只集中在少數角落——<strong>有限多樣性</strong>不會因大樣本而消失。本章以頻數 ≥ 10、一致性 ≥ 0.80 兩道門檻得到 7 列「結果 = 1」。</li>
+  <li>簡約解（3 條）使用了困難的反事實；只納入容易反事實的<strong>中間解</strong>有 5 條配方。簡約解中的條件是<strong>核心條件</strong>，中間解多出的為<strong>補充條件</strong>。</li>
+  <li>所有配方都含教育資格＋有利家庭組成；<strong>高 AFQT 從未出現</strong>，關鍵是 AFQT「不低」，且須與其他資源組合。</li>
+  <li>同一條件的角色<strong>依脈絡而定</strong>：已婚無子女者只需高中學歷；未婚有子女者沒有任何配方。</li>
+  <li>迴歸以可加、線性假定把預測<strong>外推</strong>到無案例的角落，隱蔽地處理有限多樣性；組態分析則必須明確面對它。</li>
+</ol>
+
+<h3>名詞對照</h3>
+<div class="table-wrap">
+  <table class="tbl gloss">
+    <thead><tr><th>本教材用語</th><th>簡中譯本</th><th>英文</th><th>白話說明</th></tr></thead>
+    <tbody>
+      <tr><td>淨效應</td><td>净效应</td><td>net effect</td><td>控制其他變數後，單一變數的獨立影響</td></tr>
+      <tr><td>設定依賴</td><td>设定依赖性</td><td>specification dependence</td><td>估計值隨模型放了哪些變數而改變</td></tr>
+      <tr><td>勝算比</td><td>Exp(B)</td><td>odds ratio</td><td>勝算 p／(1−p) 的倍數，不是機率的倍數</td></tr>
+      <tr><td>雙重編碼</td><td>双重编码</td><td>dual coding</td><td>把一個變數校準成「高」「低」兩個集合</td></tr>
+      <tr><td>向量空間角落</td><td>向量空间角</td><td>vector space corner</td><td>真值表的一列；條件全為 0 或 1 的理想型</td></tr>
+      <tr><td>頻數門檻</td><td>频数阈值</td><td>frequency threshold</td><td>一列至少要有幾個強隸屬案例才納入分析</td></tr>
+      <tr><td>簡約解</td><td>最简约解</td><td>parsimonious solution</td><td>允許任何餘項幫忙簡化的解</td></tr>
+      <tr><td>中間解</td><td>中间解</td><td>intermediate solution</td><td>只納入「容易」反事實的解</td></tr>
+      <tr><td>核心條件</td><td>核心前因条件</td><td>core condition</td><td>出現在簡約解中、具決定性的條件</td></tr>
+      <tr><td>補充條件</td><td>补充／有贡献的条件</td><td>contributing (peripheral) condition</td><td>只出現在中間解、去掉需困難反事實的條件</td></tr>
+      <tr><td>原始覆蓋度</td><td>原始覆盖度</td><td>raw coverage</td><td>一條配方解釋了多少比例的結果隸屬</td></tr>
+      <tr><td>唯一覆蓋度</td><td>唯一覆盖度</td><td>unique coverage</td><td>只有這條配方解釋到的部分</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>自我測驗</h3>
+<p class="quiz-score" data-quiz-score></p>
+
+<div class="quiz" data-answer="2">
+  <p class="q">從表 11-1 到表 11-2，AFQT 的係數由 0.651 降到 0.391。這最能說明淨效應分析的什麼特性？</p>
+  <div class="opts">
+    <button class="opt">AFQT 測量有誤</button>
+    <button class="opt">樣本數不足</button>
+    <button class="opt">設定依賴：估計值取決於模型中還放了哪些競爭變數</button>
+    <button class="opt">AFQT 是必要條件</button>
+  </div>
+  <div class="explain">加入教育、婚姻等幾個合理的競爭變數，AFQT 的淨效應就明顯縮小。淨效應永遠是「相對於模型裡其他變數」的估計。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">表 11-2 中已婚的 Exp(B) = 5.251，正確的解讀是？</p>
+  <div class="opts">
+    <button class="opt">已婚者避免貧窮的勝算是未婚者的約 5.25 倍</button>
+    <button class="opt">已婚者避免貧窮的機率是未婚者的 5.25 倍</button>
+    <button class="opt">已婚者有 5.25% 的機會避免貧窮</button>
+    <button class="opt">婚姻解釋了 52.5% 的變異</button>
+  </div>
+  <div class="explain">Exp(B) 是勝算比。勝算 = p／(1−p)；當機率已經很高時，勝算變 5 倍只對應機率的小幅增加。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">為什麼要把 AFQT 同時校準成「高 AFQT」與「低 AFQT」兩個集合？</p>
+  <div class="opts">
+    <button class="opt">為了讓條件數變多、解更精確</button>
+    <button class="opt">因為 fsQCA 不能處理百分位數</button>
+    <button class="opt">因為兩個集合的隸屬度相加必須等於 1</button>
+    <button class="opt">因為「不屬於高分」不等於「屬於低分」，才能檢驗關鍵是「高」還是「不低」</button>
+  </div>
+  <div class="explain">目標概念不對稱：中等分數的人兩個集合都不屬於。雙重編碼讓我們發現，配方中出現的是 ~low_AFQT，而非 high_AFQT。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">本章以「至少 10 個案例」作為頻數門檻，主要理由是？</p>
+  <div class="opts">
+    <button class="opt">統計檢定要求每格至少 10 人</button>
+    <button class="opt">它保留了 80% 以上的案例，又濾掉可能由測量誤差造成的稀少組合</button>
+    <button class="opt">8 個條件的真值表最多只能分析 23 列</button>
+    <button class="opt">低於 10 個案例的組合一致性一定低</button>
+  </div>
+  <div class="explain">23 列 n ≥ 10 的組合涵蓋 632 人（約 81.7%）；案例數 4～9 的列則當作餘項。</div>
+</div>
+
+<div class="quiz" data-answer="2">
+  <p class="q">在表 11-5 中，「核心條件」指的是？</p>
+  <div class="opts">
+    <button class="opt">一致性最高的條件</button>
+    <button class="opt">出現在最多條配方中的條件</button>
+    <button class="opt">出現在簡約解中、能區分一致子集合與非子集合的條件</button>
+    <button class="opt">迴歸係數顯著的條件</button>
+  </div>
+  <div class="explain">簡約解中的條件是決定性的成分；中間解多出來的條件（例如配方 ① 的 high_school）是補充條件，只有接受困難反事實才能刪除。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">根據表 11-6，以下關於「條件角色依脈絡而定」的敘述何者正確？</p>
+  <div class="opts">
+    <button class="opt">已婚無子女者只需高中學歷，而未婚無子女者還需要 AFQT 不低，加上大學或（高中＋父母高收入）</button>
+    <button class="opt">AFQT 不低在每一種家庭狀況中都是必要的</button>
+    <button class="opt">未婚有子女者只要讀完大學就能避免貧窮</button>
+    <button class="opt">父母高收入在所有配方中都出現</button>
+  </div>
+  <div class="explain">已婚無子女的配方是 high_school；未婚有子女者沒有任何配方 {∅}。父母收入條件只出現在 3 條配方中。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">Ragin 說邏輯斯迴歸「以間接且隱蔽的方式」處理有限多樣性，意思是？</p>
+  <div class="opts">
+    <button class="opt">迴歸會自動刪除沒有案例的組合</button>
+    <button class="opt">迴歸會在報表中警告哪些組合沒有案例</button>
+    <button class="opt">迴歸用交互作用項精確估計每個組合</button>
+    <button class="opt">可加與線性假定讓它對所有角落（包括無案例者）都給出預測值</button>
+  </div>
+  <div class="explain">只要把座標代進方程式就能得到任何一點的預測，問題因此被「迴避」而不是被面對；組態分析則必須明確處理餘項。</div>
+</div>
+
+<p><button class="btn ghost" data-quiz-reset type="button">重新作答</button></p>
+
+<div class="done-box" data-ch="11">
+  <span class="msg"></span>
+  <button class="btn" type="button">標記本章為已讀</button>
+</div>
+
+<nav class="chap-nav">
+  <a class="prev" href="ch10.html"><div class="dir">← 上一章</div><div class="ttl">第 10 章 「淨效應」思維的局限</div></a>
+  <a class="next" href="index.html"><div class="dir">下一章 →</div><div class="ttl">回本書首頁</div></a>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Charles C. Ragin, <em>Redesigning Social Inquiry: Fuzzy Sets and Beyond</em> (University of Chicago Press, 2008)<br>
+  以學習為目的之概念整理與重新詮釋，非原書譯文 · <a href="index.html">回本書首頁</a></p>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="js/ragin.js"></script>
+<script>
+/* ---------- 共用資料：條件、配方、真值表 ---------- */
+const CH11 = (function () {
+  const C = ['M', 'C', 'HI', 'LI', 'HA', 'LA', 'HS', 'COL'];
+  const label = { M: 'married', C: 'children', HI: 'high_income', LI: 'low_income', HA: 'high_AFQT', LA: 'low_AFQT', HS: 'high_school', COL: 'college' };
+  const zh = { M: '已婚', C: '有子女', HI: '父母高收入', LI: '父母低收入', HA: '高 AFQT', LA: '低 AFQT', HS: '高中教育', COL: '大學教育' };
+  // 中間解（原書表 11-5）：[條件, 是否否定, 是否核心]
+  const paths = [
+    { t: [['M', 0, 1], ['C', 1, 1], ['HS', 0, 0]], cons: .92, raw: .13, uniq: .07,
+      txt: '已婚、沒有孩子、而且受過高中教育。\n核心是「已婚＋無子女」這個家庭組成；高中教育是補充條件。\n這是唯一不要求 AFQT 不低、也不涉及父母收入的配方——有利的家庭組成本身就足以搭配一般學歷。\n它的唯一覆蓋度（0.07）最高：有不少人只能由這條路解釋（例如表 11-4 中 AFQT 偏低、父母低收入但已婚無子而脫貧的那一列）。' },
+    { t: [['M', 0, 0], ['HI', 0, 1], ['LA', 1, 1], ['HS', 0, 0]], cons: .94, raw: .10, uniq: .02,
+      txt: '已婚、父母高收入、AFQT 不低、受過高中教育。\n核心是「父母高收入＋AFQT 不低」；已婚與高中是補充條件。\n在表 11-6 中，它是已婚有子女者的路徑：家庭負擔較重，需要家庭背景資源來補位。\n一致性最高之一（0.94），但唯一覆蓋度只有 0.02——它解釋到的人大多也符合其他配方。' },
+    { t: [['C', 1, 0], ['HI', 0, 1], ['LA', 1, 1], ['HS', 0, 0]], cons: .91, raw: .14, uniq: .04,
+      txt: '沒有孩子、父母高收入、AFQT 不低、受過高中教育。\n核心同樣是「父母高收入＋AFQT 不低」；無子女與高中是補充條件。\n對未婚無子女的人來說，沒有大學學歷時，父母的資源可以「代替」大學學歷。' },
+    { t: [['C', 1, 0], ['LA', 1, 1], ['COL', 0, 1]], cons: .92, raw: .16, uniq: .06,
+      txt: '沒有孩子、AFQT 不低、受過大學教育。\n核心是「大學＋AFQT 不低」；無子女是補充條件。\n原始覆蓋度最大（0.16）：這是最「常見」的脫貧路徑；不需要父母資源，也不需要結婚。' },
+    { t: [['M', 0, 0], ['LI', 1, 0], ['LA', 1, 1], ['COL', 0, 1]], cons: .95, raw: .11, uniq: .03,
+      txt: '已婚、父母並非低收入、AFQT 不低、受過大學教育。\n核心是「大學＋AFQT 不低」；已婚與父母非低收入是補充條件。\n在表 11-6 中，它是已婚有子女者的路徑（已婚無子女者只需高中，已被配方 ① 涵蓋）：即使有大學學歷，仍需要家庭背景「不差」才能一致地避免貧窮。一致性最高（0.95）。' },
+  ];
+  // 原書表 11-3：M C HI LI HA LA HS COL n
+  const t3 = [
+    [0,0,0,1,0,1,1,0,118],[0,0,0,0,0,1,1,0,78],[0,0,0,0,0,0,1,0,53],[1,1,0,0,0,1,1,0,41],[1,1,0,0,0,0,1,0,39],
+    [1,1,0,1,0,1,1,0,34],[0,0,0,1,0,0,1,0,30],[0,0,0,0,0,0,1,1,23],[0,1,0,0,0,1,1,0,22],[0,0,1,0,0,1,1,0,20],
+    [0,1,0,1,0,1,1,0,20],[0,0,1,0,0,0,1,0,19],[1,1,0,1,0,0,1,0,19],[0,0,0,1,0,1,0,0,18],[0,0,0,1,0,0,1,1,12],
+    [0,0,1,0,0,0,1,1,12],[0,0,0,0,0,1,0,0,11],[0,1,0,0,0,0,1,0,11],[1,1,1,0,0,0,1,0,11],[1,1,1,0,0,1,1,0,11],
+    [0,0,0,1,0,1,1,1,10],[1,0,0,1,0,1,1,0,10],[1,1,0,0,0,0,1,1,10],[1,0,0,1,0,0,1,0,9],[1,0,1,0,0,0,1,1,9],
+    [1,1,1,0,0,0,1,1,9],[1,0,0,0,0,0,1,0,7],[1,0,0,0,0,1,1,0,7],[0,0,0,0,0,1,1,1,6],[0,1,0,1,0,1,0,0,6],
+    [1,0,1,0,0,0,1,0,6],[1,0,1,0,0,1,1,0,6],[1,1,0,0,0,1,0,0,6],[0,0,1,0,1,0,1,1,5],[1,1,0,1,0,0,1,1,5],
+    [0,0,0,0,0,0,0,0,4],[0,0,1,0,0,1,1,1,4],[0,1,0,0,0,0,1,1,4],[0,1,0,1,0,0,1,0,4],[1,0,0,0,0,0,1,1,4],
+    [1,1,0,0,0,1,1,1,4],[1,1,0,1,0,1,0,0,4],
+  ];
+  // 原書表 11-4：條件（同上順序）、n、一致性
+  const t4 = [
+    [0,0,1,0,0,0,1,1,12,.986],[1,1,0,0,0,0,1,1,10,.893],[0,0,0,1,0,0,1,1,12,.892],[1,1,1,0,0,0,1,0,11,.884],
+    [1,0,0,1,0,1,1,0,10,.876],[0,0,0,0,0,0,1,1,23,.864],[0,0,1,0,0,0,1,0,19,.830],[1,1,1,0,0,1,1,0,11,.792],
+    [0,0,0,0,0,0,1,0,53,.788],[0,0,0,1,0,1,1,1,10,.767],[1,1,0,0,0,0,1,0,39,.754],[1,1,0,0,0,1,1,0,41,.706],
+    [1,1,0,1,0,1,1,0,34,.657],[1,1,0,1,0,0,1,0,19,.641],[0,0,0,0,0,1,1,0,78,.636],[0,0,1,0,0,1,1,0,20,.620],
+    [0,0,0,1,0,0,1,0,30,.617],[0,1,0,0,0,0,1,0,11,.578],[0,0,0,0,0,1,0,0,11,.498],[0,0,0,1,0,1,1,0,118,.482],
+    [0,1,0,0,0,1,1,0,22,.402],[0,1,0,1,0,1,1,0,20,.376],[0,0,0,1,0,1,0,0,18,.340],
+  ];
+  const N = 774; // 由表 11-3 累積比例反推
+  const key = (r) => r.slice(0, 8).join('');
+  const term = (p) => p.t.map(([c, neg]) => (neg ? '~' : '') + label[c]).join('·');
+  const covers = (p, r) => p.t.every(([c, neg]) => r[C.indexOf(c)] === (neg ? 0 : 1));
+  const pathMem = (p, m) => Math.min(...p.t.map(([c, neg]) => neg ? 1 - m[c] : m[c]));
+  return { C, label, zh, paths, t3, t4, N, key, term, covers, pathMem };
+})();
+
+/* ---------- 淨效應計算器（表 11-2） ---------- */
+(function () {
+  const root = document.getElementById('w-logit');
+  const B = { c: 1.970, afqt: 0.391, inc: 0.357, edu: 0.635, mar: 1.658, kid: -0.524 };
+  const st = { mar: 0, kid: 0 };
+  const sl = {}; root.querySelectorAll('input[data-v]').forEach((el) => sl[el.dataset.v] = el);
+  const lg = (l) => 1 / (1 + Math.exp(-l));
+  const f = RG.fz.fmt;
+  ['mar', 'kid'].forEach((k) => {
+    const btns = root.querySelectorAll(`[data-${k}] button`);
+    btns.forEach((b) => b.addEventListener('click', () => { btns.forEach((x) => x.classList.toggle('on', x === b)); st[k] = +b.dataset.v; run(); }));
+  });
+  function run() {
+    const a = +sl.afqt.value, i = +sl.inc.value, e = +sl.edu.value;
+    ['afqt', 'inc', 'edu'].forEach((k) => root.querySelector(`[data-o="${k}"]`).textContent = (+sl[k].value).toFixed(1));
+    const L = B.c + B.afqt * a + B.inc * i + B.edu * e + B.mar * st.mar + B.kid * st.kid;
+    const P = lg(L), Pa = lg(L + B.afqt), Pe = lg(L + B.edu), Pm = lg(L + (st.mar ? 0 : B.mar));
+    root.querySelector('[data-logit]').textContent = f(L, 3);
+    root.querySelector('[data-p]').textContent = (P * 100).toFixed(1) + '%';
+    root.querySelector('[data-da]').textContent = '+' + ((Pa - P) * 100).toFixed(1) + ' 點';
+    let m = `logit = 1.970 + 0.391×(${a.toFixed(1)}) + 0.357×(${i.toFixed(1)}) + 0.635×(${e.toFixed(1)}) + 1.658×${st.mar} − 0.524×${st.kid}\n      = ${f(L, 3)}  →  p = 1/(1+e^−logit) = <span class="hl">${(P * 100).toFixed(1)}%</span>\n\n`;
+    m += `AFQT 再高 1 個標準差：logit 永遠只加 0.391，但機率增加 ${((Pa - P) * 100).toFixed(1)} 個百分點；\n教育再高 1 個標準差：機率增加 ${((Pe - P) * 100).toFixed(1)} 個百分點。`;
+    if (!st.mar) m += `\n若改為已婚：機率 ${(P * 100).toFixed(1)}% → ${(Pm * 100).toFixed(1)}%（勝算 ×5.25）。`;
+    m += P > 0.9 ? '\n機率已接近上限，同樣的係數帶來的機率變化變小——這是 logit 的非線性，不是「效果依脈絡而變」。' :
+      P < 0.5 ? '\n這個人更可能落入貧窮；在機率中段，同樣的係數換算成的機率變化最大。' : '';
+    m += '\n\n注意：無論資料中有沒有這種人，方程式都會照樣給出一個數字（見第 6 節）。';
+    root.querySelector('[data-out]').innerHTML = m;
+  }
+  Object.values(sl).forEach((el) => el.addEventListener('input', run));
+  run();
+})();
+
+/* ---------- 校準示範 ---------- */
+(function () {
+  const root = document.getElementById('w-cal');
+  const D = CH11, cal = RG.fz.calibrate, f = RG.fz.fmt;
+  const st = { mar: 1, kid: 0 };
+  const sl = {}; root.querySelectorAll('input[data-v]').forEach((el) => sl[el.dataset.v] = el);
+  const hs = (y) => y >= 12 ? 1 : y <= 6 ? 0 : [0.15, 0.30, 0.45, 0.60, 0.75][y - 7];
+  const col = (y) => y >= 16 ? 1 : y <= 12 ? 0 : [0.2, 0.4, 0.6][y - 13];
+  const presets = {
+    a: { pov: 2.4, par: 2.5, afqt: 40, edu: 12, mar: 1, kid: 0 },
+    b: { pov: 3.2, par: 1.8, afqt: 55, edu: 16, mar: 0, kid: 0 },
+    c: { pov: 1.2, par: 1.1, afqt: 15, edu: 12, mar: 0, kid: 1 },
+    d: { pov: 2.8, par: 7.0, afqt: 70, edu: 12, mar: 1, kid: 1 },
+  };
+  function segSet(k, v) { root.querySelectorAll(`[data-${k}] button`).forEach((x) => x.classList.toggle('on', +x.dataset.v === v)); st[k] = v; }
+  ['mar', 'kid'].forEach((k) => root.querySelectorAll(`[data-${k}] button`).forEach((b) => b.addEventListener('click', () => { segSet(k, +b.dataset.v); clearPreset(); run(); })));
+  const ps = root.querySelector('[data-preset]');
+  function clearPreset() { ps.value = ''; }
+  ps.addEventListener('input', () => {
+    const p = presets[ps.value]; if (!p) return;
+    ['pov', 'par', 'afqt', 'edu'].forEach((k) => sl[k].value = p[k]);
+    segSet('mar', p.mar); segSet('kid', p.kid); run();
+  });
+  function run() {
+    const pov = +sl.pov.value, par = +sl.par.value, afqt = +sl.afqt.value, edu = +sl.edu.value;
+    root.querySelector('[data-o="pov"]').textContent = pov.toFixed(1) + ' 倍';
+    root.querySelector('[data-o="par"]').textContent = par.toFixed(1) + ' 倍';
+    root.querySelector('[data-o="afqt"]').textContent = '第 ' + afqt;
+    root.querySelector('[data-o="edu"]').textContent = edu + ' 年';
+    const m = {
+      M: st.mar, C: st.kid,
+      HI: cal(par, 8, 5.5, 3), LI: cal(par, 1, 2, 3),
+      HA: cal(afqt, 93, 80, 65), LA: cal(afqt, 10, 20, 30),
+      HS: hs(edu), COL: col(edu),
+    };
+    const Y = cal(pov, 3, 2, 1);
+    const rows = D.C.map((c) => [`${D.zh[c]} <small style="color:var(--ink-faint)">${D.label[c]}</small>`, m[c]]);
+    rows.push(['<strong>避免貧窮（結果）</strong>', Y]);
+    root.querySelector('[data-mtab] tbody').innerHTML = rows.map(([n, v]) =>
+      `<tr><td style="text-align:left">${n}</td><td class="${v > 0.5 ? 'hi' : v < 0.5 ? 'lo' : 'warnc'}">${f(v, 3)}</td><td>${v > 0.5 ? '是' : v < 0.5 ? '否' : '交叉點'}</td></tr>`).join('');
+    const tie = D.C.some((c) => m[c] === 0.5);
+    let out = '';
+    if (tie) out += '有條件剛好落在交叉點 0.5，這個人無法歸入任何一個角落——這正是交叉點要避免設在實際觀察值上的原因。\n';
+    else {
+      const corner = D.C.map((c) => m[c] > 0.5 ? 1 : 0);
+      const k = corner.join('');
+      const r3 = D.t3.find((r) => D.key(r) === k), r4 = D.t4.find((r) => D.key(r) === k);
+      out += `所屬角落（真值表列）：${D.C.map((c, i) => (corner[i] ? '' : '~') + D.label[c]).join('·')}\n`;
+      out += r3 ? `→ 原書表 11-3：此角落有 ${r3[8]} 位黑人男性。` : '→ 不在表 11-3 中（此角落案例少於 4 人，或根本無人）。';
+      if (r4) out += `\n→ 表 11-4：一致性 ${r4[9].toFixed(3)}，${r4[9] >= 0.8 ? '<span class="hl">編碼為 1（避免貧窮的子集合）</span>' : '編碼為 0'}。`;
+      else if (r3) out += '\n→ 案例數低於 10，在分析中被當作餘項。';
+      out += '\n';
+    }
+    const pm = D.paths.map((p) => D.pathMem(p, m));
+    const best = Math.max(...pm);
+    out += '\n在五條配方中的隸屬度（取各條件的最小值）：\n' + pm.map((v, i) => `  配方 ${'①②③④⑤'[i]}：${f(v, 2)}${v > 0.5 ? '  ← 偏屬於' : ''}`).join('\n');
+    out += `\n整體解（取最大值）= ${f(best, 2)}；結果「避免貧窮」= ${f(Y, 2)}\n`;
+    const gap = f(best - Y, 2);
+    if (best > Y + 1e-9 && best > 0.5 && Y > 0.5) out += `→ 他符合配方、也偏屬於避免貧窮，方向一致；但 X > Y（差 ${gap}），計算一致性時 Σmin 會少算 ${gap}，造成<span class="hl">小幅扣分</span>。`;
+    else if (best > Y + 1e-9 && best > 0.5) out += `→ 符合配方卻偏不隸屬於避免貧窮：這是<span class="hl">真正的反例</span>，會明顯拉低一致性（差 ${gap}）。`;
+    else if (best > Y + 1e-9) out += `→ 兩邊都偏不隸屬，但 X > Y（差 ${gap}），仍會拉低一致性——就像原書「組合 0.4、結果 0.2」的例子。`;
+    else if (best > 0.5) out += '→ 他符合某條配方，而且結果隸屬度不低於配方隸屬度：<span class="hl">與配方一致</span>。';
+    else out += '→ 他不屬於任何配方（隸屬度皆 ≤ 0.5），也沒有違反子集合關係（X ≤ Y）。';
+    root.querySelector('[data-out]').innerHTML = out;
+  }
+  Object.values(sl).forEach((el) => el.addEventListener('input', () => { clearPreset(); run(); }));
+  run();
+})();
+
+/* ---------- 兩道門檻（表 11-3、11-4） ---------- */
+(function () {
+  const root = document.getElementById('w-tt');
+  const D = CH11;
+  const nS = root.querySelector('[data-n]'), cS = root.querySelector('[data-c]');
+  const tb = root.querySelector('[data-t4] tbody');
+  D.t4.forEach((r) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = r.slice(0, 8).map((v) => `<td>${v}</td>`).join('') + `<td>${r[8]}</td><td>${r[9].toFixed(3)}</td><td data-o></td>`;
+    tb.appendChild(tr);
+  });
+  const trs = [...tb.children];
+  function run() {
+    const nc = +nS.value, cc = +cS.value;
+    root.querySelector('[data-no]').textContent = nc;
+    root.querySelector('[data-co]').textContent = cc.toFixed(3).replace(/0$/, '');
+    const kept = D.t3.filter((r) => r[8] >= nc);
+    const cases = kept.reduce((s, r) => s + r[8], 0);
+    let m = `256 個角落 → 表 11-3 列出 42 個（n ≥ 4）→ 目前保留 <span class="hl">${kept.length}</span> 個（n ≥ ${nc}）\n`;
+    m += `保留案例 ${cases} / ${D.N} 人 = ${(cases / D.N * 100).toFixed(1)}%`;
+    m += nc === 10 ? '\n這就是原書的選擇：保留 23 列、超過 80% 的案例。' :
+      nc < 10 ? '\n門檻較低：多保留一些列，但這些列的案例太少，結論可能只反映少數人或測量誤差。（本表的一致性只列出 n ≥ 10 的 23 列。）' :
+      '\n門檻較高：結論更穩，但被丟成餘項的案例變多，也增加需要靠反事實推論的列。';
+    root.querySelector('[data-nout]').innerHTML = m;
+    let pos = 0, posN = 0;
+    D.t4.forEach((r, i) => {
+      const inN = r[8] >= nc, out = inN && r[9] >= cc;
+      if (out) { pos++; posN += r[8]; }
+      trs[i].classList.toggle('dim', !inN);
+      trs[i].classList.toggle('pos', out);
+      trs[i].querySelector('[data-o]').textContent = inN ? (out ? '1' : '0') : '餘項';
+    });
+    const inRows = D.t4.filter((r) => r[8] >= nc).length;
+    let c = `一致性門檻 ${cc.toFixed(3)}：${inRows} 列中有 <span class="hl">${pos}</span> 列編碼為「結果 = 1」（共 ${posN} 人）。`;
+    if (cc > 0.792 && cc <= 0.830) c += '\n門檻落在 0.792 與 0.830 的自然斷點之間——與原書相同的 7 列。';
+    else if (cc <= 0.792) c += '\n門檻低於 0.792：一些一致性只有約 0.75–0.79 的列也被當作充分，等於接受更多「例外」。原書說低於 0.75 已實質偏離子集合關係。';
+    else c += '\n門檻高於 0.830：較嚴格，被當作充分的組合變少，解會更窄。';
+    root.querySelector('[data-cout]').innerHTML = c;
+  }
+  nS.addEventListener('input', run); cS.addEventListener('input', run);
+  run();
+})();
+
+/* ---------- 組態圖（表 11-5）與配方探索 ---------- */
+(function () {
+  const D = CH11;
+  const rowsDef = [
+    ['g', '家庭狀況'], ['M', 'Married 已婚'], ['C', 'Children 有子女'],
+    ['g', '教育'], ['HS', 'High school 高中'], ['COL', 'College 大學'],
+    ['g', '測驗分數'], ['HA', 'High AFQT'], ['LA', 'Low AFQT'],
+    ['g', '父母收入'], ['HI', 'High income'], ['LI', 'Low income'],
+  ];
+  const sym = (p, c) => {
+    const t = p.t.find((x) => x[0] === c);
+    if (!t) return '';
+    const [, neg, core] = t;
+    return `<span class="${core ? 'core' : 'peri'}">${neg ? '⊖' : (core ? '●' : '•')}</span>`;
+  };
+  const cfg = document.querySelector('[data-cfg] tbody');
+  let html = rowsDef.map(([c, n]) => c === 'g' ? `<tr class="grp"><td colspan="6">${n}</td></tr>` :
+    `<tr><td>${n}</td>${D.paths.map((p) => `<td class="pcol">${sym(p, c)}</td>`).join('')}</tr>`).join('');
+  html += `<tr><td>一致性</td>${D.paths.map((p) => `<td class="pcol">${p.cons.toFixed(2)}</td>`).join('')}</tr>`;
+  html += `<tr><td>原始覆蓋度</td>${D.paths.map((p) => `<td class="pcol">${p.raw.toFixed(2)}</td>`).join('')}</tr>`;
+  html += `<tr><td>唯一覆蓋度</td>${D.paths.map((p) => `<td class="pcol">${p.uniq.toFixed(2)}</td>`).join('')}</tr>`;
+  cfg.innerHTML = html;
+
+  const root = document.getElementById('w-paths');
+  const btns = root.querySelectorAll('[data-pick] button');
+  const fams = [['已婚、無子女', 1, 0], ['未婚、無子女', 0, 0], ['已婚、有子女', 1, 1], ['未婚、有子女', 0, 1]];
+  function pick(i) {
+    const p = D.paths[i];
+    btns.forEach((b) => b.classList.toggle('on', +b.dataset.v === i));
+    root.querySelector('[data-cons]').textContent = p.cons.toFixed(2);
+    root.querySelector('[data-raw]').textContent = p.raw.toFixed(2);
+    root.querySelector('[data-uniq]').textContent = p.uniq.toFixed(2);
+    root.querySelector('[data-bars]').innerHTML = D.paths.map((q, j) =>
+      `<div style="font-size:.8rem;${j === i ? 'font-weight:700;color:var(--gold)' : 'color:var(--ink-faint)'}">配方 ${'①②③④⑤'[j]}　raw ${q.raw.toFixed(2)} = 唯一 ${q.uniq.toFixed(2)} ＋ 重疊 ${(q.raw - q.uniq).toFixed(2)}</div>` +
+      `<div class="cbar" style="${j === i ? '' : 'opacity:.55'}"><span class="u" style="width:${q.uniq / 0.2 * 100}%"></span><span class="s" style="width:${(q.raw - q.uniq) / 0.2 * 100}%"></span></div>`).join('');
+    document.querySelectorAll('[data-cfg] td.pcol, [data-cfg] th.pcol').forEach((td) => {
+      const idx = [...td.parentNode.children].indexOf(td) - 1;
+      td.classList.toggle('on', idx === i);
+    });
+    const rows = D.t4.filter((r) => r[9] >= 0.8 && D.covers(p, r));
+    const fit = fams.filter(([, m, c]) => {
+      const tm = p.t.find((x) => x[0] === 'M'), tc = p.t.find((x) => x[0] === 'C');
+      return (!tm || (tm[1] ? 0 : 1) === m) && (!tc || (tc[1] ? 0 : 1) === c);
+    }).map((x) => x[0]);
+    let m = `<span class="hl">${D.term(p)}</span>\n\n${p.txt}\n\n`;
+    m += `涵蓋表 11-4 中「結果 = 1」的 ${rows.length} 列（共 ${rows.reduce((s, r) => s + r[8], 0)} 人）：\n`;
+    m += rows.map((r) => '  ' + D.C.map((c, j) => (r[j] ? '' : '~') + D.label[c]).join('·') + `（n=${r[8]}，一致性 ${r[9].toFixed(3)}）`).join('\n');
+    m += `\n\n家庭狀況上適用於：${fit.join(' ／ ')}`;
+    m += `\n重疊部分 = 原始 ${p.raw.toFixed(2)} − 唯一 ${p.uniq.toFixed(2)} = ${(p.raw - p.uniq).toFixed(2)}（這些人也符合別的配方）`;
+    root.querySelector('[data-out]').innerHTML = m;
+  }
+  btns.forEach((b) => b.addEventListener('click', () => pick(+b.dataset.v)));
+  pick(0);
+})();
+
+/* ---------- 家庭情境 × 條件角色（表 11-6） ---------- */
+(function () {
+  const root = document.getElementById('w-fam');
+  const recipes = {
+    m0: { name: '已婚、無子女', r: 'high_school', paths: '配方 ①（② ③ ④ ⑤ 都被它涵蓋）' },
+    u0: { name: '未婚、無子女', r: '~low_AFQT·(college + high_school·high_income)', paths: '配方 ③、④' },
+    m1: { name: '已婚、有子女', r: '~low_AFQT·(college·~low_income + high_school·high_income)', paths: '配方 ②、⑤' },
+    u1: { name: '未婚、有子女', r: '{∅}', paths: '沒有任何配方' },
+  };
+  const pat = { low_AFQT: /~low_AFQT/g, high_income: /high_income/g, low_income: /~low_income/g, college: /college/g, high_school: /high_school/g };
+  const roles = {
+    low_AFQT: '「AFQT 不低」出現在除了「已婚無子女」以外的所有有解情境中，而且總是放在括號外——它是共同的<span class="hl">門檻</span>，但單靠它不夠，必須再配上大學、或高中＋父母高收入。\n已婚無子女者連這個門檻都不需要：有利的家庭組成已足以搭配高中學歷。\n注意：從來不是 high_AFQT。',
+    high_income: '父母高收入只在「沒有大學學歷」時出現：它與 high_school 綁在一起，扮演<span class="hl">替代大學學歷</span>的角色。\n在已婚無子女情境中完全不需要；在未婚有子女情境中，即使有它也不夠。\n同一個條件，在某些脈絡是關鍵、在另一些脈絡無關緊要——這是單一係數無法表達的。',
+    low_income: '「父母非低收入」只出現在已婚有子女者的大學路徑：家庭負擔重時，即使讀完大學，父母背景也不能太差。\n對未婚無子女者，大學＋AFQT 不低就已足夠，父母收入無關。\n（它是補充條件，來自中間解的容易反事實。）',
+    college: '大學學歷出現在「未婚無子女」與「已婚有子女」兩個情境，但搭配不同：\n· 未婚無子女：college 就夠（再加 AFQT 不低）\n· 已婚有子女：college 還需加上父母非低收入\n· 已婚無子女：不需要，高中就夠\n同樣的大學學歷，「需要搭配什麼」取決於家庭脈絡。',
+    high_school: '高中學歷是已婚無子女者的<span class="hl">完整配方</span>；在其他情境中，它只有在搭配父母高收入（和 AFQT 不低）時才有用。\n迴歸會給教育一個固定的係數；組態分析則顯示，同樣的學歷在不同家庭狀況中的「份量」完全不同。',
+  };
+  const cells = root.querySelectorAll('[data-f]');
+  const btns = root.querySelectorAll('[data-cond] button');
+  let cur = 'low_AFQT', sel = null;
+  function paint() {
+    cells.forEach((el) => {
+      const R = recipes[el.dataset.f];
+      el.innerHTML = `<span class="fam">${R.name}</span>` + R.r.replace(pat[cur], (s) => `<mark>${s}</mark>`);
+      el.classList.toggle('on', sel === el.dataset.f);
+    });
+    let m = roles[cur];
+    if (sel) {
+      const R = recipes[sel];
+      m = `【${R.name}】避免貧窮的配方：${R.r}\n來源：${R.paths}` +
+        (sel === 'u1' ? '\n未婚又有孩子的黑人男性，在資料中找不到任何一致脫貧的條件組合——家庭狀況對所需資源的影響非常大。' : '') + '\n\n' + m;
+    }
+    root.querySelector('[data-out]').innerHTML = m;
+  }
+  btns.forEach((b) => b.addEventListener('click', () => { btns.forEach((x) => x.classList.toggle('on', x === b)); cur = b.dataset.v; paint(); }));
+  cells.forEach((el) => el.addEventListener('click', () => { sel = sel === el.dataset.f ? null : el.dataset.f; paint(); }));
+  paint();
+})();
+
+/* ---------- 並排比較 ---------- */
+(function () {
+  const root = document.getElementById('w-compare');
+  const btns = root.querySelectorAll('[data-pick] button');
+  const panes = root.querySelectorAll('[data-pane]');
+  btns.forEach((b) => b.addEventListener('click', () => {
+    btns.forEach((x) => x.classList.toggle('on', x === b));
+    panes.forEach((p) => { p.hidden = p.dataset.pane !== b.dataset.v; });
+  }));
+})();
+
+/* ---------- 全書回顧：七組轉變 ---------- */
+(function () {
+  const root = document.getElementById('w-review');
+  const pairs = [
+    ['變數（variable）', '集合（set）', '「AFQT 分數」這個變數，被定義成「高 AFQT 者」「低 AFQT 者」兩個有明確成員標準的集合。'],
+    ['測量（measurement）', '校準（calibration）', '不用樣本平均與標準差，而用外部標準：官方貧窮線的倍數、軍方的 AFQT 分類。'],
+    ['因變數（dependent variable）', '質性結果（qualitative outcome）', '不是解釋所得的變異，而是界定「避免貧窮」這個結果：所得達貧窮線 2 倍是交叉點、3 倍為完全隸屬。'],
+    ['給定母體（given population）', '建構母體（constructed population）', '本章沿用 NLSY 的給定樣本，這組轉變在大樣本示範中較不明顯；但限定在黑人男性、並以頻數門檻排除稀少組合，仍是在界定「哪些案例可彼此比較」。'],
+    ['相關（correlation）', '集合關係（set relation）', '不問 AFQT 與避免貧窮相關多強，而問「某條件組合 ⊆ 避免貧窮」的一致性有多高。'],
+    ['相關矩陣（correlation matrix）', '真值表（truth table）', '表 11-3、11-4 直接攤開 256 個角落中哪些有案例、各自結果是否一致，而不是只看兩兩相關。'],
+    ['淨效應（net effects）', '前因配方（causal recipes）', '表 11-2 的係數比賽 vs. 表 11-5、11-6 的五條配方：條件的作用依脈絡而定。'],
+  ];
+  const order = [4, 1, 6, 0, 3, 5, 2];
+  const box = root.querySelector('[data-rows]');
+  box.innerHTML = pairs.map((p, i) => `<div class="rv-row" data-i="${i}"><span class="no">${i + 1}</span><span>${p[0]} →</span>
+    <select><option value="">— 選擇替代範式的對應 —</option>${order.map((j) => `<option value="${j}">${pairs[j][1]}</option>`).join('')}</select>
+    <div class="ex">${p[2]}</div></div>`).join('');
+  const rows = [...box.querySelectorAll('.rv-row')];
+  const out = root.querySelector('[data-out]');
+  root.querySelector('[data-check]').addEventListener('click', () => {
+    let ok = 0, blank = 0;
+    rows.forEach((r, i) => {
+      const v = r.querySelector('select').value;
+      if (v === '') blank++;
+      const good = v !== '' && +v === i;
+      if (good) ok++;
+      r.classList.toggle('ok', good); r.classList.toggle('ng', v !== '' && !good);
+      r.classList.toggle('show', good);
+    });
+    out.innerHTML = `答對 <span class="hl">${ok} / 7</span>` + (blank ? `（還有 ${blank} 題沒選）` : '') +
+      (ok === 7 ? '\n全對！你已經掌握了全書的骨架。每一組下方說明了它在本章中的樣子。' : '\n答對的題目會顯示它在本章中的體現；再試試其他題，或按「直接看解答」。');
+  });
+  root.querySelector('[data-show]').addEventListener('click', () => {
+    rows.forEach((r, i) => { r.querySelector('select').value = String(i); r.classList.add('ok', 'show'); r.classList.remove('ng'); });
+    out.innerHTML = '以上就是七組轉變。前三組關於「概念與測量」，中間兩組關於「案例與關係」，最後兩組關於「分析與結果呈現」。';
+  });
+})();
+</script>
+</body>
+</html>

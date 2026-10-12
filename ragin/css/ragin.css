@@ -1,0 +1,217 @@
+/* ===========================================================
+   重新設計社會科學研究（Ragin, 2008）互動教材
+   擴充樣式：建立在 ../../css/style.css 之上
+   =========================================================== */
+
+:root {
+  --gold: #b7791f;
+  --gold-soft: #fdf6e3;
+  --rose: #b83280;
+  --rose-soft: #fdeef6;
+  --ok: #2f855a;
+  --ok-soft: #e6f4ea;
+  --bad: #c53030;
+  --bad-soft: #fdecec;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --gold: #e9b45a;
+    --gold-soft: #2c2414;
+    --rose: #f08cc4;
+    --rose-soft: #2e1826;
+    --ok: #68d391;
+    --ok-soft: #15291d;
+    --bad: #fc8181;
+    --bad-soft: #2f1717;
+  }
+}
+
+.brand .logo.rg { background: linear-gradient(135deg, var(--gold), var(--rose)); }
+
+/* ---------- Part banner on index ---------- */
+.part-banner {
+  display: flex; align-items: baseline; gap: .8rem; flex-wrap: wrap;
+  margin: 2.8rem 0 .4rem; padding-bottom: .5rem; border-bottom: 2px solid var(--border);
+}
+.part-banner .pno {
+  font-family: var(--mono); font-size: .78rem; font-weight: 700; letter-spacing: .08em;
+  color: #fff; background: var(--gold); padding: .2rem .6rem; border-radius: 6px;
+}
+.part-banner h2 { margin: 0; font-size: 1.35rem; }
+.part-banner .pdesc { color: var(--ink-soft); font-size: .92rem; width: 100%; margin: .3rem 0 0; }
+.chapter-card .done-mark {
+  display: none; position: absolute; bottom: 1rem; right: 1.2rem; font-size: .75rem; font-weight: 700;
+  color: var(--ok); background: var(--ok-soft); padding: .15rem .5rem; border-radius: 999px;
+}
+.chapter-card.is-done .done-mark { display: inline-block; }
+
+/* ---------- Chapter head extras ---------- */
+.chapter-head .part { font-size: .82rem; color: var(--gold); font-weight: 700; letter-spacing: .04em; }
+.chapter-head .src { font-size: .82rem; color: var(--ink-faint); margin-top: .4rem; }
+
+/* ---------- Learning objectives ---------- */
+.objectives {
+  background: var(--gold-soft); border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--border));
+  border-radius: var(--radius-sm); padding: 1rem 1.2rem; margin: 1.2rem 0 1.6rem;
+}
+.objectives .ct { font-weight: 700; color: var(--gold); margin-bottom: .3rem; }
+.objectives ol, .objectives ul { margin: .3rem 0 0; }
+
+/* ---------- Formula display ---------- */
+.formula {
+  background: var(--bg-card); border: 1px dashed var(--accent); border-radius: var(--radius-sm);
+  padding: 1rem 1.2rem; margin: 1.2rem 0; text-align: center; font-family: var(--mono);
+  font-size: 1.02rem; overflow-x: auto;
+}
+.formula .flabel { display: block; font-family: var(--sans); font-size: .8rem; color: var(--ink-faint); margin-bottom: .4rem; }
+.formula .frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 .25rem; }
+.formula .frac > span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 .3rem .1rem; }
+.formula .frac > span:last-child { padding: .1rem .3rem 0; }
+
+/* ---------- Side-by-side comparison ---------- */
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.4rem 0; }
+.compare > div {
+  border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem 1.1rem; background: var(--bg-card);
+}
+.compare > div h4 { margin: 0 0 .4rem; font-size: 1rem; }
+.compare .old { border-top: 4px solid var(--ink-faint); }
+.compare .new { border-top: 4px solid var(--gold); }
+.compare p, .compare ul { font-size: .93rem; margin: .4rem 0; }
+@media (max-width: 680px) { .compare { grid-template-columns: 1fr; } }
+
+/* ---------- Think / reveal ---------- */
+details.think {
+  border: 1px solid var(--border); border-left: 4px solid var(--rose); background: var(--bg-card);
+  border-radius: var(--radius-sm); padding: .8rem 1.1rem; margin: 1.2rem 0;
+}
+details.think summary { cursor: pointer; font-weight: 700; color: var(--rose); list-style: none; }
+details.think summary::-webkit-details-marker { display: none; }
+details.think summary::before { content: "💭 "; }
+details.think[open] summary { margin-bottom: .5rem; }
+details.think .ans { border-top: 1px dashed var(--border); padding-top: .6rem; }
+
+/* ---------- Quiz ---------- */
+.quiz {
+  border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card);
+  padding: 1.1rem 1.2rem; margin: 1.2rem 0; box-shadow: var(--shadow);
+}
+.quiz .q { font-weight: 600; margin: 0 0 .7rem; }
+.quiz .q::before {
+  content: "Q" attr(data-n); font-family: var(--mono); font-size: .75rem; font-weight: 700; color: #fff;
+  background: var(--accent); border-radius: 5px; padding: .1rem .4rem; margin-right: .5rem; vertical-align: 2px;
+}
+.quiz .opts { display: grid; gap: .45rem; }
+.quiz .opt {
+  text-align: left; font: inherit; font-size: .93rem; cursor: pointer; color: var(--ink);
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .55rem .8rem;
+  transition: border-color .15s, background .15s;
+}
+.quiz .opt:hover { border-color: var(--accent); }
+.quiz .opt.right { background: var(--ok-soft); border-color: var(--ok); }
+.quiz .opt.wrong { background: var(--bad-soft); border-color: var(--bad); }
+.quiz .opt:disabled { cursor: default; }
+.quiz .explain { display: none; margin-top: .8rem; font-size: .92rem; color: var(--ink-soft); border-top: 1px dashed var(--border); padding-top: .7rem; }
+.quiz.answered .explain { display: block; }
+.quiz .verdict { font-weight: 700; margin-right: .3rem; }
+.quiz-score { font-weight: 700; color: var(--accent); margin: .6rem 0; }
+
+/* ---------- Key takeaways ---------- */
+.takeaways { counter-reset: tk; list-style: none; padding: 0; margin: 1.2rem 0; display: grid; gap: .6rem; }
+.takeaways li {
+  counter-increment: tk; position: relative; padding: .8rem 1rem .8rem 3rem; margin: 0;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+}
+.takeaways li::before {
+  content: counter(tk); position: absolute; left: .9rem; top: .8rem; width: 1.5rem; height: 1.5rem;
+  border-radius: 50%; background: var(--gold); color: #fff; font-weight: 700; font-size: .8rem;
+  display: grid; place-items: center;
+}
+
+/* ---------- Glossary ---------- */
+table.gloss td:first-child { font-weight: 700; white-space: nowrap; }
+table.gloss td:nth-child(2) { color: var(--ink-faint); white-space: nowrap; }
+table.gloss td:nth-child(3) { font-family: var(--mono); font-size: .85rem; white-space: nowrap; }
+abbr.t { text-decoration: underline dotted var(--accent); text-underline-offset: 3px; cursor: help; }
+
+/* ---------- Data tables used in widgets ---------- */
+table.tbl.center th, table.tbl.center td { text-align: center; }
+table.tbl td.hi { background: var(--accent2-soft) !important; font-weight: 700; }
+table.tbl td.lo { color: var(--ink-faint); }
+table.tbl td.warnc { background: var(--warn-soft) !important; }
+table.tbl input[type=number] {
+  width: 4.2rem; font-family: var(--mono); font-size: .88rem; padding: .25rem .35rem; text-align: center;
+  border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--ink);
+}
+
+/* ---------- Stat chips ---------- */
+.stats { display: flex; flex-wrap: wrap; gap: .7rem; margin: .8rem 0; }
+.stat {
+  flex: 1 1 140px; background: var(--bg-soft); border-radius: var(--radius-sm); padding: .7rem .9rem;
+  border: 1px solid var(--border);
+}
+.stat .k { font-size: .75rem; color: var(--ink-faint); font-weight: 600; }
+.stat .v { font-family: var(--mono); font-size: 1.35rem; font-weight: 700; color: var(--accent); }
+.stat .v.gold { color: var(--gold); }
+.stat .v.ok { color: var(--ok); }
+.stat .v.bad { color: var(--bad); }
+
+/* ---------- SVG plot helpers ---------- */
+.plot { width: 100%; max-width: 460px; height: auto; display: block; margin: 0 auto; }
+.plot .axis { stroke: var(--ink-faint); stroke-width: 1; }
+.plot .grid { stroke: var(--border); stroke-width: 1; }
+.plot .diag { stroke: var(--gold); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.plot .lbl { fill: var(--ink-faint); font-size: 11px; font-family: var(--sans); }
+.plot .ttl { fill: var(--ink-soft); font-size: 12px; font-weight: 600; font-family: var(--sans); }
+.plot .pt { fill: var(--accent); fill-opacity: .75; stroke: var(--bg-card); stroke-width: 1; }
+.plot .pt.off { fill: var(--bad); }
+.plot .pt.sel { fill: var(--rose); }
+.plot .curve { fill: none; stroke: var(--accent); stroke-width: 2.2; }
+.plot .area-ok { fill: var(--ok); fill-opacity: .07; }
+.plot .area-bad { fill: var(--bad); fill-opacity: .07; }
+
+/* ---------- Two-col widget layout ---------- */
+.wgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; align-items: start; }
+@media (max-width: 720px) { .wgrid { grid-template-columns: 1fr; } }
+
+/* ---------- Segmented toggle ---------- */
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; flex-wrap: wrap; }
+.seg button {
+  font: inherit; font-size: .85rem; padding: .4rem .8rem; border: 0; background: var(--bg); color: var(--ink-soft); cursor: pointer;
+  border-right: 1px solid var(--border);
+}
+.seg button:last-child { border-right: 0; }
+.seg button.on { background: var(--accent); color: #fff; }
+
+/* ---------- Software steps (fsQCA / R) ---------- */
+.sw-tabs { margin: 1.2rem 0; }
+.sw-tabs .seg { margin-bottom: .6rem; }
+.sw-pane { display: none; }
+.sw-pane.on { display: block; }
+.menu-path { font-family: var(--mono); font-size: .85rem; background: var(--bg-soft); padding: .1rem .45rem; border-radius: 5px; white-space: nowrap; }
+
+/* ---------- Done toggle ---------- */
+.done-box {
+  display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; justify-content: space-between;
+  margin: 2.5rem 0 0; padding: 1rem 1.2rem; border-radius: var(--radius-sm);
+  background: var(--accent-soft); border: 1px solid var(--border);
+}
+.done-box.is-done { background: var(--ok-soft); }
+.done-box .btn.ok { background: var(--ok); border-color: var(--ok); }
+
+/* ---------- Simplified/Traditional note ---------- */
+.sc { font-size: .8em; color: var(--ink-faint); }
+
+@media (max-width: 600px) {
+  .formula { font-size: .9rem; }
+  .stat .v { font-size: 1.15rem; }
+}
+
+/* ---------- 窄螢幕防溢出 ---------- */
+.step > div, .field, .wgrid > *, .compare > div { min-width: 0; }
+.field select, .field input[type=text], .field input[type=number] { max-width: 100%; }
+.menu-path { white-space: normal; overflow-wrap: anywhere; }
+main svg { max-width: 100%; height: auto; }
+@media (max-width: 600px) {
+  code.inline { white-space: normal; overflow-wrap: anywhere; }
+  .field select { min-width: 0 !important; width: 100%; }
+}

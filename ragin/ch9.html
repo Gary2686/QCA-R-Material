@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 9 章 容易反事實與困難反事實 · 重新設計社會科學研究</title>
+<meta name="description" content="Ragin《重新設計社會科學研究》第 9 章互動教材：容易反事實與困難反事實、複雜解／中間解／簡約解、方向性預期與 fsQCA／R 操作">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="css/ragin.css">
+<style>
+  /* ---- 本章專用：卡諾圖、解的連續體、判斷練習、刪除練習 ---- */
+  .km { border-collapse: collapse; margin: .4rem auto; font-family: var(--mono); font-size: .8rem; }
+  .km th { font-weight: 600; color: var(--ink-soft); padding: .25rem .35rem; background: var(--bg-soft); border: 1px solid var(--border); }
+  .km td { width: 2.3rem; height: 2.1rem; text-align: center; border: 1px solid var(--border); cursor: pointer; font-weight: 700; }
+  .km td.pos { background: var(--accent2-soft); color: var(--accent2); }
+  .km td.neg { background: var(--bg-card); color: var(--ink-faint); }
+  .km td.easy { background: var(--ok-soft); color: var(--ok); box-shadow: inset 0 0 0 2px var(--ok); }
+  .km td.hard { background: var(--bad-soft); color: var(--bad); }
+  .km td.rem { background: var(--bg-soft); color: var(--ink-faint); font-weight: 400; }
+  .km td.sel { outline: 3px solid var(--gold); outline-offset: -3px; }
+  .km .corner { font-size: .7rem; }
+  .legend { display: flex; flex-wrap: wrap; gap: .4rem .9rem; font-size: .8rem; color: var(--ink-soft); margin: .5rem 0; justify-content: center; }
+  .legend span::before { content: ""; display: inline-block; width: .85rem; height: .85rem; border-radius: 3px; margin-right: .3rem; vertical-align: -2px; border: 1px solid var(--border); }
+  .legend .l-pos::before { background: var(--accent2-soft); border-color: var(--accent2); }
+  .legend .l-neg::before { background: var(--bg-card); }
+  .legend .l-easy::before { background: var(--ok-soft); border: 2px solid var(--ok); }
+  .legend .l-hard::before { background: var(--bad-soft); border-color: var(--bad); }
+  .legend .l-rem::before { background: var(--bg-soft); }
+  .contin { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: .4rem; align-items: stretch; margin: .8rem 0; }
+  .contin .box { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .6rem .7rem; background: var(--bg-card); text-align: center; }
+  .contin .box .t { font-size: .75rem; font-weight: 700; color: var(--ink-faint); }
+  .contin .box .e { font-family: var(--mono); font-size: .92rem; font-weight: 700; margin-top: .25rem; word-break: break-word; }
+  .contin .box.c { border-top: 4px solid var(--ink-faint); }
+  .contin .box.i { border-top: 4px solid var(--ok); }
+  .contin .box.p { border-top: 4px solid var(--gold); }
+  .contin .sub { align-self: center; font-family: var(--mono); font-size: 1.2rem; color: var(--ink-faint); }
+  @media (max-width: 640px) { .contin { grid-template-columns: 1fr; } .contin .sub { transform: rotate(90deg); justify-self: center; } }
+  .dirrow { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin: .35rem 0; }
+  .dirrow .nm { min-width: 7.5rem; font-weight: 600; font-size: .9rem; }
+  .dirrow .nm code { font-family: var(--mono); color: var(--accent); }
+  .jcard { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .8rem 1rem; margin: .7rem 0; background: var(--bg); }
+  .jcard .sc-t { font-size: .92rem; margin: 0 0 .5rem; }
+  .jcard .seg { margin-right: .5rem; }
+  .jcard .fb { font-size: .88rem; margin-top: .5rem; color: var(--ink-soft); display: none; }
+  .jcard.done .fb { display: block; }
+  .jcard.ok { border-left: 4px solid var(--ok); }
+  .jcard.no { border-left: 4px solid var(--bad); }
+  .lit { font-family: var(--mono); font-weight: 700; font-size: .95rem; cursor: pointer; border: 1px solid var(--border); background: var(--bg); color: var(--ink); border-radius: 7px; padding: .3rem .6rem; margin: .15rem; }
+  .lit:hover { border-color: var(--accent); }
+  .lit.gone { text-decoration: line-through; color: var(--ink-faint); background: var(--ok-soft); border-color: var(--ok); }
+  .lit.locked { background: var(--bad-soft); border-color: var(--bad); }
+  .prow { display: flex; align-items: center; flex-wrap: wrap; gap: .3rem; padding: .5rem 0; border-bottom: 1px dashed var(--border); }
+  .prow .lab { font-size: .8rem; color: var(--ink-faint); min-width: 4.5rem; }
+  .prow .arrow { color: var(--ink-faint); margin: 0 .3rem; }
+  .prow .res { font-family: var(--mono); font-weight: 700; color: var(--ok); }
+</style>
+</head>
+<body>
+<div id="readbar"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="logo rg">R</span><span>重新設計社會科學研究<small>Ragin (2008) 互動教材</small></span></a>
+    <nav class="topnav">
+      <a href="index.html">本書首頁</a>
+      <a href="ch0.html">導讀</a>
+      <a href="ch1.html">第一篇</a>
+      <a href="ch4.html">第二篇</a>
+      <a href="ch6.html">第三篇</a>
+      <a href="ch8.html">第四篇</a>
+      <a href="../index.html">QCA with R ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="chapter-head">
+  <div class="part">第四篇　因果複雜性分析與淨效應分析</div>
+  <div class="eyebrow">CHAPTER 9</div>
+  <h1>容易反事實與困難反事實</h1>
+  <div class="en">Easy Versus Difficult Counterfactuals</div>
+  <div class="src">對應原書第 9 章（中譯本頁 115–126）</div>
+</div>
+
+<p class="lead">你觀察到：「天天運動、飲食清淡、<em>不</em>吃保健食品」的人都很健康。有人問：如果他們<em>也</em>吃了保健食品，還會健康嗎？大多數人會毫不猶豫地說「會」——多加一個應該有益（至少無害）的東西，不會把好結果變不見。但反過來問：「如果他們<em>不</em>運動，只靠飲食清淡和不吃保健食品，還會健康嗎？」這就難說了。兩個問題都在談<strong>沒有觀察到的情況</strong>，但一個「容易」回答、一個「困難」。本章要把這個直覺，變成 QCA 中處理<strong>邏輯餘項</strong>的正式工具：<strong>中間解（intermediate solution）</strong>。</p>
+
+<div class="objectives">
+  <div class="ct">🎯 讀完本章，你應該能夠……</div>
+  <ol>
+    <li>根據理論與實質知識，判斷一個反事實是<strong>容易</strong>的還是<strong>困難</strong>的。</li>
+    <li>說明<strong>複雜解 ⊆ 中間解 ⊆ 簡約解</strong>的子集合關係，以及它們各自對反事實的「容忍度」。</li>
+    <li>依照 Ragin 的程序，從複雜解出發、在不違反子集原則下刪除條件，<strong>手算出最佳中間解</strong>。</li>
+    <li>解釋為什麼案例導向研究者其實<strong>一直在隱含地使用容易反事實</strong>。</li>
+    <li>在 fsQCA 與 R（<code class="inline">minimize(..., dir.exp = ...)</code>）中設定<strong>方向性預期</strong>，取得中間解。</li>
+  </ol>
+</div>
+
+<nav class="toc">
+  <strong>本章目錄</strong>
+  <ol>
+    <li><a href="#s1">什麼是容易與困難的反事實</a></li>
+    <li><a href="#s2">容易反事實與 QCA：複雜／簡約連續體</a></li>
+    <li><a href="#s3">示範：Stokke 的國際漁業「點名施壓」研究</a></li>
+    <li><a href="#s4">互動實驗室：方向性預期如何改變中間解</a></li>
+    <li><a href="#s5">反事實分析與案例導向研究</a></li>
+    <li><a href="#s6">實用附錄：推導中間解（fsQCA／R）</a></li>
+    <li><a href="#s7">本章重點、名詞與自我測驗</a></li>
+  </ol>
+</nav>
+
+<!-- ================================================= -->
+<h2 id="s1">1. 什麼是容易與困難的反事實 <span class="en">· Easy versus difficult counterfactuals</span></h2>
+
+<p>先複習第 8 章：社會現象的<strong>有限多樣性（limited diversity）</strong>讓真值表中充滿沒有案例的列，也就是<strong>邏輯餘項（logical remainders）</strong>。研究者若要用這些列來簡化結果，就得做<strong>反事實（counterfactual）</strong>的思想實驗：「如果真的有這種案例，它會出現結果嗎？」本章的關鍵問題是：<strong>哪些反事實可以放心地做、哪些需要特別論證？</strong></p>
+
+<h3>情境一：加入一個「已知有幫助」的條件 → 容易</h3>
+<p>假設理論告訴我們，四個條件 A、B、C、D 都與結果 Y 有關，而且<strong>它們「存在」</strong>（而非缺席）會促成 Y。資料顯示：</p>
+<div class="formula"><span class="flabel">觀察到的組態</span>A·B·C·~D → Y　（有案例，且都出現 Y）</div>
+<p>研究者懷疑真正重要的是 A、B、C，而 <code class="inline">~D</code> 只是「碰巧伴隨」。要確認這點，最好的證據是一組 <strong>A·B·C·D</strong> 的案例——可惜真實世界裡沒有。於是做思想實驗：<em>如果</em> A·B·C·D 存在，它會導致 Y 嗎？若答案為「會」，就能進行布林簡化：</p>
+<div class="formula"><span class="flabel">納入反事實 A·B·C·D 之後</span>A·B·C·~D + A·B·C·D → Y<br>⇒ A·B·C·(~D + D) → Y<br>⇒ <strong>A·B·C → Y</strong></div>
+<p>這個推論合理嗎？取決於既有知識。因為我們相信 <strong>D 的存在只會幫助 Y</strong>（或至少 D 的缺席不是推手），把 D 加進一個<em>本來就已經會產生 Y</em> 的組合，結果當然還會出現。這就是<strong>容易的反事實（easy counterfactual）</strong>：把一個<strong>多餘但有益</strong>的條件加進已知會成功的配方。</p>
+
+<h3>情境二：拿掉一個「已知有幫助」的條件 → 困難</h3>
+<p>現在反過來：觀察到的是 <strong>A·B·C·D → Y</strong>，研究者想主張 D 是多餘的，但 <strong>A·B·C·~D</strong> 沒有案例。要宣稱「沒有 D 也會成功」，等於從一個成功配方中<strong>移除一個理論上有貢獻的成分</strong>。這是<strong>困難的反事實（difficult counterfactual）</strong>——不是不能做，而是必須提出詳細的理論論證與經驗支持。成功做到的話，往往能帶來重要的理論洞見。</p>
+
+<div class="compare">
+  <div class="new">
+    <h4>容易反事實</h4>
+    <ul>
+      <li>觀察：A·B·C·~D → Y</li>
+      <li>假想：A·B·C·<strong>D</strong> → Y？</li>
+      <li>動作：<strong>加入</strong>一個已知有益的條件</li>
+      <li>直覺：「多給一點好東西，不會讓好結果消失」</li>
+    </ul>
+  </div>
+  <div class="old">
+    <h4>困難反事實</h4>
+    <ul>
+      <li>觀察：A·B·C·D → Y</li>
+      <li>假想：A·B·C·<strong>~D</strong> → Y？</li>
+      <li>動作：<strong>移除</strong>一個已知有益的條件</li>
+      <li>直覺：「少了一個關鍵成分，還能成功嗎？」需要論證</li>
+    </ul>
+  </div>
+</div>
+
+<div class="callout key">
+  <div class="ct">🔑 判斷規則（一句話版）</div>
+  <p>看反事實組態與觀察組態「不同的那個條件」：如果反事實把它設成<strong>理論預期會促成結果的狀態</strong> → 容易；如果設成<strong>理論預期不利於結果的狀態</strong> → 困難；如果理論對它<strong>沒有方向性預期</strong> → 不能當作容易，需要另外論證。</p>
+</div>
+
+<p>還有三點要注意：</p>
+<ul>
+  <li><strong>容易／困難是連續的</strong>，不是硬性二分。一端是「把多餘的有益條件加進成功配方」，另一端是「從成功配方拿掉有貢獻的條件」。</li>
+  <li><strong>判斷依據是學術社群的知識存量</strong>，而不是研究者個人的偏好。這凸顯社會科學研究是<strong>依賴理論、具社會與集體性質</strong>的事業。</li>
+  <li>傳統方法論談反事實時，多半談的是「困難」型：例如 Fearon（1996）所說的「如果 A 沒有發生，B 就不會發生」——這是在<strong>移除</strong>一個原因，且通常是單一因素、非組態的版本。</li>
+</ul>
+
+<div class="widget" id="w-judge">
+  <div class="widget-head"><span class="wtag">練習</span> 容易還是困難？判斷 8 個反事實</div>
+  <div class="widget-body">
+    <p style="margin-top:0">每題都給你一個<strong>觀察到會出現結果</strong>的組態，以及一個<strong>沒有案例</strong>的反事實組態（兩者只差一個條件）。根據括號中的「既有知識」，判斷這個反事實屬於哪一類。</p>
+    <div data-cards></div>
+    <div class="result-box" data-jscore>尚未作答。</div>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s2">2. 容易反事實與 QCA：複雜／簡約連續體 <span class="en">· Easy counterfactuals and QCA</span></h2>
+
+<p>面對大量邏輯餘項，QCA 的使用者傳統上只有兩個選擇：</p>
+<ol>
+  <li><strong>完全不用餘項</strong>：把所有餘項當成「不會出現結果」。得到<strong>複雜解（complex solution）</strong>，又稱保守解（conservative solution）。缺點是可能<em>不必要地複雜</em>——連情境一那種顯然合理的簡化都做不到。</li>
+  <li><strong>只要能讓結果更簡約，就使用任何餘項</strong>：得到<strong>簡約解（parsimonious solution）</strong>。缺點是會<em>不加審查地</em>同時納入容易與困難的反事實，可能簡約到不切實際——就像情境二那樣把 D 輕率地丟掉。</li>
+</ol>
+
+<p>Ragin 的建議是：不要二選一，而是把這兩種解看成<strong>同一條連續體的兩個端點</strong>。兩端都建立在相同的證據上，差別只在於<strong>對反事實的容忍程度</strong>。</p>
+
+<figure class="diagram">
+  <svg viewBox="0 0 560 250" style="max-width:560px" aria-label="複雜解、中間解、簡約解的巢套關係">
+    <rect x="10" y="10" width="540" height="230" rx="18" fill="var(--gold)" fill-opacity=".10" stroke="var(--gold)" stroke-width="2"/>
+    <text x="30" y="36" font-size="14" font-weight="700" fill="var(--gold)">簡約解：容易＋困難反事實都納入（最大的集合）</text>
+    <rect x="50" y="56" width="400" height="160" rx="16" fill="var(--ok)" fill-opacity=".10" stroke="var(--ok)" stroke-width="2"/>
+    <text x="68" y="82" font-size="14" font-weight="700" fill="var(--ok)">中間解：只納入容易反事實</text>
+    <rect x="90" y="102" width="220" height="90" rx="14" fill="var(--ink-faint)" fill-opacity=".14" stroke="var(--ink-faint)" stroke-width="2"/>
+    <text x="200" y="135" font-size="14" font-weight="700" text-anchor="middle" fill="var(--ink-soft)">複雜解</text>
+    <text x="200" y="157" font-size="12" text-anchor="middle" fill="var(--ink-soft)">不納入任何反事實</text>
+    <text x="200" y="175" font-size="12" text-anchor="middle" fill="var(--ink-soft)">（只涵蓋觀察到的正面列）</text>
+  </svg>
+  <figcaption>複雜解 ⊆ 中間解 ⊆ 簡約解：越往外，納入的反事實越多、式子越簡短</figcaption>
+</figure>
+
+<h3>社會學家通常想要「中間」</h3>
+<p>Ragin 以 Barrington Moore（1966）《民主與專制的社會起源》為例：這本書比較 8 個國家的政治發展。</p>
+<ul>
+  <li><strong>極度複雜</strong>的解讀：8 個國家 = 8 種不同的條件組合，對應 8 種不同結果——什麼都沒簡化。</li>
+  <li><strong>極度簡約</strong>的解讀：只抓一個條件，例如「城市資產階級越強，越民主」。</li>
+  <li><strong>Moore 實際給的</strong>：幾條不同的政治發展<em>路徑</em>，把國家分成少數幾群——這正是介於兩端之間的解。</li>
+</ul>
+<p>QCA 的優勢在於：它不只能算出兩個端點，還提供了<strong>系統化建構中間解</strong>的工具。</p>
+
+<h3>原書表 9-1：一個四條件的小例子</h3>
+<p>四個條件 A、B、C、D，結果 Y。假設既有知識認為<strong>四個條件都是「存在」才促成 Y</strong>。16 列中只有 6 列有案例，10 列是餘項（「?」）：</p>
+
+<div class="table-wrap">
+  <table class="tbl center">
+    <thead><tr><th>A</th><th>B</th><th>C</th><th>D</th><th>Y</th><th></th><th>A</th><th>B</th><th>C</th><th>D</th><th>Y</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td></td><td>1</td><td>0</td><td>0</td><td>0</td><td>?</td></tr>
+      <tr><td>0</td><td>0</td><td>0</td><td>1</td><td>?</td><td></td><td>1</td><td>0</td><td>0</td><td>1</td><td>?</td></tr>
+      <tr><td>0</td><td>0</td><td>1</td><td>0</td><td>?</td><td></td><td>1</td><td>0</td><td>1</td><td>0</td><td>?</td></tr>
+      <tr><td>0</td><td>0</td><td>1</td><td>1</td><td>?</td><td></td><td>1</td><td>0</td><td>1</td><td>1</td><td>?</td></tr>
+      <tr><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td><td></td><td class="hi">1</td><td class="hi">1</td><td class="hi">0</td><td class="hi">0</td><td class="hi">1</td></tr>
+      <tr><td>0</td><td>1</td><td>0</td><td>1</td><td>0</td><td></td><td class="hi">1</td><td class="hi">1</td><td class="hi">0</td><td class="hi">1</td><td class="hi">1</td></tr>
+      <tr><td>0</td><td>1</td><td>1</td><td>0</td><td>?</td><td></td><td>1</td><td>1</td><td>1</td><td>0</td><td>?</td></tr>
+      <tr><td>0</td><td>1</td><td>1</td><td>1</td><td>0</td><td></td><td>1</td><td>1</td><td>1</td><td>1</td><td>?</td></tr>
+    </tbody>
+  </table>
+</div>
+<p style="font-size:.85rem;color:var(--ink-faint)">原書表 9-1（1 = 是、0 = 否、? = 無案例的邏輯餘項）。為節省空間分成左右兩欄排列。</p>
+
+<ul>
+  <li><strong>複雜解</strong>：兩個正面列 A·B·~C·~D 與 A·B·~C·D 只差 D，合併為 <strong>A·B·~C</strong>。不用任何餘項，到此為止。</li>
+  <li><strong>簡約解</strong>：允許任何餘項，結果是 <strong>A</strong>。（檢查：A=1 的 8 列中，2 列是正面、6 列是餘項，沒有任何負面列，所以 A 可以單獨成立；而 B·~C 或 ~C 都會碰到負面列 0100、0000。）</li>
+</ul>
+
+<div class="callout info">
+  <div class="ct">ℹ️ 為什麼複雜解一定是簡約解的子集？</div>
+  <p>兩個解都必須涵蓋所有「Y = 是」的觀察列；簡約解只是<strong>額外</strong>把一些餘項當成正面案例來用。所以簡約解涵蓋的列，一定包含複雜解涵蓋的列——A·B·~C ⊆ A。</p>
+</div>
+
+<p>連續體上還有其他合法的解。規則是：<strong>必須保留簡約解中的條件（A），再從複雜解（A·B·~C）的其他條件中挑一些保留</strong>。於是得到兩個中間解：</p>
+
+<div class="formula"><span class="flabel">複雜／簡約連續體（原書頁 119）</span>
+A·B·~C　⊆　{ <strong>A·B</strong>　或　<strong>A·~C</strong> }　⊆　A</div>
+
+<ul>
+  <li><strong>A·B</strong>（刪除 ~C）：需要假設餘項 A·B·C·D 與 A·B·C·~D 會出現 Y。這是在把 <strong>C 加進</strong>成功配方——而 C 的存在被認為有益 → <span style="color:var(--ok);font-weight:700">容易</span>。</li>
+  <li><strong>A·~C</strong>（刪除 B）：需要假設餘項 A·~B·~C·D 與 A·~B·~C·~D 會出現 Y。這是在從成功配方中<strong>拿掉 B</strong>——而 B 的存在被認為有益 → <span style="color:var(--bad);font-weight:700">困難</span>。</li>
+</ul>
+
+<p>「只納入容易反事實」的原則支持 <strong>A·B</strong> 為最佳中間解。有趣的是，這和傳統案例研究者會得出的結論一樣——他們關心的條件是：① 正面案例（或至少其中一群）共享的；② 被相信與結果有關的；③ 不出現在任何負面案例中的。</p>
+
+<div class="widget" id="w-cont">
+  <div class="widget-head"><span class="wtag">互動</span> 沿著連續體走一遍（原書表 9-1）</div>
+  <div class="widget-body">
+    <p style="margin-top:0">選擇一個解，下方的<strong>卡諾圖（Karnaugh map）</strong>會標出它涵蓋的列。每一格就是真值表的一列：列標題是 A、B，欄標題是 C、D。點任一格可看該列的組態。</p>
+    <div class="controls">
+      <div class="seg" data-pick>
+        <button data-v="0" class="on">複雜解 A·B·~C</button>
+        <button data-v="1">中間解 A·B</button>
+        <button data-v="2">中間解 A·~C</button>
+        <button data-v="3">簡約解 A</button>
+      </div>
+    </div>
+    <div class="table-wrap"><table class="km" data-km></table></div>
+    <div class="legend"><span class="l-pos">觀察到 Y=1</span><span class="l-neg">觀察到 Y=0</span><span class="l-easy">被納入的容易反事實</span><span class="l-hard">被納入的困難反事實</span><span class="l-rem">未使用的餘項</span></div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<details class="think">
+  <summary>想一想：為什麼不能把 A 也刪掉，得到 B·~C？</summary>
+  <div class="ans">
+    <p>因為 B·~C 會涵蓋 0100（A 缺、B 在、C 缺、D 缺），而那一列是<strong>觀察到 Y = 否</strong>的負面案例。任何解都不能涵蓋負面列——這也是為什麼簡約解的條件（A）一定要保留：<strong>中間解必須是簡約解的子集</strong>，這叫做<strong>子集原則</strong>。</p>
+  </div>
+</details>
+
+<p>Ragin 歸納出建構最佳中間解的程序：<strong>從複雜解中，刪除那些與既有知識不一致的條件；同時遵守子集原則——結果必須仍是簡約解的子集</strong>。QCA 的一大優點是：所有容易與困難的反事實都被<strong>明白寫出</strong>，納入的過程也是透明的，研究的生產者與讀者都能檢視與評估。</p>
+
+<!-- ================================================= -->
+<h2 id="s3">3. 示範：Stokke 的國際漁業「點名施壓」研究 <span class="en">· A demonstration</span></h2>
+
+<p>Olav Schram Stokke（2004）研究國際漁業制度中的「<strong>點名施壓（shaming）</strong>」：當某國違反國際漁業協定時，其他國家公開批評它，試圖讓它改變行為。<span class="sc">（簡中譯本將 shame 譯為「抹黑」。）</span>他分析了 10 次施壓，5 次成功（被批評的國家改變了行為）、5 次失敗。五個前因條件：</p>
+
+<div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th>代號</th><th>條件</th><th>白話</th><th>預期方向</th></tr></thead>
+    <tbody>
+      <tr><td><code>A</code></td><td>建議（Advice）</td><td>施壓者的批評能否援引制度內科學諮詢機構的明確建議</td><td>存在有利</td></tr>
+      <tr><td><code>C</code></td><td>承諾（Commitment）</td><td>被批評的行為是否明確違反制度決策機構通過的保育措施</td><td>存在有利</td></tr>
+      <tr><td><code>S</code></td><td>未來影響（Shadow of the future）</td><td>被施壓者認為日後還需要在制度內談新交易，若無視批評可能受損</td><td>存在有利</td></tr>
+      <tr><td><code>I</code></td><td>不便（Inconvenience）</td><td>要求對方做的行為改變，對對方而言有多不方便</td><td><strong>缺席</strong>有利</td></tr>
+      <tr><td><code>R</code></td><td>國內反響（Reverberation）</td><td>不遵守協定會在被施壓國國內引發的政治代價</td><td>存在有利</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>原書表 9-2 只列出有案例的 8 列。5 個條件共有 2<sup>5</sup> = 32 列，所以有 <strong>24 列是餘項</strong>——這是小樣本研究的典型處境，可能的解非常多。</p>
+
+<div class="table-wrap">
+  <table class="tbl center">
+    <thead><tr><th>建議 A</th><th>承諾 C</th><th>未來影響 S</th><th>不便 I</th><th>國內反響 R</th><th>成功 Y</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>0</td><td>1</td><td>1</td><td>1</td><td class="hi">1</td></tr>
+      <tr><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+      <tr><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+      <tr><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+      <tr><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td class="hi">1</td></tr>
+      <tr><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+      <tr><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td class="hi">1</td></tr>
+      <tr><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td class="hi">1</td></tr>
+    </tbody>
+  </table>
+</div>
+<p style="font-size:.85rem;color:var(--ink-faint)">原書表 9-2（未列出餘項；1 = 是、0 = 否）。10 個案例落在 8 列中。</p>
+
+<h3>兩個端點</h3>
+<div class="formula"><span class="flabel">複雜解（不用任何餘項）</span>A·S·I·R + A·C·S·~I·~R + A·~C·~S·~I·~R → Y</div>
+<p>32 列中只有 4 列呈現結果，而且只發生了一次簡化：A·C·S·I·R 與 A·~C·S·I·R 只差 C，合併為 A·S·I·R。</p>
+<div class="formula"><span class="flabel">簡約解（容易與困難的餘項都用）</span>~I + S·R → Y</div>
+<p>意思是：當「改變行為並不麻煩」（~I），或「未來還要打交道」且「國內有反響」（S·R）時，施壓會成功。這不算不合理，但案例研究者會立刻注意到一件事：<strong>四個成功組態全都有 A</strong>（科學諮詢機構的支持）。這樣明顯的共同點——甚至可視為成功的必要條件——卻在簡約解中消失了。</p>
+
+<div class="table-wrap">
+  <table class="tbl center">
+    <thead><tr><th>複雜端</th><th></th><th>簡約端</th></tr></thead>
+    <tbody>
+      <tr><td>A·~C·~S·~I·~R</td><td rowspan="2">⊆</td><td rowspan="2">~I</td></tr>
+      <tr><td>A·C·S·~I·~R</td></tr>
+      <tr><td>A·S·I·R</td><td>⊆</td><td>S·R</td></tr>
+    </tbody>
+  </table>
+</div>
+<p style="font-size:.85rem;color:var(--ink-faint)">註：簡中譯本頁 122 寫「A·~C·~S·~R 是 ~I 的子集」，漏了 ~I；應為 A·~C·~S·~I·~R。</p>
+
+<h3>逐項推導中間解</h3>
+<p>做法很機械：<strong>檢查複雜端的每一項，問「哪些條件可以刪？」</strong>每個條件只有三種命運：</p>
+<ol>
+  <li>它出現在對應的簡約項中 → <strong>不能刪</strong>（否則違反子集原則）。</li>
+  <li>它的狀態<strong>符合</strong>預期方向（例如 A 存在）→ <strong>不刪</strong>，刪掉它等於做困難反事實。</li>
+  <li>它的狀態<strong>違反</strong>預期方向（例如 I 存在、或 ~R）→ <strong>可以刪</strong>，因為「換成有利狀態，成功案例依然會成功」——這是容易反事實。</li>
+</ol>
+
+<div class="widget" id="w-prune">
+  <div class="widget-head"><span class="wtag">練習</span> 親手刪除條件，推導 Stokke 的中間解</div>
+  <div class="widget-body">
+    <p style="margin-top:0">點擊你認為<strong>可以刪除</strong>的條件。答對會劃掉（綠），答錯會告訴你為什麼不能刪（紅）。再點一次可復原。預期方向：A、C、S、R 存在有利；I <strong>缺席</strong>有利。</p>
+    <div data-rows></div>
+    <div class="result-box" data-out>從第一項開始吧。</div>
+  </div>
+</div>
+
+<p>三個中間項是 A·S·R、A·C·S·~I、A·~I。合起來：</p>
+<div class="formula">A·S·R + A·C·S·~I + A·~I → Y<br>⇒ <strong>A·S·R + A·~I → Y</strong></div>
+<p>因為 A·C·S·~I 是 A·~I 的子集（凡是 A·C·S·~I 的案例也都是 A·~I 的案例），所以它在邏輯上是多餘的，可以拿掉。結論：施壓成功有兩條路徑——① 有科學建議支持、未來還要打交道、且國內有反響（<strong>A·S·R</strong>）；② 有科學建議支持、且改變行為不麻煩（<strong>A·~I</strong>）。</p>
+
+<div class="table-wrap">
+  <table class="tbl center">
+    <thead><tr><th>複雜解</th><th></th><th>中間解（最佳）</th><th></th><th>簡約解</th></tr></thead>
+    <tbody>
+      <tr><td>A·~C·~S·~I·~R<br>A·C·S·~I·~R</td><td>⊆</td><td><strong>A·~I</strong></td><td>⊆</td><td>~I</td></tr>
+      <tr><td>A·S·I·R</td><td>⊆</td><td><strong>A·S·R</strong></td><td>⊆</td><td>S·R</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="callout tip">
+  <div class="ct">📌 這個中間解為什麼是「最佳」？</div>
+  <p>它是複雜解的超集、簡約解的子集，而且<strong>只納入容易反事實</strong>，把簡約解中那些困難的反事實（例如「沒有科學建議也能成功」）排除在外。它在複雜與簡約之間取得平衡，所用的程序正好模仿了傳統案例導向的比較研究。另外，Stokke 原本就把 A 放進結果，是依照 Ragin（2000）的建議：先做必要條件檢驗，再做充分性分析。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s4">4. 互動實驗室：方向性預期如何改變中間解 <span class="en">· Interactive lab</span></h2>
+
+<p>軟體推導中間解時，你要告訴它每個條件的<strong>方向性預期（directional expectation）</strong>：存在有利、缺席有利，或沒有明確預期（皆可）。下面的比較器會即時用布林最小化重算三種解，並在卡諾圖上標出哪些餘項被當作<strong>容易反事實</strong>（中間解納入）、哪些只被<strong>簡約解</strong>使用（困難或缺乏依據的反事實）。</p>
+
+<div class="widget" id="w-lab">
+  <div class="widget-head"><span class="wtag">互動</span> 三種解比較器</div>
+  <div class="widget-body">
+    <div class="controls">
+      <div class="field"><label>資料</label>
+        <div class="seg" data-ds>
+          <button data-v="t1" class="on">原書表 9-1（A B C D）</button>
+          <button data-v="t2">原書表 9-2（Stokke）</button>
+        </div>
+      </div>
+      <div class="field"><label>&nbsp;</label><button class="btn ghost" type="button" data-reset>恢復原書的預期設定</button></div>
+    </div>
+    <div data-dirs></div>
+    <div class="contin" data-contin></div>
+    <div class="stats">
+      <div class="stat"><div class="k">邏輯餘項</div><div class="v" data-n-rem>—</div></div>
+      <div class="stat"><div class="k">容易反事實（中間解採用）</div><div class="v ok" data-n-easy>—</div></div>
+      <div class="stat"><div class="k">僅簡約解採用的餘項</div><div class="v bad" data-n-hard>—</div></div>
+    </div>
+    <div class="table-wrap"><table class="km" data-km></table></div>
+    <div class="legend"><span class="l-pos">觀察到 Y=1</span><span class="l-neg">觀察到 Y=0</span><span class="l-easy">容易反事實</span><span class="l-hard">僅簡約解使用</span><span class="l-rem">未使用的餘項</span></div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<p>試試看這幾個實驗：</p>
+<ul>
+  <li>表 9-1 把 C 改成「缺席」：中間解會停在 A·B·~C——因為 ~C 現在符合預期，刪掉它反而是困難反事實。</li>
+  <li>表 9-1 把 B 改成「缺席」、C 改成「缺席」：中間解變成 A·~C，這就是原書提到的第二個中間解。</li>
+  <li>表 9-2 把 A 改成「皆可」：A 仍然保留（沒有預期 ≠ 可以刪除）；但若把 A 改成「缺席」，中間解就一路退到簡約解 ~I + S·R。</li>
+  <li>把所有條件都設成「皆可」：中間解 = 複雜解，因為沒有任何反事實有理論依據。</li>
+</ul>
+
+<details class="think">
+  <summary>想一想：表 9-2 若把 I 也設成「存在有利」，為什麼中間解仍然是 A·S·R + A·~I？</summary>
+  <div class="ans">
+    <p>照逐項規則，A·S·I·R 中的 I 這時符合預期，不該刪。但軟體（fsQCA 與 R 的 QCA 套件）的實作是：先把<strong>每一項</strong>導出的容易反事實<strong>集中起來</strong>，再連同正面列<strong>一起</strong>做一次布林最小化。由 A·~C·~S·~I·~R 與 A·C·S·~I·~R 導出的容易反事實（例如 A·C·S·~I·R、A·~C·S·~I·R），正好能讓 A·S·I·R 和 A·S·~I·R 合併成 A·S·R。所以最後的式子可能比你「一項一項手算」的結果再簡潔一點，但它用到的仍然只是容易反事實。</p>
+  </div>
+</details>
+
+<!-- ================================================= -->
+<h2 id="s5">5. 反事實分析與案例導向研究 <span class="en">· Counterfactual analysis and case-oriented research</span></h2>
+
+<p>從傳統量化研究的角度看，案例導向的比較研究似乎「行不通」（Achen, 2005）：</p>
+<ul>
+  <li>統計分析在<strong>大樣本</strong>時效果最好——顯著性較容易達到，也較能滿足技術上嚴苛的假設；小樣本、中等樣本則常違反這些假設。</li>
+  <li>案例研究者熟悉案例，傾向提出<strong>組合式</strong>的因果論斷；這對稀少的跨案例證據提出更高的要求，也與主流量化技術「估計各變數<strong>淨效應、獨立效應</strong>」的核心邏輯相衝突。</li>
+</ul>
+
+<p>但案例導向研究有自己的邏輯與嚴謹性：它是<strong>組態的</strong>，所以必須檢驗條件組合。大多數量化研究反而缺乏這種嚴謹——因為「配對比較」會吃掉自由度與統計檢定力。</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>表面上的質疑</h4>
+    <p>研究條件組合就得面對有限多樣性，只好用<strong>假想案例</strong>做思想實驗。這看起來違反了「實證」社會科學的規範。</p>
+  </div>
+  <div class="new">
+    <h4>本章的回應</h4>
+    <p>許多反事實其實是<strong>例行的</strong>，因為它們是<strong>容易的</strong>。QCA 把這些容易反事實<strong>形式化</strong>並明白寫出，納入跨案例分析中，任何人都能檢查。</p>
+  </div>
+</div>
+
+<div class="callout key">
+  <div class="ct">🔑 案例研究者一直都在用容易反事實</div>
+  <p>回到情境一：一位傳統案例研究者面對 A·B·C·~D → Y 的案例，會圍繞「被認為重要的因素」A、B、C 來寫因果敘事；若知識告訴他這些條件是「存在」才有幫助，他很快就得出 A·B·C → Y，而不會特別說明「我假設了 A·B·C·D 也會成功」。這種反事實常在建構解釋的過程中<strong>「即時」、隱含地</strong>完成。QCA 做的事情一模一樣，只是把它<strong>攤在陽光下</strong>。</p>
+</div>
+
+<p>本章也凸顯社會科學一個極重要的特性：它建立在<strong>理論與實質知識</strong>之上，而不只是方法技術。正是這些知識，讓我們能評估反事實是否合理；中間解的程序，等於提供了一個<strong>以知識為基礎</strong>來處理有限多樣性的方法，把既有知識直接編進實證結果的結構中。</p>
+
+<!-- ================================================= -->
+<h2 id="s6">6. 實用附錄：推導中間解 <span class="en">· Practical appendix</span></h2>
+
+<p>複雜解與簡約解的推導是「自動」的：前者把所有餘項設為「假」，後者把所有餘項都列為可用的反事實（不論容易或困難）。<strong>中間解則不是自動的</strong>，因為它需要你輸入理論與實質知識——也就是每個條件的方向性預期。清晰集與模糊集都一樣，只要使用真值表演算法即可同時得到三種解。</p>
+
+<div class="callout info">
+  <div class="ct">ℹ️ 原書的例子：怎麼設定預期？（結果 =「避免貧窮」）</div>
+  <ul>
+    <li>「至少有高中學歷」→ 選 <strong>Present（存在）</strong>：低教育與低收入的關聯眾所周知。</li>
+    <li>「父母是低收入戶」→ 選 <strong>Absent（缺席）</strong>：它的缺席才有助於避免貧窮。</li>
+    <li>「居住在城市」→ 選 <strong>Present or Absent（皆可）</strong>：美國城鄉都有大量貧窮人口，沒有明確預期；甚至城市與鄉村居民脫貧可能走不同的組態。</li>
+  </ul>
+  <p>為什麼要編碼正確？假設「高中學歷·已婚·無子女」→ 避免貧窮，但沒有「無高中學歷·已婚·無子女」的案例。若你<strong>沒有</strong>把高中學歷設為「存在有利」，軟體就可能用這個餘項把解簡化成「已婚·無子女」——等於宣稱教育無關緊要。這是一個困難反事實；而經驗上，資料中已婚無子女的正面案例其實都至少有高中學歷。正確編碼就能擋下這種沒有根據的簡化。</p>
+</div>
+
+<div class="sw-tabs">
+  <div class="seg">
+    <button data-tab="fs" class="on">fsQCA 軟體</button>
+    <button data-tab="r">R（QCA 套件）</button>
+  </div>
+  <div class="sw-pane on" data-pane="fs">
+    <div class="steps">
+      <div class="step"><div><h4>開啟真值表演算法</h4><p>點選 <span class="menu-path">Analyze → Truth Table Algorithm</span>，指定結果（Y）與前因條件。</p></div></div>
+      <div class="step"><div><h4>完成真值表編碼</h4><p>依第 7 章附錄的方式：刪除未達頻數門檻的列，依一致性在結果欄填入 1 或 0。沒有案例的列會被當作餘項。</p></div></div>
+      <div class="step"><div><h4>按下 Standard Analyses</h4><p>在真值表視窗底部點 <span class="menu-path">Standard Analyses</span>。程式會先推導<strong>複雜解</strong>，接著推導<strong>簡約解</strong>。</p></div></div>
+      <div class="step"><div><h4>（如果出現）選擇質蘊含項 Prime Implicants</h4><p>若有多個<strong>質蘊含項（prime implicants）</strong>都能涵蓋同一些正面列，fsQCA 會跳出 Prime Implicant Chart 要你勾選。請依理論與案例知識選擇最有意義的項；本章的兩個例子不會出現此視窗，因為解是唯一的。</p></div></div>
+      <div class="step"><div><h4>設定方向性預期（Intermediate Solution 對話框）</h4><p>對每個條件選擇 <span class="menu-path">Present</span>（存在有利）、<span class="menu-path">Absent</span>（缺席有利）或 <span class="menu-path">Present or Absent</span>（無預期）。Stokke 的例子：A、C、S、R 選 Present；I 選 Absent。</p></div></div>
+      <div class="step"><div><h4>閱讀輸出</h4><p>輸出視窗依序列出 <strong>COMPLEX SOLUTION</strong>、<strong>PARSIMONIOUS SOLUTION</strong>、<strong>INTERMEDIATE SOLUTION</strong>，每個解都附有一致性與覆蓋度，中間解還會列出你設定的假設（Assumptions）。報告時，一般以<strong>中間解</strong>為主，並說明方向性預期的理由。</p></div></div>
+    </div>
+  </div>
+  <div class="sw-pane" data-pane="r">
+    <p>R 的 <code class="inline">QCA</code> 套件用 <code class="inline">minimize()</code> 的兩個參數控制三種解：<code class="inline">include = "?"</code> 允許使用餘項；<code class="inline">dir.exp</code> 設定方向性預期。以下程式碼已在 QCA 3.25 實際執行過，結果與原書相同。</p>
+<pre class="code"><span class="c-fn">library</span>(QCA)
+<span class="c-com"># 原書表 9-2：每列一種組態（真實分析時每列是一個案例）</span>
+stokke <span class="c-kw">&lt;-</span> <span class="c-fn">data.frame</span>(
+  A = <span class="c-fn">c</span>(<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>),  <span class="c-com"># 科學建議</span>
+  C = <span class="c-fn">c</span>(<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">0</span>),  <span class="c-com"># 違反承諾</span>
+  S = <span class="c-fn">c</span>(<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">0</span>),  <span class="c-com"># 未來影響</span>
+  I = <span class="c-fn">c</span>(<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">0</span>),  <span class="c-com"># 不便</span>
+  R = <span class="c-fn">c</span>(<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">0</span>),  <span class="c-com"># 國內反響</span>
+  Y = <span class="c-fn">c</span>(<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">1</span>,<span class="c-num">1</span>)   <span class="c-com"># 施壓成功</span>
+)
+tt <span class="c-kw">&lt;-</span> <span class="c-fn">truthTable</span>(stokke, outcome = <span class="c-str">"Y"</span>,
+                 conditions = <span class="c-str">"A, C, S, I, R"</span>, incl.cut = <span class="c-num">1</span>)
+
+<span class="c-com"># ① 複雜（保守）解：預設不使用餘項</span>
+<span class="c-fn">minimize</span>(tt, details = <span class="c-kw">TRUE</span>)
+<span class="c-com">#   M1: A*S*I*R + A*~C*~S*~I*~R + A*C*S*~I*~R -&gt; Y</span>
+
+<span class="c-com"># ② 簡約解：允許使用所有餘項</span>
+<span class="c-fn">minimize</span>(tt, include = <span class="c-str">"?"</span>)
+<span class="c-com">#   M1: ~I + S*R -&gt; Y</span>
+
+<span class="c-com"># ③ 中間解：允許餘項＋方向性預期（新版寫法：條件名稱，~ 表示缺席有利）</span>
+ints <span class="c-kw">&lt;-</span> <span class="c-fn">minimize</span>(tt, include = <span class="c-str">"?"</span>,
+                 dir.exp = <span class="c-fn">c</span>(<span class="c-str">"A"</span>, <span class="c-str">"C"</span>, <span class="c-str">"S"</span>, <span class="c-str">"~I"</span>, <span class="c-str">"R"</span>))
+ints
+<span class="c-com">#   M1: A*~I + A*S*R -&gt; Y</span>
+
+<span class="c-com"># 列出中間解用到的容易反事實（6 列餘項）</span>
+ints$i.sol$C1P1$EC</pre>
+    <div class="callout warn">
+      <div class="ct">⚠️ dir.exp 的版本差異</div>
+      <ul>
+        <li><strong>新寫法</strong>（QCA 3.x 後期版本，本頁以 3.25 驗證）：用條件名稱，<code class="inline">"~I"</code> 表示「缺席有利」；<strong>沒有預期的條件直接不寫</strong>。也可寫成一個字串 <code class="inline">dir.exp = "A, C, S, ~I, R"</code>。</li>
+        <li><strong>舊寫法</strong>（早期版本與許多舊教材）：依 <code class="inline">conditions</code> 的順序給數字向量，1 = 存在、0 = 缺席、<code class="inline">"-"</code> = 無預期，例如 <code class="inline">dir.exp = c(1, 1, 1, 0, 1)</code>。3.25 版仍接受此寫法、結果相同，但順序一錯就會默默算錯，建議改用新寫法。</li>
+        <li>表 9-1 的對應寫法：<code class="inline">dir.exp = c("A", "B", "C", "D")</code> → 中間解 A*B；若 C 不寫（無預期）→ 中間解停在 A*B*~C。</li>
+      </ul>
+    </div>
+    <p>想看更完整的 R 操作與模糊集範例，可參考本站主教材〈<a href="../index.html">QCA with R</a>〉中關於最小化與中間解的章節。</p>
+  </div>
+</div>
+
+<p>一般而言，<strong>中間解是首選</strong>，因為它通常最容易詮釋：有限多樣性嚴重時，複雜解幾乎沒有簡化、難以解讀；簡約解則因納入大量（容易與困難的）反事實，可能簡約得不切實際。中間解依據研究者的理論與實質知識，在兩者之間取得平衡。</p>
+
+<!-- ================================================= -->
+<h2 id="s7">7. 本章重點、名詞與自我測驗 <span class="en">· Review</span></h2>
+
+<ol class="takeaways">
+  <li><strong>容易反事實</strong>：把一個理論上有益的條件<strong>加入</strong>已知會產生結果的組態；<strong>困難反事實</strong>：從已知會產生結果的組態中<strong>移除</strong>一個理論上有貢獻的條件。兩者是連續體，判斷依據是學術社群的既有知識。</li>
+  <li>QCA 的複雜解（不用餘項）與簡約解（用任何能簡化的餘項）是<strong>複雜／簡約連續體的兩端</strong>，兩者都建立在相同證據上，只差在對反事實的容忍度。</li>
+  <li>解之間保持<strong>子集關係</strong>：複雜解 ⊆ 中間解 ⊆ 簡約解。中間解必須保留簡約解中的所有條件（子集原則）。</li>
+  <li><strong>最佳中間解</strong>的程序：從複雜解的每一項中，刪除與既有知識（方向性預期）不一致的條件，但不刪簡約項中的條件。Stokke 的例子得到 A·S·R + A·~I。</li>
+  <li>簡約解可能丟掉案例研究者一眼就會看到的共同條件（例如 Stokke 的 A），中間解則把它保留下來。</li>
+  <li>案例研究者在建構解釋時，一直都<strong>隱含、即時地</strong>使用容易反事實；QCA 的貢獻是把它們<strong>明確化、透明化</strong>。</li>
+  <li>軟體操作：fsQCA 的 Standard Analyses ＋ Present／Absent／Present or Absent；R 的 <code class="inline">minimize(tt, include = "?", dir.exp = ...)</code>。</li>
+</ol>
+
+<h3>名詞對照</h3>
+<div class="table-wrap">
+  <table class="tbl gloss">
+    <thead><tr><th>本教材用語</th><th>簡中譯本</th><th>英文</th><th>白話說明</th></tr></thead>
+    <tbody>
+      <tr><td>反事實</td><td>反事实</td><td>counterfactual</td><td>對沒有觀察到的組態做的思想實驗</td></tr>
+      <tr><td>容易反事實</td><td>容易的反事实</td><td>easy counterfactual</td><td>把有益條件加進成功配方：結果應仍出現</td></tr>
+      <tr><td>困難反事實</td><td>困难的反事实</td><td>difficult counterfactual</td><td>從成功配方移除有貢獻的條件：需詳細論證</td></tr>
+      <tr><td>邏輯餘項</td><td>逻辑余项</td><td>logical remainder</td><td>真值表中沒有（或幾乎沒有）案例的列</td></tr>
+      <tr><td>有限多樣性</td><td>有限多样性</td><td>limited diversity</td><td>真實案例只佔邏輯可能組合的一小部分</td></tr>
+      <tr><td>複雜解</td><td>复杂解</td><td>complex (conservative) solution</td><td>完全不使用餘項的解</td></tr>
+      <tr><td>簡約解</td><td>简约解</td><td>parsimonious solution</td><td>使用任何能讓式子更短的餘項</td></tr>
+      <tr><td>中間解</td><td>中间解</td><td>intermediate solution</td><td>只使用容易反事實的解</td></tr>
+      <tr><td>方向性預期</td><td>预期</td><td>directional expectation</td><td>條件的存在或缺席哪一個有利於結果</td></tr>
+      <tr><td>子集原則</td><td>子集原则</td><td>subset principle</td><td>中間解須是簡約解的子集、複雜解的超集</td></tr>
+      <tr><td>質蘊含項</td><td>主蕴含项</td><td>prime implicant</td><td>最小化後無法再簡化的條件組合</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>自我測驗</h3>
+<p class="quiz-score" data-quiz-score></p>
+
+<div class="quiz" data-answer="1">
+  <p class="q">觀察到 A·B·~C → Y，且理論認為 C 的<strong>存在</strong>有利於 Y。反事實「A·B·C → Y」屬於哪一種？</p>
+  <div class="opts">
+    <button class="opt">困難反事實，因為它改變了觀察到的組態</button>
+    <button class="opt">容易反事實，因為只是把有益的條件加進已會成功的配方</button>
+    <button class="opt">無法判斷，因為 A·B·C 沒有案例</button>
+    <button class="opt">不是反事實，因為 C 已經被觀察到</button>
+  </div>
+  <div class="explain">所有反事實都涉及沒有案例的組態，這不是判斷依據。關鍵是方向：把預期有利的 C 加進一個本來就成功的組合，結果理應仍會出現——容易。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">下列哪一個關係永遠成立？</p>
+  <div class="opts">
+    <button class="opt">簡約解 ⊆ 中間解 ⊆ 複雜解</button>
+    <button class="opt">中間解 ⊆ 複雜解 ⊆ 簡約解</button>
+    <button class="opt">三種解互不相交</button>
+    <button class="opt">複雜解 ⊆ 中間解 ⊆ 簡約解</button>
+  </div>
+  <div class="explain">納入的反事實越多，涵蓋的列就越多，集合越大。複雜解不納入任何反事實，所以最小；簡約解納入最多，所以最大。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">表 9-1 中，複雜解為 A·B·~C、簡約解為 A。若理論認為所有條件都是「存在」有利，最佳中間解是？</p>
+  <div class="opts">
+    <button class="opt">A·B</button>
+    <button class="opt">A·~C</button>
+    <button class="opt">B·~C</button>
+    <button class="opt">A·B·~C·D</button>
+  </div>
+  <div class="explain">刪除 ~C（與「C 存在有利」不一致）只需容易反事實；刪除 B 則是困難反事實；B·~C 違反子集原則（會涵蓋負面列 0100）；A·B·~C·D 甚至比複雜解還窄。</div>
+</div>
+
+<div class="quiz" data-answer="2">
+  <p class="q">在 Stokke 的例子中，為什麼 A·S·I·R 裡的 S 和 R 不能刪除？</p>
+  <div class="opts">
+    <button class="opt">因為它們的狀態違反了方向性預期</button>
+    <button class="opt">因為它們沒有任何案例</button>
+    <button class="opt">因為它們出現在對應的簡約項 S·R 中，刪掉會違反子集原則</button>
+    <button class="opt">因為它們是必要條件</button>
+  </div>
+  <div class="explain">中間項必須是對應簡約項的子集；簡約項 S·R 包含 S 和 R，中間項就必須保留它們。真正可刪的是 I（違反「I 缺席有利」）。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">Stokke 例子的簡約解 ~I + S·R 被批評的主要原因是？</p>
+  <div class="opts">
+    <button class="opt">它涵蓋了負面案例</button>
+    <button class="opt">它丟掉了所有成功組態都共有的條件 A（科學建議），而這是案例研究者一定會注意的共同點</button>
+    <button class="opt">它的一致性低於 0.8</button>
+    <button class="opt">它比複雜解更複雜</button>
+  </div>
+  <div class="explain">簡約解是邏輯上正確的，但它靠困難反事實（例如「沒有科學建議也會成功」）把 A 刪掉了。中間解 A·S·R + A·~I 則保留了 A。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">在 fsQCA 設定中間解時，「居住在城市」對「避免貧窮」沒有明確預期，應該選？</p>
+  <div class="opts">
+    <button class="opt">Present</button>
+    <button class="opt">Absent</button>
+    <button class="opt">直接把這個條件從分析中刪除</button>
+    <button class="opt">Present or Absent</button>
+  </div>
+  <div class="explain">沒有理論依據時選 Present or Absent。此時軟體不會把該條件的任何刪除視為容易反事實，條件會被保留（除非簡約解本身就不含它）。</div>
+</div>
+
+<div class="quiz" data-answer="2">
+  <p class="q">在 R 的 QCA 套件（新版）中，下列哪一個寫法對應「A、C、S、R 存在有利，I 缺席有利」？</p>
+  <div class="opts">
+    <button class="opt"><code>minimize(tt, dir.exp = c("A","C","S","I","R"))</code></button>
+    <button class="opt"><code>minimize(tt, include = "?", dir.exp = c(1,1,1,1,1))</code></button>
+    <button class="opt"><code>minimize(tt, include = "?", dir.exp = c("A","C","S","~I","R"))</code></button>
+    <button class="opt"><code>minimize(tt, include = "1", dir.exp = "~I")</code></button>
+  </div>
+  <div class="explain">中間解需要 <code>include = "?"</code>（允許使用餘項）加上方向性預期；I 缺席有利要寫成 <code>"~I"</code>。舊版數字寫法則是 <code>c(1,1,1,0,1)</code>。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">Ragin 說案例導向研究者是反事實的「老手」，意思是？</p>
+  <div class="opts">
+    <button class="opt">他們在建構解釋時，常常隱含且即時地做出容易反事實的簡化</button>
+    <button class="opt">他們總是避免任何反事實</button>
+    <button class="opt">他們偏好困難反事實，因為能帶來理論突破</button>
+    <button class="opt">他們使用統計方法估計反事實結果</button>
+  </div>
+  <div class="explain">例如面對 A·B·C·~D 的成功案例，他們會直接圍繞 A、B、C 建構論證，等於默默假設「有 D 也會成功」。QCA 只是把這個步驟明確化。</div>
+</div>
+
+<p><button class="btn ghost" data-quiz-reset type="button">重新作答</button></p>
+
+<div class="done-box" data-ch="9">
+  <span class="msg"></span>
+  <button class="btn" type="button">標記本章為已讀</button>
+</div>
+
+<nav class="chap-nav">
+  <a class="prev" href="ch8.html"><div class="dir">← 上一章</div><div class="ttl">第 8 章 有限多樣性與反事實案例</div></a>
+  <a class="next" href="ch10.html"><div class="dir">下一章 →</div><div class="ttl">第 10 章 「淨效應」思維的局限</div></a>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Charles C. Ragin, <em>Redesigning Social Inquiry: Fuzzy Sets and Beyond</em> (University of Chicago Press, 2008)<br>
+  以學習為目的之概念整理與重新詮釋，非原書譯文 · <a href="index.html">回本書首頁</a></p>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="js/ragin.js"></script>
+<script>
+/* ---------- 共用：布林最小化（Quine–McCluskey）與三種解 ---------- */
+window.CH9 = (function () {
+  function bits(i, k) { const a = []; for (let j = k - 1; j >= 0; j--) a.push((i >> j) & 1); return a; }
+  function covers(t, r) { return t.every((v, j) => v < 0 || v === r[j]); }
+  function lits(t) { return t.filter((v) => v >= 0).length; }
+  function primes(mins, k) {
+    let cur = mins.map((m) => bits(m, k)); const all = [];
+    const key = (t) => t.join(',');
+    while (cur.length) {
+      const used = new Set(), next = new Map();
+      for (let a = 0; a < cur.length; a++) for (let b = a + 1; b < cur.length; b++) {
+        const x = cur[a], y = cur[b]; let d = -1, n = 0;
+        for (let j = 0; j < k; j++) if (x[j] !== y[j]) { n++; d = j; }
+        if (n === 1 && x[d] >= 0 && y[d] >= 0) { const t = x.slice(); t[d] = -1; next.set(key(t), t); used.add(a); used.add(b); }
+      }
+      cur.forEach((t, i) => { if (!used.has(i)) all.push(t); });
+      cur = [...next.values()];
+    }
+    const seen = new Set();
+    return all.filter((t) => { const s = key(t); if (seen.has(s)) return false; seen.add(s); return true; });
+  }
+  // 最少項數、其次最少字面數的所有覆蓋（可能不唯一）
+  function cover(pis, pos, k) {
+    const P = pos.map((m) => bits(m, k));
+    const cand = pis.filter((t) => P.some((r) => covers(t, r)));
+    const n = cand.length; let best = null;
+    for (let size = 1; size <= n && !best; size++) {
+      const idx = [...Array(size).keys()], sols = [];
+      for (;;) {
+        const ts = idx.map((i) => cand[i]);
+        if (P.every((r) => ts.some((t) => covers(t, r)))) sols.push(ts);
+        let i = size - 1;
+        while (i >= 0 && idx[i] === n - size + i) i--;
+        if (i < 0) break;
+        idx[i]++; for (let j = i + 1; j < size; j++) idx[j] = idx[j - 1] + 1;
+      }
+      if (sols.length) {
+        const L = (ts) => ts.reduce((s, t) => s + lits(t), 0);
+        const m = Math.min(...sols.map(L));
+        best = sols.filter((ts) => L(ts) === m);
+      }
+    }
+    return best || [[]];
+  }
+  /* out：長度 2^k，1 / 0 / null（餘項）；dir：1 存在、0 缺席、-1 無預期 */
+  function solve(out, k, dir) {
+    const pos = [], rem = [];
+    out.forEach((v, i) => { if (v === 1) pos.push(i); else if (v === null) rem.push(i); });
+    const comp = cover(primes(pos, k), pos, k)[0];
+    const pars = cover(primes(pos.concat(rem), k), pos, k)[0];
+    const steps = [];
+    let terms = comp.map((T) => {
+      const P = pars.find((p) => p.every((v, j) => v < 0 || v === T[j]));
+      const why = [];
+      const t = T.map((v, j) => {
+        if (v < 0) return -1;
+        if (P && P[j] >= 0) { why.push([j, v, 'pars']); return v; }
+        if (dir[j] >= 0 && dir[j] !== v) { why.push([j, v, 'drop']); return -1; }
+        why.push([j, v, dir[j] < 0 ? 'none' : 'keep']); return v;
+      });
+      steps.push({ T, P, t, why });
+      return t;
+    });
+    terms = terms.filter((t, i) => !terms.some((u, j) => j !== i &&
+      u.every((v, q) => v < 0 || v === t[q]) && (lits(u) < lits(t) || (lits(u) === lits(t) && j < i))));
+    const inT = (ts, r) => ts.some((t) => covers(t, r));
+    const easy = rem.filter((m) => inT(terms, bits(m, k)));
+    const interM = cover(primes(pos.concat(easy), k), pos, k);
+    const inter = interM[0];
+    const hard = rem.filter((m) => inT(pars, bits(m, k)) && !inT(inter, bits(m, k)));
+    return { pos, rem, comp, pars, inter, interM, easy, hard, steps };
+  }
+  function term(t, names) {
+    const s = t.map((v, j) => v < 0 ? null : (v ? names[j] : '~' + names[j])).filter(Boolean).join('·');
+    return s || '（恆真）';
+  }
+  function expr(ts, names) { return ts.map((t) => term(t, names)).join(' + '); }
+  function table(rows, k) { // rows: [['0101', 1], ...]
+    const o = Array(2 ** k).fill(null); rows.forEach(([s, y]) => { o[parseInt(s, 2)] = y; }); return o;
+  }
+  // 卡諾圖：前兩個條件為列、其餘為欄，Gray code 排列
+  function gray(n) { let g = ['']; for (let i = 0; i < n; i++) g = g.map((x) => '0' + x).concat(g.slice().reverse().map((x) => '1' + x)); return g; }
+  function kmap(tbl, names, cls, onPick) {
+    const k = names.length, rv = gray(2), cv = gray(k - 2);
+    let h = `<tr><th class="corner">${names.slice(0, 2).join('')} \\ ${names.slice(2).join('')}</th>` + cv.map((c) => `<th>${c}</th>`).join('') + '</tr>';
+    rv.forEach((r) => {
+      h += `<tr><th>${r}</th>` + cv.map((c) => {
+        const m = parseInt(r + c, 2), info = cls(m);
+        return `<td class="${info[0]}" data-m="${m}">${info[1]}</td>`;
+      }).join('') + '</tr>';
+    });
+    tbl.innerHTML = h;
+    tbl.querySelectorAll('td').forEach((td) => td.addEventListener('click', () => {
+      tbl.querySelectorAll('td').forEach((x) => x.classList.toggle('sel', x === td));
+      onPick(+td.dataset.m);
+    }));
+  }
+  return { bits, covers, solve, term, expr, table, kmap };
+})();
+
+/* ---------- 練習：容易 vs 困難 ---------- */
+(function () {
+  const root = document.getElementById('w-judge');
+  const L = { easy: '容易', hard: '困難', none: '無方向預期' };
+  const items = [
+    { s: '觀察：A·B·C·~D → Y；反事實：A·B·C·<b>D</b>（知識：D 的存在有利於 Y）', a: 'easy', w: '把一個預期有利的條件加入已會成功的配方——原書情境一的典型容易反事實。' },
+    { s: '觀察：A·B·C·D → Y；反事實：A·B·C·<b>~D</b>（知識：D 的存在有利於 Y）', a: 'hard', w: '從成功配方中拿掉一個有貢獻的條件——原書情境二，需要詳細論證。' },
+    { s: '觀察：高中學歷·已婚·無子女 → 避免貧窮；反事實：<b>無高中學歷</b>·已婚·無子女（知識：學歷有助脫貧）', a: 'hard', w: '移除了預期有利的「高中學歷」。若接受它，解會變成「已婚·無子女」，等於宣稱教育無關——附錄中警告的例子。' },
+    { s: '觀察：父母低收入·高中學歷·就業 → 避免貧窮；反事實：<b>父母非低收入</b>·高中學歷·就業（知識：父母低收入不利脫貧）', a: 'easy', w: '「父母低收入」預期是缺席才有利。反事實把它改成有利狀態（缺席），成功配方只會更穩——容易。' },
+    { s: '觀察（Stokke）：A·C·S·~I·<b>~R</b> → 成功；反事實：A·C·S·~I·<b>R</b>（知識：國內反響有利於施壓成功）', a: 'easy', w: '加入國內反響 R，只會讓施壓更有效。原書正是據此刪掉 ~R。' },
+    { s: '觀察（Stokke）：A·S·I·R → 成功；反事實：<b>~A</b>·S·I·R（知識：科學建議的支持有利於成功）', a: 'hard', w: '拿掉科學建議 A。簡約解 S·R 隱含了這個反事實，中間解則拒絕它。' },
+    { s: '觀察：城市居民·高中學歷 → 避免貧窮；反事實：<b>鄉村居民</b>·高中學歷（知識：城鄉都有大量貧窮，無明確方向）', a: 'none', w: '沒有理論方向，無法歸為容易。fsQCA 選 Present or Absent 時，這個條件不會被當成「可容易刪除」。' },
+    { s: '觀察（Stokke）：A·~C·~S·<b>~I</b>·~R → 成功；反事實：A·~C·~S·<b>I</b>·~R（知識：行為改變越不方便越難成功）', a: 'hard', w: 'I（不便）預期是缺席才有利。反事實把對方改成「很不方便」，卻仍假設會成功——困難。' },
+  ];
+  const box = root.querySelector('[data-cards]'), score = root.querySelector('[data-jscore]');
+  items.forEach((it, i) => {
+    const d = document.createElement('div');
+    d.className = 'jcard';
+    d.innerHTML = `<p class="sc-t"><strong>${i + 1}.</strong> ${it.s}</p>
+      <div class="seg">${['easy', 'hard', 'none'].map((v) => `<button type="button" data-v="${v}">${L[v]}</button>`).join('')}</div>
+      <div class="fb"></div>`;
+    d.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+      d.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
+      const ok = b.dataset.v === it.a;
+      d.classList.add('done'); d.classList.toggle('ok', ok); d.classList.toggle('no', !ok);
+      d.dataset.res = ok ? '1' : '0';
+      d.querySelector('.fb').innerHTML = (ok ? '<strong style="color:var(--ok)">✔ 正確。</strong>' : `<strong style="color:var(--bad)">✘ 答案是「${L[it.a]}」。</strong>`) + it.w;
+      tally();
+    }));
+    box.appendChild(d);
+  });
+  function tally() {
+    const cs = [...box.children], done = cs.filter((c) => c.dataset.res), right = done.filter((c) => c.dataset.res === '1').length;
+    let msg = `已判斷 ${done.length} / ${cs.length} 題，答對 <span class="hl">${right}</span> 題。`;
+    if (done.length === cs.length) msg += right >= 7 ? '\n很好！記住口訣：往「預期有利」的方向改 → 容易；往反方向改 → 困難；沒有預期 → 不算容易。' : '\n回頭看看錯的題目：關鍵永遠是「反事實把那個條件改成了有利還是不利的狀態」。';
+    score.innerHTML = msg;
+  }
+})();
+
+/* ---------- 連續體走一遍（表 9-1） ---------- */
+(function () {
+  const root = document.getElementById('w-cont');
+  const names = ['A', 'B', 'C', 'D'];
+  const tbl = CH9.table([['0000', 0], ['0100', 0], ['0101', 0], ['0111', 0], ['1100', 1], ['1101', 1]], 4);
+  const sols = [
+    { t: [[1, 1, 0, -1]], name: '複雜解 A·B·~C', txt: '不使用任何餘項，只涵蓋兩個觀察到 Y 的列。這是連續體「最複雜」的一端。' },
+    { t: [[1, 1, -1, -1]], name: '中間解 A·B', txt: '刪掉 ~C，額外納入 A·B·C·~D 與 A·B·C·D 兩個餘項。它們是把 C「加進」成功配方——在「C 存在有利」的知識下是<span class="hl">容易反事實</span>。這是最佳中間解。' },
+    { t: [[1, -1, 0, -1]], name: '中間解 A·~C', txt: '刪掉 B，額外納入 A·~B·~C·~D 與 A·~B·~C·D。它們是從成功配方「拿掉」B——在「B 存在有利」的知識下是困難反事實。合法，但需要強力論證。' },
+    { t: [[1, -1, -1, -1]], name: '簡約解 A', txt: '納入 A=1 的全部 6 個餘項，不論容易或困難。這是連續體「最簡約」的一端。' },
+  ];
+  const easyRows = [14, 15]; // A·B·C·~D, A·B·C·D
+  const out = root.querySelector('[data-out]'), km = root.querySelector('[data-km]');
+  let cur = 0;
+  const cfg = (m) => CH9.bits(m, 4).map((v, j) => (v ? '' : '~') + names[j]).join('·');
+  function draw() {
+    const S = sols[cur];
+    const inS = (m) => S.t.some((t) => CH9.covers(t, CH9.bits(m, 4)));
+    const used = [];
+    CH9.kmap(km, names, (m) => {
+      if (tbl[m] === 1) return ['pos', '1'];
+      if (tbl[m] === 0) return ['neg', '0'];
+      if (inS(m)) { used.push(m); return easyRows.includes(m) ? ['easy', '易'] : ['hard', '難']; }
+      return ['rem', '?'];
+    }, (m) => {
+      const st = tbl[m] === 1 ? '觀察到 Y=1' : tbl[m] === 0 ? '觀察到 Y=0' : inS(m) ? (easyRows.includes(m) ? '餘項，此解把它當作容易反事實' : '餘項，此解把它當作困難反事實') : '餘項，此解沒有使用';
+      out.innerHTML = `${S.name}\n${S.txt}\n\n點選的列：<span class="hl">${cfg(m)}</span> → ${st}`;
+    });
+    out.innerHTML = `${S.name}\n${S.txt}\n\n納入的反事實（${used.length} 列）：${used.length ? used.map(cfg).join('、') : '無'}`;
+  }
+  const btns = root.querySelectorAll('[data-pick] button');
+  btns.forEach((b) => b.addEventListener('click', () => { btns.forEach((x) => x.classList.toggle('on', x === b)); cur = +b.dataset.v; draw(); }));
+  draw();
+})();
+
+/* ---------- 逐項刪除練習（Stokke） ---------- */
+(function () {
+  const root = document.getElementById('w-prune');
+  const nm = { A: '科學建議', C: '違反承諾', S: '未來影響', I: '不便', R: '國內反響' };
+  const dir = { A: 1, C: 1, S: 1, I: 0, R: 1 };
+  const T = [
+    { lits: [['A', 1], ['S', 1], ['I', 1], ['R', 1]], par: ['S', 'R'], parTxt: 'S·R' },
+    { lits: [['A', 1], ['C', 1], ['S', 1], ['I', 0], ['R', 0]], par: ['I'], parTxt: '~I' },
+    { lits: [['A', 1], ['C', 0], ['S', 0], ['I', 0], ['R', 0]], par: ['I'], parTxt: '~I' },
+  ];
+  const lab = (c, v) => (v ? '' : '~') + c;
+  const box = root.querySelector('[data-rows]'), out = root.querySelector('[data-out]');
+  const state = T.map((t) => t.lits.map(() => false));
+  function canDrop(t, c, v) {
+    if (t.par.includes(c)) return [false, `「${lab(c, v)}」出現在對應的簡約項 ${t.parTxt} 中，刪掉會讓中間項不再是簡約項的子集（違反子集原則）。`];
+    if (dir[c] === v) return [false, `「${lab(c, v)}」（${nm[c]}）的狀態符合預期方向，本來就有利於成功。刪掉它等於假設「沒有它也會成功」——困難反事實。`];
+    return [true, `可以刪！「${lab(c, v)}」違反預期方向（${nm[c]}應為${dir[c] ? '存在' : '缺席'}才有利）。改成 ${lab(c, 1 - v)} 後成功案例仍會成功——容易反事實。`];
+  }
+  function result(i) { const s = T[i].lits.filter((_, j) => !state[i][j]).map(([c, v]) => lab(c, v)); return s.join('·'); }
+  function render() {
+    box.innerHTML = '';
+    T.forEach((t, i) => {
+      const row = document.createElement('div');
+      row.className = 'prow';
+      row.innerHTML = `<span class="lab">第 ${i + 1} 項</span>` + t.lits.map(([c, v], j) =>
+        `<button type="button" class="lit${state[i][j] ? ' gone' : ''}" data-i="${i}" data-j="${j}">${lab(c, v)}</button>`).join('') +
+        `<span class="arrow">→</span><span class="res">${result(i)}</span><span class="lab" style="margin-left:auto">簡約項：${t.parTxt}</span>`;
+      box.appendChild(row);
+    });
+    box.querySelectorAll('.lit').forEach((b) => b.addEventListener('click', () => {
+      const i = +b.dataset.i, j = +b.dataset.j, [c, v] = T[i].lits[j];
+      if (state[i][j]) { state[i][j] = false; render(); out.innerHTML = `已復原「${lab(c, v)}」。`; return; }
+      const [ok, why] = canDrop(T[i], c, v);
+      if (ok) { state[i][j] = true; render(); } else { b.classList.add('locked'); }
+      out.innerHTML = (ok ? '<span class="hl">✔ </span>' : '✘ ') + why + check();
+    }));
+  }
+  function check() {
+    const done = T.every((t, i) => t.lits.every(([c, v], j) => state[i][j] === canDrop(t, c, v)[0]));
+    if (!done) return '';
+    return '\n\n<span class="hl">三項都完成了！</span>\n' + T.map((_, i) => result(i)).join(' + ') +
+      '\n其中 A·C·S·~I 是 A·~I 的子集（多餘），簡化後的中間解：\n<span class="hl">A·S·R + A·~I → 成功</span>';
+  }
+  render();
+})();
+
+/* ---------- 三種解比較器 ---------- */
+(function () {
+  const root = document.getElementById('w-lab');
+  const DS = {
+    t1: { names: ['A', 'B', 'C', 'D'], lab: ['A', 'B', 'C', 'D'], def: [1, 1, 1, 1],
+      rows: [['0000', 0], ['0100', 0], ['0101', 0], ['0111', 0], ['1100', 1], ['1101', 1]] },
+    t2: { names: ['A', 'C', 'S', 'I', 'R'], lab: ['科學建議', '違反承諾', '未來影響', '不便', '國內反響'], def: [1, 1, 1, 0, 1],
+      rows: [['10111', 1], ['10010', 0], ['10011', 0], ['00010', 0], ['11111', 1], ['11110', 0], ['11100', 1], ['10000', 1]] },
+  };
+  let ds = 't1', dir = DS.t1.def.slice();
+  const dirsBox = root.querySelector('[data-dirs]'), out = root.querySelector('[data-out]');
+  function buildDirs() {
+    const D = DS[ds];
+    dirsBox.innerHTML = D.names.map((n, j) => `<div class="dirrow"><span class="nm"><code>${n}</code> ${D.lab[j] !== n ? D.lab[j] : ''}</span>
+      <div class="seg" data-j="${j}">${[[1, '存在有利'], [0, '缺席有利'], [-1, '皆可（無預期）']].map(([v, t]) =>
+        `<button type="button" data-v="${v}" class="${dir[j] === v ? 'on' : ''}">${t}</button>`).join('')}</div></div>`).join('');
+    dirsBox.querySelectorAll('.seg').forEach((sg) => sg.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+      dir[+sg.dataset.j] = +b.dataset.v;
+      sg.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
+      run();
+    })));
+  }
+  function run() {
+    const D = DS[ds], k = D.names.length, n = D.names, tbl = CH9.table(D.rows, k);
+    const r = CH9.solve(tbl, k, dir);
+    const interTxt = r.interM.length > 1 ? r.interM.map((m, i) => `M${i + 1}: ${CH9.expr(m, n)}`).join('<br>') : CH9.expr(r.inter, n);
+    root.querySelector('[data-contin]').innerHTML =
+      `<div class="box c"><div class="t">複雜解</div><div class="e">${CH9.expr(r.comp, n)}</div></div><div class="sub">⊆</div>` +
+      `<div class="box i"><div class="t">中間解</div><div class="e">${interTxt}</div></div><div class="sub">⊆</div>` +
+      `<div class="box p"><div class="t">簡約解</div><div class="e">${CH9.expr(r.pars, n)}</div></div>`;
+    root.querySelector('[data-n-rem]').textContent = r.rem.length;
+    root.querySelector('[data-n-easy]').textContent = r.easy.length;
+    root.querySelector('[data-n-hard]').textContent = r.hard.length;
+    const cfg = (m) => CH9.bits(m, k).map((v, j) => (v ? '' : '~') + n[j]).join('·');
+    const status = (m) => tbl[m] === 1 ? ['pos', '1'] : tbl[m] === 0 ? ['neg', '0'] :
+      r.easy.includes(m) ? ['easy', '易'] : r.hard.includes(m) ? ['hard', '簡'] : ['rem', '?'];
+    const stTxt = { pos: '觀察到結果＝是', neg: '觀察到結果＝否', easy: '餘項：中間解把它當作容易反事實', hard: '餘項：只有簡約解使用（困難或缺乏方向依據的反事實）', rem: '餘項：三種解都沒有使用' };
+    // 逐項說明
+    const lines = r.steps.map((s) => {
+      const parts = s.why.map(([j, v, w]) => {
+        const l = (v ? '' : '~') + n[j];
+        return w === 'pars' ? `${l} 保留（在簡約項中）` : w === 'drop' ? `<span class="hl">${l} 刪除</span>（違反預期 → 容易反事實）` :
+          w === 'keep' ? `${l} 保留（符合預期，刪了是困難反事實）` : `${l} 保留（無預期）`;
+      });
+      return `• ${CH9.term(s.T, n)}（對應簡約項 ${s.P ? CH9.term(s.P, n) : '—'}）\n   ${parts.join('；')}`;
+    });
+    const de = dir.map((v, j) => v === 1 ? `"${n[j]}"` : v === 0 ? `"~${n[j]}"` : null).filter(Boolean);
+    const rcode = de.length ? `minimize(tt, include = "?", dir.exp = c(${de.join(', ')}))` : '（R 至少需要一個方向性預期；全部「皆可」時中間解 = 複雜解）';
+    const base = `逐項檢查複雜解：\n${lines.join('\n')}\n\n容易反事實 ${r.easy.length} 列：${r.easy.map(cfg).join('、') || '無'}` +
+      (r.interM.length > 1 ? '\n注意：這組預期下中間解不唯一（R 也會列出多個模型）。' : '') +
+      `\n\nR 對應寫法：\n${rcode}`;
+    out.innerHTML = base;
+    CH9.kmap(root.querySelector('[data-km]'), n, status, (m) => {
+      out.innerHTML = `點選的列：<span class="hl">${cfg(m)}</span> → ${stTxt[status(m)[0]]}\n\n` + base;
+    });
+  }
+  const dsBtns = root.querySelectorAll('[data-ds] button');
+  dsBtns.forEach((b) => b.addEventListener('click', () => {
+    dsBtns.forEach((x) => x.classList.toggle('on', x === b));
+    ds = b.dataset.v; dir = DS[ds].def.slice(); buildDirs(); run();
+  }));
+  root.querySelector('[data-reset]').addEventListener('click', () => { dir = DS[ds].def.slice(); buildDirs(); run(); });
+  buildDirs(); run();
+})();
+</script>
+</body>
+</html>

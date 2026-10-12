@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 10 章 「淨效應」思維的局限 · 重新設計社會科學研究</title>
+<meta name="description" content="Ragin《重新設計社會科學研究》第 10 章互動教材：淨效應思維、模型設定依賴、共線性與重疊的不平等、案例類別、組態比較、有限多樣性與模糊集組態分析">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="css/ragin.css">
+<style>
+  .sbar { display: flex; height: 30px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); margin: .6rem 0 .3rem; background: var(--bg-soft); }
+  .sbar > span { display: block; height: 100%; transition: width .25s; }
+  .sbar .u1 { background: var(--accent); }
+  .sbar .u2 { background: var(--gold); }
+  .sbar .sh { background: repeating-linear-gradient(45deg, var(--rose), var(--rose) 5px, color-mix(in srgb, var(--rose) 55%, var(--bg-card)) 5px, color-mix(in srgb, var(--rose) 55%, var(--bg-card)) 10px); }
+  .sbar .un { background: var(--bg-soft); }
+  .legend { display: flex; flex-wrap: wrap; gap: .4rem 1rem; font-size: .8rem; color: var(--ink-soft); }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: .3rem; vertical-align: -1px; }
+  .bars { display: grid; gap: .35rem; margin: .8rem 0; }
+  .bars .brow { display: grid; grid-template-columns: 7.5rem 1fr 3.2rem; gap: .5rem; align-items: center; font-size: .82rem; }
+  .bars .track { background: var(--bg-soft); border-radius: 6px; height: 18px; overflow: hidden; border: 1px solid var(--border); }
+  .bars .fill { height: 100%; background: var(--accent); transition: width .25s; }
+  .bars .fill.g { background: var(--gold); }
+  .bars .fill.r { background: var(--rose); }
+  .bars .brow.cur .fill { background: var(--rose); }
+  .bars .brow.cur { font-weight: 700; }
+  .bars .num { font-family: var(--mono); text-align: right; }
+  .qitem { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .7rem .9rem; margin: .6rem 0; background: var(--bg); }
+  .qitem .qt { margin: 0 0 .5rem; font-size: .95rem; }
+  .qitem .fb { display: none; font-size: .88rem; color: var(--ink-soft); margin-top: .5rem; border-top: 1px dashed var(--border); padding-top: .5rem; }
+  .qitem.done .fb { display: block; }
+  .qitem .seg button.right { background: var(--ok); color: #fff; }
+  .qitem .seg button.wrong { background: var(--bad); color: #fff; }
+  td.clk { cursor: pointer; text-decoration: underline dotted var(--accent); text-underline-offset: 3px; }
+  .mini { font-size: .82rem; color: var(--ink-faint); }
+  .fzrow { display: grid; grid-template-columns: 9.5rem 1fr 3rem; gap: .5rem; align-items: center; font-size: .8rem; font-family: var(--mono); }
+  .fzrow.top { font-weight: 700; color: var(--ok); }
+  .fzrow .track { background: var(--bg-soft); border-radius: 5px; height: 12px; overflow: hidden; border: 1px solid var(--border); }
+  .fzrow .fill { height: 100%; background: var(--accent); }
+  .fzrow.top .fill { background: var(--ok); }
+  @media (max-width: 600px) {
+    .bars .brow { grid-template-columns: 5.6rem 1fr 2.8rem; }
+    .fzrow { grid-template-columns: 7.6rem 1fr 2.6rem; font-size: .74rem; }
+  }
+</style>
+</head>
+<body>
+<div id="readbar"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="logo rg">R</span><span>重新設計社會科學研究<small>Ragin (2008) 互動教材</small></span></a>
+    <nav class="topnav">
+      <a href="index.html">本書首頁</a>
+      <a href="ch0.html">導讀</a>
+      <a href="ch1.html">第一篇</a>
+      <a href="ch4.html">第二篇</a>
+      <a href="ch6.html">第三篇</a>
+      <a href="ch8.html">第四篇</a>
+      <a href="../index.html">QCA with R ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="chapter-head">
+  <div class="part">第四篇　因果複雜性分析與淨效應分析</div>
+  <div class="eyebrow">CHAPTER 10</div>
+  <h1>「淨效應」思維的局限</h1>
+  <div class="en">The Limitations of Net-Effects Thinking</div>
+  <div class="src">對應原書第 10 章（中譯本頁 127–136）</div>
+</div>
+
+<p class="lead">想像有人告訴你：「控制其他變數後，上大學能讓陷入貧窮的機率平均降低 8 個百分點。」這句話很嚴謹，但如果你是一位要決定補助誰念大學的政策制定者，你真正想知道的其實是：<strong>對哪一種人</strong>，大學會是「決定性」的那一步？對家境優渥的人，大學也許只是錦上添花；對弱勢家庭的孩子，它可能就是能否脫貧的分水嶺。一個「平均」的淨效應，正好把這兩種截然不同的故事壓扁成一個數字。本章要談的，就是這種<strong>淨效應思維</strong>的長處、盲點，以及 QCA 的組態思維如何補上它看不見的部分。</p>
+
+<div class="objectives">
+  <div class="ct">🎯 讀完本章，你應該能夠……</div>
+  <ol>
+    <li>用白話說明什麼是「淨效應」，以及它背後的<strong>獨立性</strong>與<strong>可加性</strong>假設。</li>
+    <li>解釋為什麼淨效應的大小會隨<strong>模型設定</strong>與<strong>自變數間的相關</strong>而改變（以《鐘形曲線》爭論為例）。</li>
+    <li>說出淨效應方法在概念上的三個局限：忽略案例的組態、與政策關心的「人群類別」脫節、把研究窄化成理論之間的「比賽」。</li>
+    <li>讀懂原書表 10-1 的假想真值表，指出「相關眼光」與「組態眼光」得出的結論為何不同。</li>
+    <li>說明可加性假設如何<strong>暗中</strong>把邏輯餘項（沒有案例的組合）納入結論。</li>
+    <li>理解在模糊集中，有限多樣性如何從「空白格」轉變為「向量空間中的空扇區」。</li>
+  </ol>
+</div>
+
+<nav class="toc">
+  <strong>本章目錄</strong>
+  <ol>
+    <li><a href="#s1">什麼是淨效應思維</a></li>
+    <li><a href="#s2">淨效應方法的問題</a></li>
+    <li><a href="#s3">把焦點轉移到案例類別上</a></li>
+    <li><a href="#s4">組態比較：同一張表，兩種結論</a></li>
+    <li><a href="#s5">模糊集與組態分析</a></li>
+    <li><a href="#s6">展望與 R 對照：lm() 與 QCA 並排</a></li>
+    <li><a href="#s7">本章重點、名詞與自我測驗</a></li>
+  </ol>
+</nav>
+
+<!-- ================================================= -->
+<h2 id="s1">1. 什麼是淨效應思維 <span class="en">· Net-effects thinking</span></h2>
+
+<p>多元迴歸等傳統量化方法是今天社會科學量化研究的骨幹，也常被視為「最科學、最嚴謹」的工具。Ragin 並不否認它們的嚴謹，但他提醒：這些方法的嚴謹是<strong>某一種特定的嚴謹</strong>，有它自己的紀律（discipline）與適用範圍，並不是放諸四海皆準。本章聚焦在其中一個關鍵特徵——<strong>估計各個自變數對結果的「淨效應」（net effect）</strong>——並把以此為核心的研究習慣稱為「淨效應思維」。</p>
+
+<div class="callout info">
+  <div class="ct">ℹ️ 先說清楚 Ragin 的立場</div>
+  <p>他<strong>不是</strong>說迴歸有缺陷。迴歸強大而嚴謹，評估自變數的相對重要性也確實有價值。他的論點是：① 這不該是社會科學唯一的任務；② 淨效應的估計<strong>本身就要求研究者假定因果關係不複雜</strong>，所以它天生不適合分析因果複雜性。除了估計淨效應，研究者也應該探問：不同條件<strong>如何組合起來</strong>產生結果？</p>
+</div>
+
+<h3>典型流程：讓理論「比賽」</h3>
+<p>在今天的「常規」社會科學裡，很常見的研究任務是：從幾個彼此競爭的理論中各挑出一些變數，丟進同一個模型，看誰是結果的「最佳預測因子」——誰解釋的變異最多，誰的理論就「贏了比賽」。問題是，大多數理論對條件與結果的描述都相當模糊，很少說清楚「某個原因要在什麼情境下才會發揮作用」。研究者往往只能整理出一份籠統的前因清單，然後交給模型評比。這套流程因為缺乏替代方案，已經變成一種<strong>預設程序</strong>。</p>
+
+<h3>「自」變數的「自」是什麼意思？</h3>
+<p>我們習慣把「前因變數」與「自變數」（independent variable）當同義詞，但「independent」原本的意思是<strong>自主、獨立</strong>：不論其他變數取什麼值（也就是不論處在什麼情境），每個自變數都被假定能<strong>獨立地</strong>影響結果的水準或機率。由此推出兩個關鍵性質：</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>① 可加性（additivity）</h4>
+    <p>某個自變數的淨效應，在其他自變數的<strong>任何取值與任何組合</strong>下都一樣。教育的效果，對富裕家庭和貧窮家庭的孩子是同一個數字。</p>
+  </div>
+  <div class="new">
+    <h4>② 不重疊的貢獻（non-overlapping contribution）</h4>
+    <p>為了得到 X<sub>1</sub> 的淨效應，要把它與其他自變數<strong>共享</strong>的解釋力扣掉。淨效應＝每個變數「獨占」的那一份解釋力。</p>
+  </div>
+</div>
+
+<div class="callout key">
+  <div class="ct">🔑 核心觀念：重疊越多，淨效應越小</div>
+  <p>變數之間共享多少解釋力，直接取決於它們的<strong>相關</strong>。一般來說，自變數之間的相關越高，每個變數的淨效應就越小——因為能「獨占」的部分越來越少。下面的互動元件讓你親眼看到這個現象。</p>
+</div>
+
+<div class="widget" id="w-split">
+  <div class="widget-head"><span class="wtag">互動</span> 淨效應「被分割」：兩個高度相關的自變數</div>
+  <div class="widget-body">
+    <p style="margin-top:0">假設 X<sub>1</sub>＝AFQT 測驗分數、X<sub>2</sub>＝原生家庭社經地位，結果 Y＝避免貧窮（皆已標準化）。先設定每個自變數與 Y 的相關，再拉動<strong>兩個自變數之間的相關 r<sub>12</sub></strong>，觀察「各自獨占的貢獻」如何縮水。</p>
+    <div class="slider-row"><span class="sl-label" style="width:auto">r(X₁,Y)</span><input type="range" min="0" max="0.8" step="0.05" value="0.5" data-r1><output data-o1>0.50</output></div>
+    <div class="slider-row"><span class="sl-label" style="width:auto">r(X₂,Y)</span><input type="range" min="0" max="0.8" step="0.05" value="0.5" data-r2><output data-o2>0.50</output></div>
+    <div class="slider-row"><span class="sl-label" style="width:auto">r₁₂</span><input type="range" min="0" max="0.95" step="0.05" value="0.6" data-r12><output data-o12>0.60</output></div>
+    <div class="sbar" data-bar><span class="u1"></span><span class="u2"></span><span class="sh"></span><span class="un"></span></div>
+    <div class="legend"><span><i style="background:var(--accent)"></i>X₁ 獨占</span><span><i style="background:var(--gold)"></i>X₂ 獨占</span><span><i style="background:var(--rose)"></i>兩者共享（歸不了任何人）</span><span><i style="background:var(--bg-soft);border:1px solid var(--border)"></i>未解釋</span></div>
+    <div class="stats">
+      <div class="stat"><div class="k">模型總 R²</div><div class="v" data-R2>—</div></div>
+      <div class="stat"><div class="k">X₁ 標準化係數 β₁</div><div class="v" data-b1>—</div></div>
+      <div class="stat"><div class="k">X₁ 獨占貢獻（半偏 r²）</div><div class="v gold" data-u1>—</div></div>
+      <div class="stat"><div class="k">共享部分</div><div class="v bad" data-sh>—</div></div>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<div class="formula">
+  <span class="flabel">兩個自變數時的標準化係數與獨占貢獻（由相關係數直接算出）</span>
+  β<sub>1</sub> = <span class="frac"><span>r<sub>1Y</sub> − r<sub>12</sub>·r<sub>2Y</sub></span><span>1 − r<sub>12</sub><sup>2</sup></span></span>
+  　　獨占貢獻<sub>1</sub> = <span class="frac"><span>(r<sub>1Y</sub> − r<sub>12</sub>·r<sub>2Y</sub>)<sup>2</sup></span><span>1 − r<sub>12</sub><sup>2</sup></span></span>
+</div>
+<p class="mini">例：r<sub>1Y</sub> = r<sub>2Y</sub> = 0.5 時，總 R² = 0.5 /(1 + r<sub>12</sub>)，每個變數的獨占貢獻 = 0.25(1 − r<sub>12</sub>)/(1 + r<sub>12</sub>)。r<sub>12</sub> 從 0 升到 0.9，獨占貢獻從 0.250 掉到約 0.013，但兩者合起來的解釋力（R²）只從 0.500 降到 0.263——大部分解釋力變成了「共享、無法歸屬」。</p>
+
+<h3>模糊理論與線性可加模型的「默契」</h3>
+<p>Ragin 指出模糊的理論和淨效應思維之間有一層潛在的連結：理論越薄弱，越不會說明情境、範圍條件，或條件之間如何改變彼此的作用（即<strong>不可加性</strong>）。這個指引的空缺，就由<strong>線性可加模型</strong>來填補。研究者常說線性可加模型「最簡單」「假定最少」——於是<strong>可加性（＝因果簡單性）變成預設值</strong>，任何不可加的分析反而需要額外的理論背書，而這樣的理論通常付之闕如。</p>
+
+<details class="think">
+  <summary>想一想：線性可加模型真的「假定最少」嗎？</summary>
+  <div class="ans">
+    <p>不見得。「每個變數在任何情境下效果都一樣」本身就是一個<strong>很強</strong>的假定：它斷言了沒有交互作用、沒有門檻、沒有「要 A 和 B 同時存在才有用」的情況。說它「最簡單」只是因為我們習慣了把它當起點。從集合論的角度看，同樣可以主張「條件會組合起來發揮作用」才是更貼近案例知識的起點。</p>
+  </div>
+</details>
+
+<p>淨效應計算還和一個觀念很契合：社會科學的首要目標，是評估競爭理論的相對解釋力。淨效應給了每個理論變數一個「不重疊」的量化分數，看似為理論裁判提供了穩固基礎。但 Ragin 提醒：社會科學理論多半只是一幅<strong>概略的圖像</strong>（general portrait），彼此並非真正互斥、直接對立。硬要它們比賽，可能做出<strong>不必要、甚至不可能</strong>的理論裁判。</p>
+
+<!-- ================================================= -->
+<h2 id="s2">2. 淨效應方法的問題 <span class="en">· Problems with the net-effects approach</span></h2>
+
+<p>當淨效應方法被當成產生社會科學知識的<strong>唯一或首要</strong>途徑時，問題就浮現了。原書把它們分成<strong>實務問題</strong>與<strong>概念問題</strong>兩類。先看總覽：</p>
+
+<div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th>類型</th><th>問題</th><th>一句話說明</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2"><strong>實務</strong></td><td>① 依賴模型設定</td><td>同一個變數的淨效應，放進的競爭變數越多就越小，甚至降到零；「正確」設定需要強理論，而這正是缺的。</td></tr>
+      <tr><td>② 自變數高度相關</td><td>社會不平等彼此重疊（測驗分數、家庭背景、學校、社區一起好或一起壞），能「擠」出來的獨立效應很小。</td></tr>
+      <tr><td rowspan="3"><strong>概念</strong></td><td>③ 案例被抽象成變數，看不見組態</td><td>可加性假設效果與情境無關；但大學教育對不同人群的作用可能天差地別（因果異質性）。</td></tr>
+      <tr><td>④ 與政策關心的「類別」脫節</td><td>政策談的是「工作貧窮者」「單親媽媽」這類<strong>特徵組合</strong>，以及在什麼條件下介入才會有決定性效果。</td></tr>
+      <tr><td>⑤ 理論比賽不是社會的核心關切</td><td>哪個理論解釋最多變異主要是學術問題；社會想知道哪些條件在什麼情況下是決定性的。</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>① 淨效應依賴模型設定：《鐘形曲線》的爭論</h3>
+<p>Herrnstein 與 Murray（1994）的《鐘形曲線》（<em>The Bell Curve</em>）使用「全國青年長期追蹤調查」（NLSY）資料，主張被視為一般智力測驗的 <strong>AFQT</strong>（軍隊資格測驗，Armed Forces Qualification Test）分數，對貧窮等結果有<strong>非常強</strong>的淨效應：分數越高，越不可能貧窮。但 Fischer 等人（1996）用<strong>同一筆資料、同一種估計技術</strong>（logistic 迴歸），卻發現 AFQT 對貧窮的淨效應<strong>很弱</strong>。</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>Herrnstein &amp; Murray（1994）</h4>
+    <p>只讓少數（通常一、兩個）變數與 AFQT 競爭 → AFQT 的淨效應很大。</p>
+  </div>
+  <div class="new">
+    <h4>Fischer 等（1996）</h4>
+    <p>放進許多與 AFQT 相關的競爭變數 → AFQT 的淨效應變得很弱。</p>
+  </div>
+</div>
+
+<p>哪一個才「對」？答案取決於你認為哪一個模型設定才正確——於是關於淨效應的爭論，常常僵持在模型設定上。社會科學家傾向於「變數越多越好」，但 Achen（2005a）提醒：自變數太多同樣可能造成設定誤差，產生難以詮釋的結果。</p>
+
+<div class="widget" id="w-spec">
+  <div class="widget-head"><span class="wtag">互動</span> 模型設定依賴：加進越多競爭變數，AFQT 的淨效應越小</div>
+  <div class="widget-body">
+    <p style="margin-top:0">模擬：AFQT 與結果的相關為 r<sub>A</sub>；每加入一個競爭變數（家庭社經、教育年數、父母教育、學校品質、社區品質），它與結果的相關為 r<sub>C</sub>；所有自變數兩兩之間的相關為 r。下圖顯示「模型裡有 k 個競爭變數」時，AFQT 的標準化係數。</p>
+    <div class="slider-row"><span class="sl-label" style="width:auto">r（自變數間）</span><input type="range" min="0" max="0.85" step="0.05" value="0.5" data-r><output data-ro>0.50</output></div>
+    <div class="slider-row"><span class="sl-label" style="width:auto">r<sub>A</sub>（AFQT, Y）</span><input type="range" min="0.2" max="0.6" step="0.05" value="0.4" data-ra><output data-rao>0.40</output></div>
+    <div class="slider-row"><span class="sl-label" style="width:auto">r<sub>C</sub>（競爭, Y）</span><input type="range" min="0.1" max="0.6" step="0.05" value="0.35" data-rc><output data-rco>0.35</output></div>
+    <div class="slider-row"><span class="sl-label" style="width:auto">目前 k</span><input type="range" min="0" max="5" step="1" value="1" data-k><output data-ko>1</output></div>
+    <div class="bars" data-bars></div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<p class="mini">註：這是用相關矩陣直接解出的標準化迴歸係數（線性模型），用來呈現「設定依賴」的機制，不是重現原研究的 logistic 迴歸數值。</p>
+
+<h3>② 自變數高度相關：重疊的不平等</h3>
+<p>社會科學家感興趣的自變數往往彼此高度相關。在《鐘形曲線》的例子裡，AFQT 分數與原生家庭社經地位高度相關，兩者又和受教育年數、社區與學校特性等條件相關。社會不平等是<strong>疊在一起</strong>的：測驗分數高的人，家庭背景往往較好、學校較好、社區也較好。相關不是百分之百，所以技術上仍能從資料中「擠」出各自的淨效應估計——但壓倒性的經驗模式其實是一種<strong>混淆效應</strong>（confounded effect）：有利條件聚在一起、不利條件也聚在一起，而不是一個個可以分析性地拆開的獨立變數。</p>
+
+<div class="callout warn">
+  <div class="ct">⚠️ 反直覺之處</div>
+  <p>社會學家其實都知道：不平等之所以有力量、之所以持久，正是<strong>因為它們彼此重疊、相互強化</strong>。既然如此，量化研究卻幾乎完全依賴「把每個原因切開、估計各自獨立效應」的技術，就顯得有些違反直覺了。你在上面的 w-split 元件裡看到的「共享部分」，在真實社會裡恰恰可能是最重要的部分。</p>
+</div>
+
+<h3>③ 案例被抽象成變數：因果異質性消失了</h3>
+<p>檢查自變數間的相關並據此調整淨效應是有用的；但把案例<strong>整體地</strong>看成「屬性的特定組態」同樣有用。不同的案例以不同方式組合了相關的前因特徵，因此值得分別評估這些組合的結果。原書的例子：</p>
+<ul>
+  <li>對<strong>高收入家庭出身、已婚的白人男性</strong>來說，大學教育對避免貧窮也許沒什麼影響——他們本來就很少貧窮。</li>
+  <li>對<strong>低收入家庭出身、未婚的黑人女性</strong>來說，大學教育可能有重大影響。</li>
+</ul>
+<p>把案例看成組態，就能做<strong>依情境劃定範圍</strong>的評估：測驗分數在什麼條件下對避免貧窮很重要？婚姻在什麼條件下重要？這些連結在白人女性與黑人男性之間是否不同？這類「條件問題」（哪些條件促成或阻止原因與結果的連結）超出了傳統淨效應分析的範圍，因為後者追求的是<strong>與情境無關</strong>的效應估計。</p>
+
+<div class="widget" id="w-hetero">
+  <div class="widget-head"><span class="wtag">互動</span> 案例類別比較：「平均淨效應」背後藏了什麼？</div>
+  <div class="widget-body">
+    <p style="margin-top:0">樣本由兩類人組成。<strong>優勢組</strong>：無大學 90% 避免貧窮、有大學 95%。<strong>弱勢組</strong>：無大學 40% 避免貧窮，有大學則提高「大學效果」這麼多。迴歸模型：避免貧窮 ~ 大學 ＋ 弱勢組（線性機率模型，加權 OLS）。</p>
+    <div class="slider-row"><span class="sl-label" style="width:auto">弱勢組占樣本</span><input type="range" min="0.1" max="0.9" step="0.05" value="0.5" data-s><output data-so>50%</output></div>
+    <div class="slider-row"><span class="sl-label" style="width:auto">優勢組大學率</span><input type="range" min="0.1" max="0.9" step="0.05" value="0.6" data-pa><output data-pao>60%</output></div>
+    <div class="slider-row"><span class="sl-label" style="width:auto">弱勢組大學率</span><input type="range" min="0.05" max="0.9" step="0.05" value="0.2" data-pd><output data-pdo>20%</output></div>
+    <div class="slider-row"><span class="sl-label" style="width:auto">弱勢組的大學效果</span><input type="range" min="0" max="0.55" step="0.05" value="0.45" data-e><output data-eo>+45</output></div>
+    <div class="bars" data-bars></div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<div class="callout tip">
+  <div class="ct">📌 觀察重點</div>
+  <p>控制組別之後的「淨效應」是兩組組內效果的<strong>加權平均</strong>，權重 ∝ 該組人數 × 大學率 × (1 − 大學率)。所以它對兩組人<strong>都不準</strong>：低估了弱勢組、高估了優勢組。拉高「優勢組大學率」到 0.9，你會發現弱勢組在淨效應中的權重反而變大——淨效應的數值甚至會隨著<em>樣本組成</em>而變，即使每一組內部的因果故事完全沒變。</p>
+</div>
+
+<h3>④ 政策談的是「類別」，不是「變數」</h3>
+<p>組態式的評估和社會政策的爭論直接相關。政策論述關注的往往是人（案例）的<strong>類別與種類</strong>——「真正的弱勢者」「工作貧窮者」「領福利的單親媽媽」——這些說法本身就是<strong>特徵的組合</strong>。而社會政策的本質是<strong>介入</strong>。知道「教育整體而言能降低貧窮機率」固然很好，但從政策角度，更有用的是知道：<strong>在什麼條件下</strong>，教育能產生決定性影響，保護弱勢者免於貧窮。淨效應是從總體抽出的樣本算出來的，而不是對特定種類與類別的案例做「結構化、聚焦的比較」（George 1979）。</p>
+
+<h3>⑤ 理論比賽不是社會的核心關切</h3>
+<p>淨效應提供了不同理論變數相對解釋力的簡潔評估，但「哪個理論主導貧窮的變異」主要是<strong>學術</strong>問題。對更廣大的社會、尤其以介入為目標時，重要的是找出<strong>哪些前因條件在什麼情況下起決定性作用</strong>——至於這些條件來自哪個（通常也很模糊的）理論，就沒那麼要緊了。</p>
+
+<div class="callout key">
+  <div class="ct">🔑 小結：嚴謹既是優點，也是限制</div>
+  <p>淨效應方法強大而嚴謹，但也正是被這種嚴謹所限制——它的優點同時是它的缺點，在研究案例特徵的<strong>組合</strong>（特別是重疊的不平等）時尤其明顯。因此值得用一種優點不同的方法來<strong>平衡與補充</strong>：明確考慮案例組合的組態方法。</p>
+</div>
+
+<div class="widget" id="w-rewrite">
+  <div class="widget-head"><span class="wtag">練習</span> 淨效應問題 vs. 組態問題</div>
+  <div class="widget-body">
+    <p style="margin-top:0">判斷下列研究問題屬於哪一種思維。作答後會出現另一種問法的改寫示範。</p>
+    <div data-items></div>
+    <div class="result-box" data-out>尚未作答。</div>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s3">3. 把焦點轉移到案例類別上 <span class="en">· Shifting the focus to kinds of cases</span></h2>
+
+<p>社會科學方法可以排成一條光譜：一端是小樣本、案例導向的質性方法，另一端是大樣本、變數導向的量化方法。大家都惋惜兩端之間的鴻溝，做研究時卻通常只站在其中一端。Ragin 主張：透過 QCA，可以把<strong>案例導向研究的精神與邏輯帶進大樣本研究</strong>——把案例看成組態，探索條件組合與結果之間的關係，進而揭露哪些條件與情境會促成或阻止某個關係（例如教育與避免貧窮之間的關係）。</p>
+
+<p>QCA 的出發點是：<strong>依案例所展現的條件組合來看待案例</strong>。工具就是真值表——列出所有邏輯上可能的條件組合、把案例依其組合分類，並記錄每種組合的結果值。原書表 10-1 是一個假想例子：200 個案例、4 個清晰集條件、1 個結果。</p>
+
+<ol>
+  <li><strong>C</strong>：受訪者是否有大學學歷？</li>
+  <li><strong>I</strong>：受訪者是否在至少中產階級收入的家庭中長大？（表頭簡稱「高收入家庭」）</li>
+  <li><strong>P</strong>：父母是否至少有一位有大學學歷？</li>
+  <li><strong>S</strong>：受訪者的 AFQT 分數是否偏高？</li>
+</ol>
+<p>結果 <strong>A</strong>＝避免貧窮。4 個條件 → 2<sup>4</sup> = 16 種組合，也就是 16 列。QCA 的目標，是以<strong>邏輯速記</strong>的方式總結這張表：哪些組合與結果相連。</p>
+
+<div class="widget" id="w-t101">
+  <div class="widget-head"><span class="wtag">互動</span> 原書表 10-1：用三種眼光看同一張真值表</div>
+  <div class="widget-body">
+    <div class="controls">
+      <div class="seg" data-lens>
+        <button data-v="plain" class="on">原表</button>
+        <button data-v="net">淨效應眼光</button>
+        <button data-v="conf">組態眼光</button>
+        <button data-v="rem">有限多樣性</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl center" data-tt>
+        <thead><tr><th>列</th><th>大學學歷<br>C</th><th>高收入家庭<br>I</th><th>父母大學<br>P</th><th>高 AFQT<br>S</th><th>避免貧窮<br>A</th><th>案例數</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<h3>不均勻的分布：相關，還是有限多樣性？</h3>
+<p>表 10-1 呈現了非實驗資料的典型特徵：200 個案例<strong>很不均勻</strong>地散布在 16 列中，有些列完全沒有案例。同一個現象，兩種方法有不同的理解：</p>
+<div class="compare">
+  <div class="old">
+    <h4>淨效應方法</h4>
+    <p>分布不均是<strong>自變數之間相關</strong>的結果。自變數相關越高，案例在各組合間就越集中、越不均勻。</p>
+  </div>
+  <div class="new">
+    <h4>QCA</h4>
+    <p>分布不均是<strong>有限多樣性</strong>（limited diversity）。4 個二分變數其實構成一個有 16 個類別的名義變數，而只有其中一部分類別有實例（見第 8、9 章）。</p>
+  </div>
+</div>
+<p>案例太少的列（例如第 2、3、10、12 列只有 1–4 個案例）沒有給結果值（表中的「?」）：經驗證據不足時，不能判斷該列的結果。在 QCA 中，這些列與完全沒有案例的列一樣，都屬於<strong>邏輯餘項</strong>（logical remainders）。</p>
+
+<h3>結果欄怎麼編碼？</h3>
+<p>在 QCA 中，結果是依<strong>集合論標準</strong>編碼的：關鍵問題是，某一列的個人在多大程度上構成「避免貧窮」集合的子集合——也就是該列的人有多<strong>一致地</strong>避免貧窮。個人層次的資料很少出現完美的子集合關係（總有「條件全好卻仍陷入貧窮」的意外案例），所以研究者要先訂規則：</p>
+<ul>
+  <li><strong>一致性門檻</strong>：例如該列避免貧窮的比例必須超過 <strong>0.90</strong>（一致性的定義見第 3、7 章）。</li>
+  <li><strong>機率標準</strong>：例如在 α = 0.05 下，該列避免貧窮的比例必須<strong>顯著高於</strong> 0.80。</li>
+</ul>
+<p>具體採用哪個基準，取決於既有的理論與實質知識。清晰集的一致性評估很直接（就是比例）；模糊集的原理相同，只是程序較複雜。表 10-1 的「避免貧窮」欄，就是依這樣的一致性評估編出來的。</p>
+
+<!-- ================================================= -->
+<h2 id="s4">4. 組態比較：同一張表，兩種結論 <span class="en">· Configurational comparisons</span></h2>
+
+<p>兩種方法最根本的差別是：淨效應方法聚焦在<strong>可分析性地分開的自變數及其相關</strong>；QCA 聚焦在<strong>由條件組合所定義的案例類別</strong>。淨效應方法藉由檢視變數間的相關來建立通則；QCA 則<strong>由下而上</strong>比較案例組態，在陳述為「真」的前提下，逐步建立更具包容性的條件組合來形成通則。</p>
+
+<h3>淨效應的讀法：大學學歷就是關鍵</h3>
+<p>看表 10-1：凡是 A = 1 的列，C 都是 1；凡是 A = 0 的列，C 都是 0。在有結果值的 190 個案例中，C 與 A <strong>完全相關</strong>（φ = 1.00）。從淨效應的角度，這強烈暗示避免貧窮的關鍵就是大學學歷；一旦納入 C，其他變數就無法再多解釋任何變異（線性機率模型中 C 的係數 = 1，I、P、S 的係數都是 0）。</p>
+
+<h3>組態的讀法：大學學歷 × 高收入家庭</h3>
+<p>QCA 不會這麼快下結論。真值表裡有好幾種「C 存在、但案例不足所以結果未知」的組合。例如第 9 列：有大學學歷、但其他三個條件都缺席——<strong>沒有任何案例</strong>，因此無從判斷這種組合是否會避免貧窮。進一步看：A = 1 的四列（13–16）<strong>全都同時具備 C 與 I</strong>。依第 8、9 章的論點，即使 C 與 A 在資料中完全對應，「單靠大學教育就能避免貧窮」仍是不明智的結論。用 QCA 時，你很難忽略這個事實：<strong>大學學歷與高收入家庭總是一起出現</strong>，兩者應被看成相互強化、共同作用的組合。</p>
+
+<div class="callout key">
+  <div class="ct">🔑 可加性假設偷偷做了反事實推論</div>
+  <p>在傳統淨效應分析中，這些餘項組合其實<strong>已經被納入結論</strong>，只是大多數使用者看不見。可加性假定「C 的效應不論其他變數取什麼值都相同」，等於替第 9–12 列（C 存在、I 缺席，但沒有足夠案例）預先填上了「會避免貧窮」。換句話說，<strong>有限多樣性的問題與反事實分析，都被藏在「隔離每個自變數效應」的分析工作裡了</strong>。</p>
+</div>
+
+<div class="widget" id="w-additive">
+  <div class="widget-head"><span class="wtag">互動</span> 餘項怎麼填，結論就怎麼變（表 10-1）</div>
+  <div class="widget-body">
+    <p style="margin-top:0">點選表中標為「?」的列（第 2–4、7、9–12 列），可在 <strong>? → 1 → 0 → ?</strong> 之間切換你對該列結果的「假設」。系統用布林最小化（Quine–McCluskey）即時算出解。「?」視為不納入（等同保守解）。</p>
+    <div class="controls">
+      <button class="btn ghost" type="button" data-act="reset">全部恢復為 ?（只用有證據的列）</button>
+      <button class="btn ghost" type="button" data-act="add">套用可加性假設（照線性模型預測填）</button>
+      <button class="btn ghost" type="button" data-act="all">讓演算法自由選擇餘項（簡約解）</button>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl center" data-tt>
+        <thead><tr><th>列</th><th>C</th><th>I</th><th>P</th><th>S</th><th>A（含你的假設）</th><th>n</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<details class="think">
+  <summary>想一想：為什麼「讓演算法自由選擇餘項」得到的解和線性模型一樣是 C？</summary>
+  <div class="ans">
+    <p>簡約解允許任何餘項被當成「1」，只要能讓式子更短。C 存在的 8 列中，13–16 列是正面案例，9–12 列都是餘項，沒有任何負面列——所以把 9–12 列假設為 1，就能把 C·I 簡化成 C。這正是可加性模型在背後做的事。差別在於：QCA 會<strong>攤開</strong>告訴你「這個結論靠的是第 9–12 列的假設」，你可以用理論與案例知識判斷這些假設是「容易」還是「困難」的反事實（第 9 章）。在這個例子裡，「沒有家庭資源也只靠大學學歷就能避免貧窮」並不是一個顯然成立的假設。</p>
+  </div>
+</details>
+
+<div class="widget" id="w-recipes">
+  <div class="widget-head"><span class="wtag">互動</span> 兩條路徑的資料：迴歸看到一個平均，QCA 看到兩個配方</div>
+  <div class="widget-body">
+    <p style="margin-top:0">選一個「真實的」資料生成規則，系統依各列案例數產生結果（例外比例由滑桿控制），再同時跑<strong>加法式線性機率模型</strong>（Y ~ A + B + C）與<strong>真值表＋布林最小化</strong>（一致性門檻 0.80）。你也可以直接修改每列的案例數（設為 0 就變成餘項）。</p>
+    <div class="controls">
+      <div class="seg" data-rule>
+        <button data-v="ABC" class="on">Y = A·B + C</button>
+        <button data-v="AB">Y = A·B</button>
+        <button data-v="AorB">Y = A + B</button>
+      </div>
+    </div>
+    <div class="slider-row"><span class="sl-label" style="width:auto">每列例外比例</span><input type="range" min="0" max="0.2" step="0.05" value="0.1" data-noise><output data-no>10%</output></div>
+    <div class="table-wrap">
+      <table class="tbl center" data-tt>
+        <thead><tr><th>A</th><th>B</th><th>C</th><th>案例數</th><th>Y=1 人數</th><th>一致性</th><th>結果</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="wgrid">
+      <div>
+        <div class="stats">
+          <div class="stat"><div class="k">迴歸：A 的淨效應</div><div class="v" data-ba>—</div></div>
+          <div class="stat"><div class="k">B 的淨效應</div><div class="v" data-bb>—</div></div>
+          <div class="stat"><div class="k">C 的淨效應</div><div class="v" data-bc>—</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="stats">
+          <div class="stat"><div class="k">QCA 解（保守解）</div><div class="v gold" data-sol style="font-size:1.1rem">—</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s5">5. 模糊集與組態分析 <span class="en">· Fuzzy sets and configurational analysis</span></h2>
+
+<p>因為清晰集與模糊集在數學上相通（第 7 章），表 10-1 這樣的真值表也可以由<strong>模糊集資料</strong>建構。步驟是：</p>
+
+<div class="steps">
+  <div class="step"><div><h4>校準每個條件</h4><p>把原始資料轉成隸屬分數，例如每個人在「高 AFQT 分數」集合中的隸屬度（第 5 章的直接校準法）。</p></div></div>
+  <div class="step"><div><h4>計算每個人在 16 種組合中的隸屬度</h4><p>組合的隸屬度＝相關集合（或其否定）隸屬度的<strong>最小值</strong>。例如第 4 列是 ~C·~I·P·S，某人在這列的隸屬度 = min(1−C, 1−I, P, S)。</p></div></div>
+  <div class="step"><div><h4>校準結果並評估每一列的一致性</h4><p>校準「避免貧窮」的隸屬度後，評估每個組合是否構成結果的<strong>模糊子集合</strong>，也就是該列所代表的人有多一致地避免貧窮。這比清晰集分析的子集合定義<strong>更嚴格、要求更高</strong>。</p></div></div>
+  <div class="step"><div><h4>用真值表總結，再做邏輯綜合</h4><p>k 個條件就有 2<sup>k</sup> 個模糊集評估（這裡 2<sup>4</sup> = 16 個）。真值表的結果欄記錄每個評估是否通過；最後的邏輯綜合，描述哪些條件組合透過模糊子集合關係與結果相連。</p></div></div>
+</div>
+
+<div class="widget" id="w-fz">
+  <div class="widget-head"><span class="wtag">互動</span> 一個人同時「部分屬於」16 個組合</div>
+  <div class="widget-body">
+    <p style="margin-top:0">調整某位受訪者在四個集合中的隸屬度，看他在 16 個組合（向量空間的 16 個扇區）中各自的隸屬度。</p>
+    <div class="slider-row"><span class="sl-label">C</span><input type="range" min="0" max="1" step="0.05" value="0.8" data-v="0"><output>0.80</output></div>
+    <div class="slider-row"><span class="sl-label">I</span><input type="range" min="0" max="1" step="0.05" value="0.3" data-v="1"><output>0.30</output></div>
+    <div class="slider-row"><span class="sl-label">P</span><input type="range" min="0" max="1" step="0.05" value="0.6" data-v="2"><output>0.60</output></div>
+    <div class="slider-row"><span class="sl-label">S</span><input type="range" min="0" max="1" step="0.05" value="0.9" data-v="3"><output>0.90</output></div>
+    <div data-rows style="display:grid;gap:.25rem;margin-top:.6rem"></div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<h3>有限多樣性換了一個樣子</h3>
+<p>在清晰集中，有限多樣性表現為 k 維交叉表裡的<strong>空白格</strong>（＝真值表的邏輯餘項列）。在模糊集中，它變成 k 維<strong>向量空間</strong>裡<strong>空白（或幾乎空白）的扇區</strong>（vacant sectors）。這個空間有 2<sup>k</sup> 個扇區（也就是 2<sup>k</sup> 個角落），每個案例在所有扇區都有某種程度的隸屬；有些扇區擠滿了強隸屬的案例，有些則一個強隸屬的案例都沒有。在自然發生的社會資料中，大量扇區缺乏案例是很常見的——正如二分條件的交叉表會產生大量空白格。好消息是：第 8、9 章為清晰集發展的處理工具（建構真值表、區分容易與困難反事實），同樣適用於模糊集。</p>
+
+<div class="callout info">
+  <div class="ct">ℹ️ 為什麼「扇區」和「列」可以一一對應？</div>
+  <p>上面的元件中，只要沒有任何條件的隸屬度剛好等於 0.5，一個案例在 16 個組合中<strong>最多只有一個</strong>隸屬度大於 0.5——它「最靠近」的那個角落。這就是第 7 章把模糊集案例分派到真值表各列的依據：每列的「案例數」算的是在該扇區隸屬度 &gt; 0.5 的案例。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s6">6. 展望與 R 對照：lm() 與 QCA 並排 <span class="en">· Looking ahead</span></h2>
+
+<p>第 11 章會用一個大樣本資料集——Herrnstein 與 Murray（1994）《鐘形曲線》所用的 NLSY 資料——完整示範模糊集分析，並用同一份資料做兩個對照分析：<strong>logistic 迴歸的傳統淨效應分析</strong>與<strong>模糊集真值表分析</strong>。結果將顯示：模糊集方法提供了淨效應分析所繞過的東西——把案例當作組態仔細檢視，以及與結果相連的不同條件組合。</p>
+
+<p>在進入第 11 章之前，可以先用表 10-1 的假想資料，在 R 中親手體驗本章的對比（概念示範）：</p>
+
+<div class="sw-tabs">
+  <div class="seg">
+    <button data-tab="lm" class="on">淨效應：lm()</button>
+    <button data-tab="qca">組態：QCA 套件</button>
+  </div>
+  <div class="sw-pane on" data-pane="lm">
+<pre class="code"><span class="c-com"># 原書表 10-1（假想資料）：16 列、200 個案例</span>
+t101 <span class="c-kw">&lt;-</span> <span class="c-fn">data.frame</span>(
+  C = <span class="c-fn">rep</span>(<span class="c-fn">c</span>(<span class="c-num">0</span>, <span class="c-num">1</span>), each = <span class="c-num">8</span>),
+  I = <span class="c-fn">rep</span>(<span class="c-fn">rep</span>(<span class="c-fn">c</span>(<span class="c-num">0</span>, <span class="c-num">1</span>), each = <span class="c-num">4</span>), <span class="c-num">2</span>),
+  P = <span class="c-fn">rep</span>(<span class="c-fn">rep</span>(<span class="c-fn">c</span>(<span class="c-num">0</span>, <span class="c-num">1</span>), each = <span class="c-num">2</span>), <span class="c-num">4</span>),
+  S = <span class="c-fn">rep</span>(<span class="c-fn">c</span>(<span class="c-num">0</span>, <span class="c-num">1</span>), <span class="c-num">8</span>),
+  A = <span class="c-fn">c</span>(<span class="c-num">0</span>,<span class="c-kw">NA</span>,<span class="c-kw">NA</span>,<span class="c-kw">NA</span>, <span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-kw">NA</span>,<span class="c-num">0</span>, <span class="c-kw">NA</span>,<span class="c-kw">NA</span>,<span class="c-kw">NA</span>,<span class="c-kw">NA</span>, <span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>),
+  n = <span class="c-fn">c</span>(<span class="c-num">30</span>,<span class="c-num">3</span>,<span class="c-num">4</span>,<span class="c-num">0</span>, <span class="c-num">25</span>,<span class="c-num">19</span>,<span class="c-num">0</span>,<span class="c-num">20</span>, <span class="c-num">0</span>,<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">2</span>, <span class="c-num">19</span>,<span class="c-num">22</span>,<span class="c-num">32</span>,<span class="c-num">23</span>)
+)
+cases <span class="c-kw">&lt;-</span> t101[<span class="c-fn">rep</span>(<span class="c-num">1</span>:<span class="c-num">16</span>, t101$n), <span class="c-num">1</span>:<span class="c-num">5</span>]   <span class="c-com"># 展開成 200 個人</span>
+known <span class="c-kw">&lt;-</span> <span class="c-fn">subset</span>(cases, !<span class="c-fn">is.na</span>(A))           <span class="c-com"># 結果已知的 190 人</span>
+
+<span class="c-com"># 線性機率模型：每個變數的「淨效應」</span>
+<span class="c-fn">coef</span>(<span class="c-fn">lm</span>(A ~ C + I + P + S, data = known))
+<span class="c-com">#  (Intercept)  C   I   P   S</span>
+<span class="c-com">#       0       1   0   0   0    ← 「大學學歷就是一切」</span>
+
+<span class="c-com"># 註：改用 glm(..., family = binomial) 會因 C 完全分離 A</span>
+<span class="c-com">#     而出現 "fitted probabilities numerically 0 or 1" 警告</span>
+
+<span class="c-com"># 用模型「預測」沒有案例的第 9 列（只有大學學歷）</span>
+<span class="c-fn">predict</span>(<span class="c-fn">lm</span>(A ~ C + I + P + S, data = known),
+        newdata = <span class="c-fn">data.frame</span>(C = <span class="c-num">1</span>, I = <span class="c-num">0</span>, P = <span class="c-num">0</span>, S = <span class="c-num">0</span>))
+<span class="c-com"># 1 ← 可加性替一個沒有任何證據的組合下了結論</span></pre>
+  </div>
+  <div class="sw-pane" data-pane="qca">
+<pre class="code"><span class="c-fn">library</span>(QCA)
+<span class="c-com"># 承上：known 只含結果已知的 190 人；案例不足的列自然成為餘項</span>
+tt <span class="c-kw">&lt;-</span> <span class="c-fn">truthTable</span>(known, outcome = <span class="c-str">"A"</span>,
+                 conditions = <span class="c-fn">c</span>(<span class="c-str">"C"</span>, <span class="c-str">"I"</span>, <span class="c-str">"P"</span>, <span class="c-str">"S"</span>),
+                 incl.cut = <span class="c-num">0.9</span>, n.cut = <span class="c-num">1</span>,
+                 show.cases = <span class="c-kw">FALSE</span>, sort.by = <span class="c-fn">c</span>(<span class="c-str">"incl"</span>, <span class="c-str">"n"</span>))
+tt
+
+<span class="c-com"># 保守（複雜）解：不使用任何餘項</span>
+<span class="c-fn">minimize</span>(tt, details = <span class="c-kw">TRUE</span>)
+<span class="c-com"># M1: C*I -&gt; A    ← 大學學歷「與」高收入家庭的組合</span>
+
+<span class="c-com"># 簡約解：讓演算法自由使用餘項</span>
+<span class="c-fn">minimize</span>(tt, include = <span class="c-str">"?"</span>, details = <span class="c-kw">TRUE</span>)
+<span class="c-com"># M1: C -&gt; A       ← 與 lm() 相同，但它依賴第 9–12 列的假設</span>
+<span class="c-com">#                   （用 sol &lt;- minimize(...); sol$SA 查看用了哪些餘項）</span></pre>
+    <p>對照兩個分頁：<strong>線性模型與簡約解都說「C」</strong>，但只有 QCA 讓你看見這個結論依賴了哪些沒有案例的組合；保守解 C·I 則忠實反映了資料中實際存在的證據。這正是第 8、9 章「容易／困難反事實」要處理的問題，也是第 11 章大樣本分析的伏筆。</p>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s7">7. 本章重點、名詞與自我測驗 <span class="en">· Review</span></h2>
+
+<ol class="takeaways">
+  <li><strong>淨效應</strong>＝控制其他變數後，某自變數對結果「不重疊」的獨立貢獻；它建立在<strong>獨立性</strong>與<strong>可加性</strong>（效應與情境無關）的假定上。</li>
+  <li>自變數間相關越高，共享的解釋力越多，淨效應越小；因此淨效應高度<strong>依賴模型設定</strong>（《鐘形曲線》vs. Fischer 等的 AFQT 爭論）。</li>
+  <li>社會不平等是<strong>重疊、互相強化</strong>的；硬把它們拆成獨立效應，可能正好丟掉最重要的部分。</li>
+  <li>淨效應追求與情境無關的平均，看不見<strong>因果異質性</strong>：同一條件對不同類別案例的作用可能截然不同；政策關心的正是這些<strong>案例類別</strong>與「在什麼條件下有決定性效果」。</li>
+  <li>QCA 把案例看成<strong>組態</strong>：非實驗資料的不均勻分布被理解為<strong>有限多樣性</strong>，案例不足的列是<strong>邏輯餘項</strong>。</li>
+  <li>表 10-1 中 C 與 A 完全相關，但正面列全都同時具備 C 與 I；<strong>可加性假設暗中把餘項當成正面案例</strong>，QCA 則把這些反事實攤開來檢視。</li>
+  <li>在模糊集中，有限多樣性從「空白格」變成「向量空間的空扇區」；2<sup>k</sup> 個模糊子集合評估以真值表總結，再做邏輯綜合。</li>
+</ol>
+
+<h3>名詞對照</h3>
+<div class="table-wrap">
+  <table class="tbl gloss">
+    <thead><tr><th>本教材用語</th><th>簡中譯本</th><th>英文</th><th>白話說明</th></tr></thead>
+    <tbody>
+      <tr><td>淨效應</td><td>净效应</td><td>net effect</td><td>控制其他變數後，某變數獨占的效應</td></tr>
+      <tr><td>淨效應思維</td><td>净效应思维</td><td>net-effects thinking</td><td>把評估各變數獨立效應當成研究主要任務的習慣</td></tr>
+      <tr><td>自變數</td><td>自变量</td><td>independent variable</td><td>被假定能獨立、自主影響結果的變數</td></tr>
+      <tr><td>可加性</td><td>可加性</td><td>additivity</td><td>某變數的效應在其他變數任何取值下都相同</td></tr>
+      <tr><td>模型設定</td><td>模型设定</td><td>model specification</td><td>決定把哪些變數、以何種形式放進模型</td></tr>
+      <tr><td>混淆效應</td><td>混淆效应</td><td>confounded effect</td><td>多個有利（或不利）條件聚在一起、難以拆開的效應</td></tr>
+      <tr><td>組態</td><td>组态</td><td>configuration</td><td>案例所具有的條件組合</td></tr>
+      <tr><td>案例類別</td><td>案例类别</td><td>kinds of cases</td><td>由特定條件組合定義的一群案例</td></tr>
+      <tr><td>有限多樣性</td><td>有限多样性</td><td>limited diversity</td><td>很多邏輯上可能的組合在經驗上沒有（足夠）案例</td></tr>
+      <tr><td>邏輯餘項</td><td>逻辑余项</td><td>logical remainder</td><td>缺乏足夠案例、結果未知的真值表列</td></tr>
+      <tr><td>結構化、聚焦的比較</td><td>结构化、聚焦的比较</td><td>structured, focused comparison</td><td>針對特定類別案例進行有系統的比較（George 1979）</td></tr>
+      <tr><td>空扇區</td><td>空白扇形区域</td><td>vacant sector</td><td>模糊集向量空間中缺乏強隸屬案例的角落</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>自我測驗</h3>
+<p class="quiz-score" data-quiz-score></p>
+
+<div class="quiz" data-answer="2">
+  <p class="q">「自變數」的「自」（independent）在淨效應思維中的核心含義是？</p>
+  <div class="opts">
+    <button class="opt">它和其他自變數的相關必須為零</button>
+    <button class="opt">它是研究者可以自由操弄的變數</button>
+    <button class="opt">不論其他變數取什麼值，它都能獨立地影響結果</button>
+    <button class="opt">它只能是連續變數</button>
+  </div>
+  <div class="explain">「independent」指自主能力：每個自變數被假定在任何情境下都能獨立影響結果。由此推出可加性——它的淨效應在其他變數的所有取值組合下都相同。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">Herrnstein &amp; Murray 與 Fischer 等用同一資料、同一技術，卻對 AFQT 的淨效應得出相反結論。關鍵差別在於？</p>
+  <div class="opts">
+    <button class="opt">放進模型、與 AFQT 競爭的變數數量不同</button>
+    <button class="opt">一方用 OLS、另一方用 logistic 迴歸</button>
+    <button class="opt">兩者的樣本來自不同國家</button>
+    <button class="opt">AFQT 的測量方式不同</button>
+  </div>
+  <div class="explain">Herrnstein 與 Murray 通常只放一兩個競爭變數；Fischer 等放進許多與 AFQT 相關的變數。淨效應依賴模型設定，爭論因此常僵持在「哪個設定才對」。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">兩個自變數與結果的相關都固定，只把兩者之間的相關從 0.2 提高到 0.8，最可能發生什麼事？</p>
+  <div class="opts">
+    <button class="opt">兩者的淨效應都變大</button>
+    <button class="opt">模型總 R² 一定上升</button>
+    <button class="opt">淨效應不受影響</button>
+    <button class="opt">各自獨占的貢獻縮小，共享而無法歸屬的部分變大</button>
+  </div>
+  <div class="explain">重疊程度是相關的直接函數。相關越高，能「獨占」的解釋力越少，淨效應越小；大量解釋力變成共享部分（試試 w-split 元件）。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">在表 10-1 中，為什麼 QCA 不贊成「單靠大學學歷就能避免貧窮」的結論？</p>
+  <div class="opts">
+    <button class="opt">因為 C 與 A 的相關不夠高</button>
+    <button class="opt">因為避免貧窮的四列都同時具備 C 與 I，而「有 C 無 I」的組合缺乏案例</button>
+    <button class="opt">因為 AFQT 分數才是真正的原因</button>
+    <button class="opt">因為樣本只有 200 人，不能做推論</button>
+  </div>
+  <div class="explain">C 與 A 完全相關，但第 9–12 列（有 C、無 I）沒有足夠案例。保守解是 C·I；要得到「C 單獨足夠」，必須假設這些餘項會避免貧窮。</div>
+</div>
+
+<div class="quiz" data-answer="2">
+  <p class="q">原書說傳統淨效應分析其實也把餘項納入了結論，是透過什麼方式？</p>
+  <div class="opts">
+    <button class="opt">刪除案例數少的觀察值</button>
+    <button class="opt">使用顯著性檢定</button>
+    <button class="opt">可加性假設：假定某變數的效應在其他變數任何取值下都相同</button>
+    <button class="opt">以多數決決定矛盾列</button>
+  </div>
+  <div class="explain">可加性等於替沒有案例的組合預先填上答案（例如「只有大學學歷」也會避免貧窮），只是使用者通常看不見，因此有限多樣性與反事實問題被「藏」了起來。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">下列哪一個問題最能代表組態思維？</p>
+  <div class="opts">
+    <button class="opt">在什麼條件組合下，大學教育對避免貧窮具有決定性作用？</button>
+    <button class="opt">控制家庭背景後，教育年數每增加一年，貧窮機率降低多少？</button>
+    <button class="opt">AFQT 與家庭社經地位，哪一個對貧窮的解釋力較大？</button>
+    <button class="opt">模型中加入社區品質後，R² 增加了多少？</button>
+  </div>
+  <div class="explain">組態思維問的是「哪些條件組合、在什麼情境下」與結果相連；其餘三個都是在比較或估計獨立的淨效應。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">在模糊集分析中，有限多樣性表現為？</p>
+  <div class="opts">
+    <button class="opt">隸屬度只能是 0 或 1</button>
+    <button class="opt">一致性一定低於 0.5</button>
+    <button class="opt">所有案例都落在同一列</button>
+    <button class="opt">k 維向量空間中有許多空白或幾乎空白的扇區</button>
+  </div>
+  <div class="explain">清晰集的「空白格」在模糊集中變成 2<sup>k</sup> 個扇區中缺乏強隸屬案例的扇區；第 8、9 章的工具同樣適用。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">以下哪一項最符合 Ragin 對淨效應方法的整體評價？</p>
+  <div class="opts">
+    <button class="opt">它有根本缺陷，應該被 QCA 取代</button>
+    <button class="opt">它強大而嚴謹，但不適合分析因果複雜性，應以組態方法平衡與補充</button>
+    <button class="opt">它只適用於小樣本研究</button>
+    <button class="opt">只要變數放得夠多，就能解決所有問題</button>
+  </div>
+  <div class="explain">Ragin 明說這不是要指出迴歸有缺陷；它的嚴謹本身就是限制。組態方法的優點不同，可用來補充，而非取代。</div>
+</div>
+
+<p><button class="btn ghost" data-quiz-reset type="button">重新作答</button></p>
+
+<div class="done-box" data-ch="10">
+  <span class="msg"></span>
+  <button class="btn" type="button">標記本章為已讀</button>
+</div>
+
+<nav class="chap-nav">
+  <a class="prev" href="ch9.html"><div class="dir">← 上一章</div><div class="ttl">第 9 章 容易反事實與困難反事實</div></a>
+  <a class="next" href="ch11.html"><div class="dir">下一章 →</div><div class="ttl">第 11 章 淨效應與組態：實證示範</div></a>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Charles C. Ragin, <em>Redesigning Social Inquiry: Fuzzy Sets and Beyond</em> (University of Chicago Press, 2008)<br>
+  以學習為目的之概念整理與重新詮釋，非原書譯文 · <a href="index.html">回本書首頁</a></p>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="js/ragin.js"></script>
+<script>
+/* ---------- 共用：線性代數、加權 OLS、布林最小化 ---------- */
+const K10 = (function () {
+  const K = {
+    solve(A, b) {
+      const n = b.length, M = A.map((r, i) => [...r, b[i]]);
+      for (let c = 0; c < n; c++) {
+        let p = c; for (let r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+        if (Math.abs(M[p][c]) < 1e-12) return null;
+        [M[c], M[p]] = [M[p], M[c]];
+        for (let r = 0; r < n; r++) if (r !== c) { const f = M[r][c] / M[c][c]; for (let k = c; k <= n; k++) M[r][k] -= f * M[c][k]; }
+      }
+      return M.map((r, i) => r[n] / r[i]);
+    },
+    isPD(S) {
+      const n = S.length, L = S.map(() => Array(n).fill(0));
+      for (let i = 0; i < n; i++) for (let j = 0; j <= i; j++) {
+        let s = S[i][j]; for (let k = 0; k < j; k++) s -= L[i][k] * L[j][k];
+        if (i === j) { if (s <= 1e-9) return false; L[i][i] = Math.sqrt(s); } else L[i][j] = s / L[j][j];
+      }
+      return true;
+    },
+    stdReg(Rxx, rxy) {
+      const beta = K.solve(Rxx, rxy); if (!beta) return null;
+      const R2 = beta.reduce((s, b, i) => s + b * rxy[i], 0);
+      const uniq = rxy.map((_, j) => {
+        if (rxy.length === 1) return R2;
+        const idx = rxy.map((_, i) => i).filter((i) => i !== j);
+        const sub = K.stdReg(idx.map((a) => idx.map((b) => Rxx[a][b])), idx.map((a) => rxy[a]));
+        return R2 - sub.R2;
+      });
+      return { beta, R2, uniq };
+    },
+    wols(rows) {
+      rows = rows.filter((r) => r.w > 0);
+      if (!rows.length) return null;
+      const p = rows[0].x.length + 1, XtX = Array.from({ length: p }, () => Array(p).fill(0)), Xty = Array(p).fill(0);
+      rows.forEach((r) => {
+        const x = [1, ...r.x];
+        for (let i = 0; i < p; i++) { Xty[i] += r.w * x[i] * r.y; for (let j = 0; j < p; j++) XtX[i][j] += r.w * x[i] * x[j]; }
+      });
+      const b = K.solve(XtX, Xty); return b ? { b } : null;
+    },
+    minimize(k, pos, dc) {
+      if (!pos.length) return [];
+      let terms = [...new Set([...pos, ...dc])].map((m) => ({ v: m, mask: 0 }));
+      const primes = [];
+      while (terms.length) {
+        const used = new Set(), next = new Map();
+        for (let i = 0; i < terms.length; i++) for (let j = i + 1; j < terms.length; j++) {
+          const a = terms[i], b = terms[j];
+          if (a.mask !== b.mask) continue;
+          const d = a.v ^ b.v;
+          if (d && !(d & (d - 1))) { const t = { v: a.v & ~d, mask: a.mask | d }; next.set(t.v + ':' + t.mask, t); used.add(i); used.add(j); }
+        }
+        terms.forEach((t, i) => { if (!used.has(i) && !primes.some((p) => p.v === t.v && p.mask === t.mask)) primes.push(t); });
+        terms = [...next.values()];
+      }
+      const covers = (p, m) => (m & ~p.mask) === p.v;
+      const lits = (p) => k - p.mask.toString(2).split('').filter((c) => c === '1').length;
+      let best = null;
+      for (let s = 1; s < (1 << primes.length); s++) {
+        const sel = primes.filter((_, i) => s & (1 << i));
+        if (best && sel.length > best.length) continue;
+        if (!pos.every((m) => sel.some((p) => covers(p, m)))) continue;
+        const L = sel.reduce((a, p) => a + lits(p), 0);
+        if (!best || sel.length < best.length || (sel.length === best.length && L < best.L)) { best = sel; best.L = L; }
+      }
+      return best || [];
+    },
+    termStr(p, k, names) {
+      const out = [];
+      for (let i = 0; i < k; i++) {
+        const bit = 1 << (k - 1 - i);
+        if (p.mask & bit) continue;
+        out.push((p.v & bit) ? names[i] : '~' + names[i]);
+      }
+      return out.length ? out.join('·') : '（恆真）';
+    },
+    solStr(sol, k, names) { return sol.length ? sol.map((p) => K.termStr(p, k, names)).sort().join(' + ') : '（無：沒有任何組合通過）'; },
+  };
+  return K;
+})();
+const f2 = (v) => RG.fz.fmt(v, 2), f3 = (v) => RG.fz.fmt(v, 3);
+const pct = (v) => Math.round(v * 100) + '%';
+function bar(label, val, max, cls, cur, txt) {
+  const w = Math.max(0, Math.min(100, (val / max) * 100));
+  return `<div class="brow${cur ? ' cur' : ''}"><span>${label}</span><div class="track"><div class="fill ${cls || ''}" style="width:${w}%"></div></div><span class="num">${txt != null ? txt : f2(val)}</span></div>`;
+}
+
+/* ---------- w-split：淨效應被分割 ---------- */
+(function () {
+  const root = document.getElementById('w-split');
+  const s1 = root.querySelector('[data-r1]'), s2 = root.querySelector('[data-r2]'), s12 = root.querySelector('[data-r12]');
+  const segs = root.querySelectorAll('[data-bar] span');
+  function run() {
+    const r1 = +s1.value, r2 = +s2.value, r = +s12.value;
+    root.querySelector('[data-o1]').textContent = r1.toFixed(2);
+    root.querySelector('[data-o2]').textContent = r2.toFixed(2);
+    root.querySelector('[data-o12]').textContent = r.toFixed(2);
+    const out = root.querySelector('[data-out]');
+    if (!K10.isPD([[1, r, r1], [r, 1, r2], [r1, r2, 1]])) {
+      ['[data-R2]', '[data-b1]', '[data-u1]', '[data-sh]'].forEach((q) => root.querySelector(q).textContent = '—');
+      segs.forEach((s) => s.style.width = '0');
+      out.innerHTML = '這組相關係數在數學上不可能同時成立（相關矩陣非正定）。\n請降低 r₁₂ 或調整兩個 r(X,Y)。';
+      return;
+    }
+    const o = K10.stdReg([[1, r], [r, 1]], [r1, r2]);
+    const u1 = o.uniq[0], u2 = o.uniq[1], R2 = o.R2, sh = R2 - u1 - u2;
+    const widths = [u1, u2, Math.max(0, sh), 1 - R2 - Math.min(0, sh)];
+    segs.forEach((s, i) => s.style.width = (Math.max(0, widths[i]) * 100).toFixed(1) + '%');
+    root.querySelector('[data-R2]').textContent = f3(R2);
+    root.querySelector('[data-b1]').textContent = f3(o.beta[0]);
+    root.querySelector('[data-u1]').textContent = f3(u1);
+    root.querySelector('[data-sh]').textContent = f3(sh);
+    const share = R2 > 0 ? (u1 + u2) / R2 : 0;
+    let msg = `模型總共解釋 ${pct(R2)} 的變異；其中只有 <span class="hl">${pct(share)}</span> 能明確歸給某一個變數。`;
+    if (sh < -1e-6) msg += '\n（共享部分為負：這是「壓抑效果」（suppression），兩個變數合起來反而比各自加總解釋得更多。）';
+    else if (r >= .7) msg += `\nr₁₂ = ${r.toFixed(2)} 時，大部分解釋力（${f3(sh)}）落入「共享」區：資料說的是「有利條件一起出現」，淨效應卻只能報告兩個縮水的數字。`;
+    else if (r <= .1) msg += '\n自變數幾乎不相關時，淨效應就等於各自的單獨效應——這是淨效應思維最舒服的世界，但社會資料很少長這樣。';
+    else msg += '\n繼續把 r₁₂ 往右拉，看看獨占的藍色與金色區塊如何被斜紋的「共享」區吃掉。';
+    out.innerHTML = msg;
+  }
+  [s1, s2, s12].forEach((el) => el.addEventListener('input', run)); run();
+})();
+
+/* ---------- w-spec：模型設定依賴 ---------- */
+(function () {
+  const root = document.getElementById('w-spec');
+  const sr = root.querySelector('[data-r]'), sa = root.querySelector('[data-ra]'), sc = root.querySelector('[data-rc]'), sk = root.querySelector('[data-k]');
+  const names = ['只有 AFQT', '+家庭社經', '+教育年數', '+父母教育', '+學校品質', '+社區品質'];
+  function fit(k, r, ra, rc) {
+    const p = k + 1;
+    const R = Array.from({ length: p }, (_, i) => Array.from({ length: p }, (_, j) => (i === j ? 1 : r)));
+    const ry = [ra, ...Array(k).fill(rc)];
+    const S = R.map((row, i) => [...row, ry[i]]); S.push([...ry, 1]);
+    if (!K10.isPD(S)) return null;
+    return K10.stdReg(R, ry);
+  }
+  function run() {
+    const r = +sr.value, ra = +sa.value, rc = +sc.value, kc = +sk.value;
+    root.querySelector('[data-ro]').textContent = r.toFixed(2);
+    root.querySelector('[data-rao]').textContent = ra.toFixed(2);
+    root.querySelector('[data-rco]').textContent = rc.toFixed(2);
+    root.querySelector('[data-ko]').textContent = kc;
+    const fits = [0, 1, 2, 3, 4, 5].map((k) => fit(k, r, ra, rc));
+    root.querySelector('[data-bars]').innerHTML = fits.map((o, k) =>
+      o ? bar(names[k], Math.max(0, o.beta[0]), Math.max(ra, .01), '', k === kc, f3(o.beta[0])) : bar(names[k], 0, 1, '', k === kc, '不可行')).join('');
+    const o0 = fits[0], ok = fits[kc];
+    const out = root.querySelector('[data-out]');
+    if (!ok) { out.innerHTML = '這組相關在 k 這麼大時不可能同時成立（相關矩陣非正定）。請降低 r_C 或提高 r。'; return; }
+    const drop = 1 - ok.beta[0] / o0.beta[0];
+    let msg = `k = ${kc}：AFQT 的標準化係數 = <span class="hl">${f3(ok.beta[0])}</span>（只放 AFQT 時是 ${f3(o0.beta[0])}，縮水 ${pct(Math.max(0, drop))}）；獨占貢獻 = ${f3(ok.uniq[0])}。`;
+    if (r < .05) msg += '\n自變數之間不相關時，加多少變數 AFQT 的係數都不變——設定依賴的根源正是「相關」。';
+    else if (ok.beta[0] < .05) msg += '\n淨效應幾乎被「控制」到零了。這就是 Fischer 等人那一側的故事。';
+    else msg += `\n同一份資料，「H&amp;M 式」小模型（k = 1）與「Fischer 式」大模型（k = 5）分別給出 ${fits[1] ? f3(fits[1].beta[0]) : '—'} 與 ${fits[5] ? f3(fits[5].beta[0]) : '—'}。哪一個「對」？取決於你相信哪一個設定。`;
+    out.innerHTML = msg;
+  }
+  [sr, sa, sc, sk].forEach((el) => el.addEventListener('input', run)); run();
+})();
+
+/* ---------- w-hetero：案例類別與平均淨效應 ---------- */
+(function () {
+  const root = document.getElementById('w-hetero');
+  const ss = root.querySelector('[data-s]'), spa = root.querySelector('[data-pa]'), spd = root.querySelector('[data-pd]'), se = root.querySelector('[data-e]');
+  function run() {
+    const s = +ss.value, pa = +spa.value, pd = +spd.value, e = +se.value;
+    root.querySelector('[data-so]').textContent = pct(s);
+    root.querySelector('[data-pao]').textContent = pct(pa);
+    root.querySelector('[data-pdo]').textContent = pct(pd);
+    root.querySelector('[data-eo]').textContent = '+' + Math.round(e * 100);
+    const yA0 = .90, yA1 = .95, yD0 = .40, yD1 = .40 + e;
+    // 格資料：x = [大學, 弱勢組]
+    const cells = [
+      { x: [0, 0], y: yA0, w: (1 - s) * (1 - pa) }, { x: [1, 0], y: yA1, w: (1 - s) * pa },
+      { x: [0, 1], y: yD0, w: s * (1 - pd) }, { x: [1, 1], y: yD1, w: s * pd },
+    ];
+    const net = K10.wols(cells).b[1];
+    const biv = K10.wols(cells.map((c) => ({ x: [c.x[0]], y: c.y, w: c.w }))).b[1];
+    const effA = yA1 - yA0, effD = yD1 - yD0;
+    const wA = (1 - s) * pa * (1 - pa), wD = s * pd * (1 - pd);
+    const mx = Math.max(.6, biv, effD);
+    root.querySelector('[data-bars]').innerHTML =
+      bar('優勢組內', effA, mx, 'g', false, '+' + f2(effA)) +
+      bar('弱勢組內', effD, mx, 'r', false, '+' + f2(effD)) +
+      bar('淨效應（控制組別）', net, mx, '', true, '+' + f2(net)) +
+      bar('未控制（雙變數）', biv, mx, '', false, '+' + f2(biv));
+    let msg = `迴歸報告：控制組別後，大學使避免貧窮的機率提高 <span class="hl">${Math.round(net * 100)} 個百分點</span>。`;
+    msg += `\n但沒有任何一類人真的經歷這個數字：優勢組只提高 ${Math.round(effA * 100)} 點，弱勢組提高 ${Math.round(effD * 100)} 點。`;
+    msg += `\n淨效應 = 兩組效果的加權平均，弱勢組權重 = ${pct(wD / (wA + wD))}。`;
+    if (effD - effA > .25) msg += '\n政策意涵：若把補助平均撒給所有人，會高估它對優勢組的價值、低估它對弱勢組的價值——組態問題「對誰、在什麼條件下有決定性效果」才是政策要問的。';
+    else if (Math.abs(effD - effA) < .06) msg += '\n兩組效果幾乎相同時，平均淨效應才是對每個人都準確的描述——這正是可加性假設成立的情況。';
+    if (Math.abs(biv - net) > .1) msg += `\n（未控制組別的雙變數差異 ${f2(biv)} 更大，因為優勢組同時較常念大學、也較少貧窮——重疊的不平等。）`;
+    root.querySelector('[data-out]').innerHTML = msg;
+  }
+  [ss, spa, spd, se].forEach((el) => el.addEventListener('input', run)); run();
+})();
+
+/* ---------- w-rewrite：淨效應問題 vs 組態問題 ---------- */
+(function () {
+  const root = document.getElementById('w-rewrite');
+  const items = [
+    { q: '控制家庭收入後，教育年數每多一年，陷入貧窮的勝算降低多少？', a: 'net', alt: '組態改寫：哪些「教育 × 家庭背景 × 婚姻」的組合，一致地避免貧窮？' },
+    { q: '在什麼樣的家庭背景組合下，大學學歷對避免貧窮是決定性的？', a: 'conf', alt: '淨效應版本：控制家庭背景後，大學學歷對貧窮的平均淨效應是多少？' },
+    { q: 'AFQT 分數與家庭社經地位，哪一個對貧窮的解釋力比較大？', a: 'net', alt: '組態改寫：高 AFQT 在缺乏家庭資源時，是否仍是避免貧窮的組合的一部分？' },
+    { q: '「未婚、低收入家庭出身、無大學學歷」這類人，是否一致地陷入貧窮？', a: 'conf', alt: '淨效應版本：婚姻、家庭收入、學歷各自對貧窮的獨立效應為何？' },
+    { q: '加入社區品質變數後，學校品質的係數還顯著嗎？', a: 'net', alt: '組態改寫：好學校只有在好社區中才與好結果相連嗎？還是兩者各自都是一條路徑？' },
+    { q: '有哪幾種不同的條件組合，都能讓企業成功轉型？', a: 'conf', alt: '淨效應版本：領導風格、資源、市場壓力中，哪一個對轉型成功的平均效果最大？' },
+    { q: '在已婚與未婚者之間，測驗分數與避免貧窮的連結是否不同？', a: 'conf', alt: '淨效應版本：控制婚姻狀態後，測驗分數的淨效應是多少？（交互項是淨效應框架中的有限補救）' },
+    { q: '這個社會政策方案在全體樣本中的平均處理效果是多少？', a: 'net', alt: '組態改寫：這個方案對哪些類別的人（例如「工作貧窮的單親家長」）產生決定性效果？' },
+  ];
+  const box = root.querySelector('[data-items]'), out = root.querySelector('[data-out]');
+  const lab = { net: '淨效應問題', conf: '組態問題' };
+  items.forEach((it, i) => {
+    const d = document.createElement('div');
+    d.className = 'qitem';
+    d.innerHTML = `<p class="qt"><strong>${i + 1}.</strong> ${it.q}</p><div class="seg"><button type="button" data-v="net">淨效應問題</button><button type="button" data-v="conf">組態問題</button></div><div class="fb"></div>`;
+    d.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+      if (d.classList.contains('done')) return;
+      d.classList.add('done'); it.got = b.dataset.v === it.a;
+      b.classList.add(it.got ? 'right' : 'wrong');
+      if (!it.got) d.querySelector(`button[data-v="${it.a}"]`).classList.add('right');
+      d.querySelector('.fb').innerHTML = `${it.got ? '✔' : '✘'} 這是<strong>${lab[it.a]}</strong>。${it.alt}`;
+      score();
+    }));
+    box.appendChild(d);
+  });
+  function score() {
+    const done = items.filter((x) => x.got !== undefined), right = done.filter((x) => x.got).length;
+    let msg = `已作答 ${done.length} / ${items.length}，答對 <span class="hl">${right}</span> 題。`;
+    if (done.length === items.length) msg += '\n判斷訣竅：問「多少」「哪個比較大」「控制後還顯著嗎」→ 淨效應；問「在什麼條件下」「哪些組合」「對哪一類人」→ 組態。';
+    out.innerHTML = msg;
+  }
+})();
+
+/* ---------- 表 10-1 資料 ---------- */
+const T101 = [
+  [0,0,0,0,0,30],[0,0,0,1,null,3],[0,0,1,0,null,4],[0,0,1,1,null,0],
+  [0,1,0,0,0,25],[0,1,0,1,0,19],[0,1,1,0,null,0],[0,1,1,1,0,20],
+  [1,0,0,0,null,0],[1,0,0,1,null,1],[1,0,1,0,null,0],[1,0,1,1,null,2],
+  [1,1,0,0,1,19],[1,1,0,1,1,22],[1,1,1,0,1,32],[1,1,1,1,1,23],
+];
+const A2s = (v) => v === null ? '?' : String(v);
+
+/* ---------- w-t101：三種眼光 ---------- */
+(function () {
+  const root = document.getElementById('w-t101');
+  const tb = root.querySelector('tbody'), out = root.querySelector('[data-out]');
+  T101.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i + 1}</td>` + r.slice(0, 4).map((v) => `<td>${v}</td>`).join('') + `<td><strong>${A2s(r[4])}</strong></td><td>${r[5]}</td>`;
+    tb.appendChild(tr);
+  });
+  const trs = [...tb.children];
+  const txt = {
+    plain: '原書表 10-1：4 個清晰集條件、200 個案例。\n「?」＝案例太少（1–4 個）或沒有案例，無法判斷結果。\n選上方的按鈕，用不同的眼光重看這張表。',
+    net: '淨效應眼光：只看「C」欄與「A」欄。\n凡 A = 1 的列 C 都是 1、凡 A = 0 的列 C 都是 0 → 在 190 個結果已知的案例中 φ(C, A) = <span class="hl">1.00</span>。\n（對照：φ(I, A) = 0.44、φ(P, A) = 0.37、φ(S, A) = 0.05）\n結論：「大學學歷就是關鍵」，其他變數不再有額外解釋力。',
+    conf: '組態眼光：A = 1 的四列（13–16）<span class="hl">全都同時具備 C 與 I</span>。\nP 與 S 在這四列中有無皆可 → 可合併為 C·I。\n而「有 C、沒有 I」的第 9–12 列，幾乎沒有證據。\n結論：大學學歷與高收入家庭是一起作用的組合，不能說 C 單獨就足夠。',
+    rem: '有限多樣性：16 列中有 8 列是邏輯餘項——\n　完全沒有案例：第 4、7、9、11 列\n　案例太少（1–4 個）：第 2、3、10、12 列\n只有 8 種組合（共 190 人）有足以判斷結果的證據；另有 10 人落在案例太少的 4 列。\n淨效應方法把這種不均勻解讀為「自變數相關」；QCA 把它看成「多樣性有限」。',
+  };
+  function paint(v) {
+    trs.forEach((tr, i) => {
+      const tds = tr.querySelectorAll('td'), r = T101[i];
+      tds.forEach((td) => td.classList.remove('hi', 'lo', 'warnc'));
+      if (v === 'net') tds.forEach((td, j) => td.classList.add(j === 1 || j === 5 ? 'hi' : 'lo'));
+      if (v === 'conf') tds.forEach((td, j) => { if (r[4] === 1 && (j === 1 || j === 2 || j === 5)) td.classList.add('hi'); else if (r[4] !== 1) td.classList.add('lo'); });
+      if (v === 'rem' && r[4] === null) tds.forEach((td) => td.classList.add('warnc'));
+    });
+    out.innerHTML = txt[v];
+  }
+  const btns = root.querySelectorAll('[data-lens] button');
+  btns.forEach((b) => b.addEventListener('click', () => { btns.forEach((x) => x.classList.toggle('on', x === b)); paint(b.dataset.v); }));
+  paint('plain');
+})();
+
+/* ---------- w-additive：餘項假設與解 ---------- */
+(function () {
+  const root = document.getElementById('w-additive');
+  const tb = root.querySelector('tbody'), out = root.querySelector('[data-out]');
+  const names = ['C', 'I', 'P', 'S'];
+  let assume = T101.map(() => null), mode = 'manual';
+  T101.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i + 1}</td>` + r.slice(0, 4).map((v) => `<td>${v}</td>`).join('') + `<td data-a></td><td>${r[5]}</td>`;
+    if (r[4] === null) {
+      const td = tr.querySelector('[data-a]'); td.classList.add('clk');
+      td.addEventListener('click', () => { mode = 'manual'; assume[i] = assume[i] === null ? 1 : assume[i] === 1 ? 0 : null; run(); });
+    }
+    tb.appendChild(tr);
+  });
+  const trs = [...tb.children];
+  // 線性模型（以已知案例估計）：A = C → 預測值
+  const lpm = K10.wols(T101.filter((r) => r[4] !== null).map((r) => ({ x: r.slice(0, 4), y: r[4], w: r[5] }))).b;
+  const pred = (r) => lpm[0] + r.slice(0, 4).reduce((s, v, j) => s + v * lpm[j + 1], 0);
+  function run() {
+    const pos = [], dc = [];
+    T101.forEach((r, i) => {
+      const v = r[4] !== null ? r[4] : assume[i];
+      if (v === 1) pos.push(i);
+      if (mode === 'pars' && r[4] === null) dc.push(i);
+      const td = trs[i].querySelector('[data-a]');
+      td.classList.remove('hi', 'warnc');
+      if (r[4] !== null) td.innerHTML = `<strong>${r[4]}</strong>`;
+      else if (mode === 'pars') { td.textContent = '?（可用）'; td.classList.add('warnc'); }
+      else { td.textContent = assume[i] === null ? '?' : `${assume[i]}（假設）`; if (assume[i] !== null) td.classList.add('warnc'); }
+    });
+    const sol = K10.minimize(4, pos, dc);
+    const s = K10.solStr(sol, 4, names);
+    const usedRem = T101.map((_, i) => i).filter((i) => T101[i][4] === null && (assume[i] === 1 || (mode === 'pars' && sol.some((p) => (i & ~p.mask) === p.v))));
+    usedRem.forEach((i) => trs[i].querySelector('[data-a]').classList.add('hi'));
+    let msg = `解：<span class="hl">${s} → A</span>`;
+    msg += usedRem.length ? `\n這個解依賴的餘項假設：第 ${usedRem.map((i) => i + 1).join('、')} 列（綠底）。` : '\n這個解只用了有經驗證據的列，沒有任何反事實假設。';
+    if (s === 'C') msg += '\n→ 得到與淨效應分析相同的「大學學歷就夠了」。注意它要成立，必須假設「有大學、沒有高收入家庭」的組合也會避免貧窮。';
+    else if (s === 'C·I') msg += '\n→ 保守的組態結論：大學學歷「與」高收入家庭的組合。';
+    if (mode === 'add') { const z = (v) => f2(Math.abs(v) < 1e-9 ? 0 : v); msg += `\n（以 190 個已知案例估計的線性模型：A = ${z(lpm[0])} + ${z(lpm[1])}·C + ${z(lpm[2])}·I + ${z(lpm[3])}·P + ${z(lpm[4])}·S。\n它對所有餘項的預測：C = 1 的列 → 1，C = 0 的列 → 0——可加性替第 9–12 列填上了「會避免貧窮」。）`; }
+    out.innerHTML = msg;
+  }
+  root.querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', () => {
+    const a = b.dataset.act;
+    if (a === 'reset') { mode = 'manual'; assume = T101.map(() => null); }
+    if (a === 'add') { mode = 'add'; assume = T101.map((r) => (r[4] === null ? (pred(r) >= .5 ? 1 : 0) : null)); }
+    if (a === 'all') { mode = 'pars'; assume = T101.map(() => null); }
+    run();
+  }));
+  run();
+})();
+
+/* ---------- w-recipes：迴歸 vs 配方 ---------- */
+(function () {
+  const root = document.getElementById('w-recipes');
+  const tb = root.querySelector('tbody'), out = root.querySelector('[data-out]'), sn = root.querySelector('[data-noise]');
+  const names = ['A', 'B', 'C'];
+  const counts = [40, 12, 30, 10, 30, 10, 20, 10];
+  const rules = {
+    ABC: { f: (a, b, c) => (a && b) || c, txt: 'A·B + C' },
+    AB: { f: (a, b) => a && b, txt: 'A·B' },
+    AorB: { f: (a, b) => a || b, txt: 'A + B' },
+  };
+  let rule = 'ABC';
+  for (let m = 0; m < 8; m++) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${m >> 2 & 1}</td><td>${m >> 1 & 1}</td><td>${m & 1}</td><td><input type="number" min="0" max="999" value="${counts[m]}" data-n="${m}"></td><td data-y></td><td data-c></td><td data-o></td>`;
+    tb.appendChild(tr);
+  }
+  const trs = [...tb.children];
+  function run() {
+    const noise = +sn.value;
+    root.querySelector('[data-no]').textContent = pct(noise);
+    const rows = [], pos = [];
+    let note = [];
+    for (let m = 0; m < 8; m++) {
+      const a = m >> 2 & 1, b = m >> 1 & 1, c = m & 1;
+      const n = Math.max(0, Math.round(+trs[m].querySelector('input').value || 0));
+      const t = rules[rule].f(a, b, c);
+      const y = Math.round(n * (t ? 1 - noise : noise));
+      const cons = n ? y / n : NaN;
+      trs[m].querySelector('[data-y]').textContent = n ? y : '—';
+      trs[m].querySelector('[data-c]').textContent = n ? f2(cons) : '—';
+      const o = trs[m].querySelector('[data-o]');
+      o.classList.remove('hi', 'warnc', 'lo');
+      if (!n) { o.textContent = '餘項'; o.classList.add('warnc'); }
+      else if (cons >= .8) { o.textContent = '1'; o.classList.add('hi'); pos.push(m); }
+      else { o.textContent = '0'; o.classList.add('lo'); }
+      if (n) { rows.push({ x: [a, b, c], y: 1, w: y }); rows.push({ x: [a, b, c], y: 0, w: n - y }); }
+    }
+    const fit = rows.length ? K10.wols(rows) : null;
+    const sol = K10.solStr(K10.minimize(3, pos, []), 3, names);
+    ['A', 'B', 'C'].forEach((v, i) => root.querySelector('[data-b' + v.toLowerCase() + ']').textContent = fit ? (fit.b[i + 1] >= 0 ? '+' : '') + f2(fit.b[i + 1]) : '—');
+    root.querySelector('[data-sol]').textContent = sol;
+    let msg = `真實規則：Y = ${rules[rule].txt}　｜　QCA 找回：<span class="hl">${sol}</span>`;
+    if (!pos.length) msg += '\n（沒有任何一列的一致性達到 0.80：例外太多，或你把案例數改得太少了。）';
+    if (fit) {
+      const [b0, bA, bB, bC] = fit.b;
+      msg += `\n迴歸：Y ≈ ${f2(b0)} ${bA >= 0 ? '+' : '−'} ${f2(Math.abs(bA))}·A ${bB >= 0 ? '+' : '−'} ${f2(Math.abs(bB))}·B ${bC >= 0 ? '+' : '−'} ${f2(Math.abs(bC))}·C`;
+      if (rule === 'ABC') msg += `\n迴歸說 A、B 各有約 ${f2((bA + bB) / 2)} 的「平均」效果——但實際上 A 只有在 B 存在、且 C 不存在時才有用；C 存在時 A、B 完全無關緊要。兩條路徑被壓成了三個平均斜率。`;
+      if (rule === 'AB') msg += '\n迴歸把「A 和 B 必須同時存在」拆成兩個獨立的正效果，看起來好像只有 A 也能提高 Y——其實單獨的 A 完全沒有用。';
+      if (rule === 'AorB') msg += '\nA、B 是兩條可以互相替代的路徑。迴歸係數各自為正但小於 1，因為「已經有 A 時再多 B」不會更好——這也是不可加的。';
+    }
+    out.innerHTML = msg;
+  }
+  root.querySelectorAll('[data-rule] button').forEach((b) => b.addEventListener('click', () => {
+    root.querySelectorAll('[data-rule] button').forEach((x) => x.classList.toggle('on', x === b));
+    rule = b.dataset.v; run();
+  }));
+  sn.addEventListener('input', run);
+  tb.querySelectorAll('input').forEach((el) => el.addEventListener('input', run));
+  run();
+})();
+
+/* ---------- w-fz：16 個組合的隸屬度 ---------- */
+(function () {
+  const root = document.getElementById('w-fz');
+  const sl = [...root.querySelectorAll('input[data-v]')];
+  const names = ['C', 'I', 'P', 'S'];
+  function run() {
+    const x = sl.map((s) => +s.value);
+    sl.forEach((s) => s.nextElementSibling.textContent = (+s.value).toFixed(2));
+    const mem = [];
+    for (let m = 0; m < 16; m++) {
+      let v = 1; const lab = [];
+      for (let j = 0; j < 4; j++) {
+        const on = m >> (3 - j) & 1;
+        v = Math.min(v, on ? x[j] : 1 - x[j]);
+        lab.push(on ? names[j] : '~' + names[j]);
+      }
+      mem.push({ m, v, lab: lab.join('·') });
+    }
+    const max = Math.max(...mem.map((d) => d.v));
+    root.querySelector('[data-rows]').innerHTML = mem.map((d) =>
+      `<div class="fzrow${d.v > .5 ? ' top' : ''}"><span>${d.m + 1}. ${d.lab}</span><div class="track"><div class="fill" style="width:${d.v * 100}%"></div></div><span style="text-align:right">${f2(d.v)}</span></div>`).join('');
+    const tops = mem.filter((d) => d.v > .5);
+    const pos = mem.filter((d) => d.v > 0).length;
+    let msg = `這位受訪者在 ${pos} 個組合中有正的隸屬度。`;
+    if (tops.length === 1) msg += `\n只有第 ${tops[0].m + 1} 列（<span class="hl">${tops[0].lab}</span>）的隸屬度 > 0.5（= ${f2(tops[0].v)}）：這就是他「最靠近」的角落，真值表會把他算進這一列的案例數。`;
+    else msg += `\n沒有任何組合的隸屬度超過 0.5（最大為 ${f2(max)}）——因為至少有一個條件的隸屬度剛好是 0.5，他正好落在扇區的邊界上。`;
+    root.querySelector('[data-out]').innerHTML = msg;
+  }
+  sl.forEach((s) => s.addEventListener('input', run)); run();
+})();
+</script>
+</body>
+</html>

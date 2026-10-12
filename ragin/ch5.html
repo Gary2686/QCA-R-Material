@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 5 章 校準模糊集 · 重新設計社會科學研究</title>
+<meta name="description" content="Ragin《重新設計社會科學研究》第 5 章互動教材：直接校準法、間接校準法、log odds、三個定性錨點、已校準測量的應用">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="css/ragin.css">
+<style>
+  .calplot { width: 100%; max-width: 560px; height: auto; display: block; margin: .4rem auto 0; }
+  .calplot .curve2 { fill: none; stroke: var(--gold); stroke-width: 2; stroke-dasharray: 6 4; }
+  .calplot .anchor { stroke: var(--rose); stroke-width: 1.2; stroke-dasharray: 4 3; }
+  .calplot .alab { fill: var(--rose); font-size: 10.5px; font-family: var(--sans); }
+  .calplot .pt.q { fill: var(--gold); }
+  .legend-row { display: flex; flex-wrap: wrap; gap: .9rem; justify-content: center; font-size: .8rem; color: var(--ink-soft); margin-top: .3rem; }
+  .legend-row i { display: inline-block; width: 18px; height: 0; border-top: 2.5px solid var(--accent); vertical-align: middle; margin-right: .3rem; }
+  .legend-row i.g { border-top: 2.5px dashed var(--gold); }
+  .legend-row i.d { width: 9px; height: 9px; border: 0; border-radius: 50%; background: var(--accent); }
+  .legend-row i.q { width: 9px; height: 9px; border: 0; border-radius: 50%; background: var(--gold); }
+  .legend-row i.s { width: 9px; height: 9px; border: 0; border-radius: 50%; background: var(--rose); }
+  table.tbl.compact th, table.tbl.compact td { padding: .35rem .5rem; font-size: .84rem; white-space: nowrap; }
+  table.tbl td.num { font-family: var(--mono); text-align: right; }
+  table.tbl select { font-family: var(--mono); font-size: .82rem; padding: .15rem .2rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--ink); }
+  .field input[type=number].sm { min-width: 0; width: 7.2rem; }
+  .widget .slider-row input[type=range] { flex: 1 1 120px; min-width: 0; max-width: 260px; }
+  .widget .slider-row span:last-child { font-size: .85rem; white-space: nowrap; }
+  .practice { display: grid; gap: .8rem; }
+  .practice .item { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .8rem 1rem; background: var(--bg); }
+  .practice .item p { margin: 0 0 .5rem; font-size: .93rem; }
+  .practice .fb { display: none; margin-top: .6rem; font-size: .9rem; color: var(--ink-soft); border-top: 1px dashed var(--border); padding-top: .5rem; }
+  .practice .item.done .fb { display: block; }
+  .practice .fb b.ok { color: var(--ok); }
+  .practice .fb b.bad { color: var(--bad); }
+</style>
+</head>
+<body>
+<div id="readbar"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="logo rg">R</span><span>重新設計社會科學研究<small>Ragin (2008) 互動教材</small></span></a>
+    <nav class="topnav">
+      <a href="index.html">本書首頁</a>
+      <a href="ch0.html">導讀</a>
+      <a href="ch1.html">第一篇</a>
+      <a href="ch4.html">第二篇</a>
+      <a href="ch6.html">第三篇</a>
+      <a href="ch8.html">第四篇</a>
+      <a href="../index.html">QCA with R ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="chapter-head">
+  <div class="part">第二篇　校準與測量</div>
+  <div class="eyebrow">CHAPTER 5</div>
+  <h1>校準模糊集</h1>
+  <div class="en">Calibrating Fuzzy Sets: The Direct and Indirect Methods</div>
+  <div class="src">對應原書第 5 章（中譯本頁 57–72）</div>
+</div>
+
+<p class="lead">體溫計顯示 37.8°C，這個數字本身不會告訴你「有沒有發燒」；要先有醫學上公認的門檻（例如 38°C 算發燒、37.5°C 算微燒），數字才有意義。同樣地，一個國家人均所得 7,470 美元，它算不算「已開發國家」？本章教你兩套把原始數值<strong>校準（calibrate）</strong>成 0～1 模糊隸屬分數的具體方法：一套靠<strong>三個錨點</strong>（直接法），一套靠<strong>先分組再擬合</strong>（間接法）。</p>
+
+<div class="objectives">
+  <div class="ct">🎯 讀完本章，你應該能夠……</div>
+  <ol>
+    <li>說明為什麼校準需要<strong>外部標準</strong>，而不是樣本平均數與標準差。</li>
+    <li>在隸屬度、勝算（odds）與<strong>對數勝算（log odds）</strong>三種尺度之間自由換算。</li>
+    <li>用<strong>直接法</strong>的三個錨點，手算任何一個案例的模糊隸屬分數（偏離值 → 標量 → log odds → 隸屬度）。</li>
+    <li>說明<strong>間接法</strong>的兩個步驟：依實質知識做定性分組，再用分數 logit 迴歸擬合。</li>
+    <li>解釋為何兩個高度相關（r = 0.911）的模糊集，在集合論檢驗中仍可能得出很不同的結論。</li>
+    <li>在 fsQCA 與 R 中正確下達校準指令，並注意兩者<strong>錨點順序相反</strong>。</li>
+  </ol>
+</div>
+
+<nav class="toc">
+  <strong>本章目錄</strong>
+  <ol>
+    <li><a href="#s1">把定距變數轉為模糊集：三種尺度</a></li>
+    <li><a href="#s2">直接校準法</a></li>
+    <li><a href="#s3">間接校準法</a></li>
+    <li><a href="#s4">使用已校準的測量</a></li>
+    <li><a href="#s5">結論</a></li>
+    <li><a href="#s6">實用附錄：在 fsQCA／R 中校準</a></li>
+    <li><a href="#s7">本章重點、名詞與自我測驗</a></li>
+  </ol>
+</nav>
+
+<!-- ================================================= -->
+<h2 id="s1">1. 把定距變數轉為模糊集：三種尺度 <span class="en">· Converting interval-scale variables to fuzzy sets</span></h2>
+
+<p>第 4 章說過：傳統變數要嘛<strong>沒有校準</strong>，要嘛只靠樣本平均數與標準差做了「隱性」校準——換一個樣本，標準就跟著變。模糊集則必須用<strong>外部標準</strong>來校準，而這些標準要符合研究者對目標集合的<strong>概念化、定義與命名</strong>。</p>
+
+<p>理想上，「人均所得多少才算完全屬於已開發國家」應該由學界累積的實質知識決定。Ragin 坦白承認：這樣的共識知識庫目前並不存在，部分原因是變數導向研究只在乎「離平均數多遠」，很少有人認真討論門檻。但他也強調，這不是什麼艱難任務，只需要研究者<strong>持續關注實質問題</strong>（例如：什麼樣的國家才算完全已開發？）。所以本章的重點是<strong>校準技術</strong>，錨點的具體數值只是示範。</p>
+
+<div class="callout info">
+  <div class="ct">ℹ️ 本章方法的兩個前提</div>
+  <p>① 你手上已經有一個<strong>定距或定比尺度的指標</strong>，例如用人均國民所得（GNP per capita）衡量發展。<br>② 你的概念可以用<strong>集合</strong>來命名，例如「已開發國家集合」。注意這個命名會把研究拉向<strong>案例導向</strong>：「已開發國家」指向一群具體的國家，而「發展程度」只是國家間變異的一個向度。</p>
+</div>
+
+<h3>同一個數字的三種寫法</h3>
+<p>直接法的訣竅是借用一個中間尺度：<strong>對數勝算（log odds，簡中譯本稱「對數概率」）</strong>。三種尺度的換算如下：</p>
+
+<div class="formula">
+  <span class="flabel">隸屬度 → 勝算 → 對數勝算</span>
+  勝算 = <span class="frac"><span>隸屬度</span><span>1 − 隸屬度</span></span>　　log odds = ln(勝算)
+</div>
+<div class="formula">
+  <span class="flabel">反過來：對數勝算 → 隸屬度</span>
+  隸屬度 = <span class="frac"><span>exp(log odds)</span><span>1 + exp(log odds)</span></span>
+</div>
+
+<p>原書表 5-1 把各種<strong>口語標籤（verbal label）</strong>對應到三種尺度（我們已用 python 重算，與原書一致）：</p>
+
+<div class="table-wrap">
+  <table class="tbl center compact" id="t51">
+    <thead><tr><th>口語標籤</th><th>隸屬度</th><th>勝算（odds）</th><th>log odds</th></tr></thead>
+    <tbody>
+      <tr data-lo="5"><td>完全隸屬</td><td>0.993</td><td>148.41</td><td>5.0</td></tr>
+      <tr data-lo="3"><td>完全隸屬門檻</td><td>0.953</td><td>20.09</td><td>3.0</td></tr>
+      <tr data-lo="2"><td>相當隸屬</td><td>0.881</td><td>7.39</td><td>2.0</td></tr>
+      <tr data-lo="0.5"><td>有點隸屬</td><td>0.622</td><td>1.65</td><td>0.5</td></tr>
+      <tr data-lo="0"><td>交叉點</td><td>0.500</td><td>1.00</td><td>0.0</td></tr>
+      <tr data-lo="-0.5"><td>有點不隸屬</td><td>0.378</td><td>0.61</td><td>−0.5</td></tr>
+      <tr data-lo="-2"><td>相當不隸屬</td><td>0.119</td><td>0.14</td><td>−2.0</td></tr>
+      <tr data-lo="-3"><td>完全不隸屬門檻</td><td>0.047</td><td>0.05</td><td>−3.0</td></tr>
+      <tr data-lo="-5"><td>完全不隸屬</td><td>0.007</td><td>0.01</td><td>−5.0</td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="sc">原書說明：隸屬度刻意取 0.993、0.953 這類數字，是為了讓 log odds 剛好落在 5、3 等整數上。</p>
+
+<p>為什麼要繞道 log odds？因為它有兩個好性質：</p>
+<ul>
+  <li><strong>以 0 為中心完全對稱</strong>：+2 與 −2 分別代表「相當隸屬」與「相當不隸屬」，距離交叉點一樣遠。</li>
+  <li><strong>沒有天花板與地板</strong>：log odds 可以是 +50 或 −50，但換回隸屬度永遠落在 0～1 之間——這正是模糊隸屬分數的基本要求。你在 log odds 尺度上怎麼做線性運算都不會「爆表」。</li>
+</ul>
+
+<div class="widget" id="w-lo">
+  <div class="widget-head"><span class="wtag">互動</span> log odds ↔ 隸屬度轉換器</div>
+  <div class="widget-body">
+    <p style="margin-top:0">拖曳滑桿改變 log odds，或直接輸入隸屬度。表 5-1 中最接近的那一列會被標亮。</p>
+    <div class="slider-row"><span class="sl-label">L</span><input type="range" min="-7" max="7" step="0.1" value="3" data-lo><output data-loout>3.0</output><span>log odds</span></div>
+    <div class="controls">
+      <div class="field"><label>或輸入隸屬度（0.001～0.999）</label><input type="number" class="sm" min="0.001" max="0.999" step="0.001" value="0.953" data-mem></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="k">log odds</div><div class="v" data-s1>—</div></div>
+      <div class="stat"><div class="k">勝算 odds</div><div class="v gold" data-s2>—</div></div>
+      <div class="stat"><div class="k">隸屬度</div><div class="v ok" data-s3>—</div></div>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<div class="callout warn">
+  <div class="ct">⚠️ 模糊隸屬分數不是機率</div>
+  <p>雖然公式長得像 logistic 迴歸，但 0～1 的隸屬分數代表的是一個命題的<strong>真值（truth value）</strong>，而不是事件發生的<strong>機率（probability）</strong>。Ragin 的例子：「啤酒是致命毒藥」這個命題的真值大約是 0.05——幾乎（但不完全）不屬於「真命題」集合。如果把它讀成機率，就變成「每 20 瓶啤酒就有 1 瓶會毒死人」，那每天暢飲啤酒的數百萬人早就出事了。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s2">2. 直接校準法 <span class="en">· The direct method</span></h2>
+
+<p>任何校準的起點，都是把<strong>目標集合說清楚</strong>。這裡的目標集合是「已開發國家」，原始資料是 136 國的人均國民所得；原書表 5-2 列出其中 24 國作示範。</p>
+
+<p>直接法用三個<strong>定性錨點（qualitative anchors）</strong>來建構校準（參見第 2 章）：</p>
+
+<div class="table-wrap">
+  <table class="tbl center">
+    <thead><tr><th>錨點</th><th>Ragin 的設定（人均所得）</th><th>對應 log odds</th><th>對應隸屬度</th></tr></thead>
+    <tbody>
+      <tr><td>完全隸屬門檻（full membership）</td><td>20,000 美元</td><td>+3</td><td>≈ 0.95</td></tr>
+      <tr><td>交叉點（crossover point）</td><td>5,000 美元</td><td>0</td><td>0.50</td></tr>
+      <tr><td>完全不隸屬門檻（full non-membership）</td><td>2,500 美元</td><td>−3</td><td>≈ 0.05</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>交叉點是「最模糊」的位置：剛好在這裡的案例，既說不上在集合內、也說不上在集合外。所得 ≥ 20,000 的國家視為完全屬於已開發國家（隸屬度 ≥ 0.95）；所得 ≤ 2,500 的國家視為完全不屬於（隸屬度 ≤ 0.05）。</p>
+
+<div class="callout tip">
+  <div class="ct">📌 為什麼門檻是 0.95 而不是 1.0？</div>
+  <p>因為用 log odds 計算，隸屬度永遠不會剛好等於 1.0 或 0.0（那需要正負無限大）。所以 Ragin 約定：<strong>高於 0.95 就當作（幾乎）完全隸屬，低於 0.05 就當作（幾乎）完全不隸屬</strong>。表格中出現的 1.00、0.00 只是四捨五入的結果。</p>
+</div>
+
+<h3>四個步驟</h3>
+<div class="steps">
+  <div class="step"><div><h4>算偏離值：原始值 − 交叉點</h4><p>以交叉點為中心重新定位。正值＝偏向隸屬，負值＝偏向不隸屬。例如阿根廷 7,470 − 5,000 = 2,470。</p></div></div>
+  <div class="step"><div><h4>選標量（scalar）</h4><p>交叉點<strong>上方</strong>：標量 = 3 ÷（完全隸屬門檻 − 交叉點）= 3 / 15,000 = 0.0002。<br>交叉點<strong>下方</strong>：標量 = −3 ÷（完全不隸屬門檻 − 交叉點）= −3 / −2,500 = 0.0012。</p></div></div>
+  <div class="step"><div><h4>相乘得到 log odds</h4><p>偏離值 × 標量。阿根廷：2,470 × 0.0002 = 0.494。這一步把「所得」重新刻度成「屬於已開發國家的對數勝算」。</p></div></div>
+  <div class="step"><div><h4>換回隸屬度</h4><p>exp(0.494) / (1 + exp(0.494)) = <strong>0.62</strong>。阿根廷「有點屬於」已開發國家。</p></div></div>
+</div>
+
+<p>你可以把這套程序想像成：在「偏離值—log odds」平面上畫兩條<strong>斜率不同</strong>的直線，都從原點 (0, 0) 出發，一條通往 (15,000, 3)，一條通往 (−2,500, −3)；兩個標量就是這兩條線的斜率。下方的 S 形曲線，就是把這條「折線」經過 exp/(1+exp) 彎曲後的樣子。</p>
+
+<div class="formula">
+  <span class="flabel">直接法的完整公式</span>
+  log odds = (x − 交叉點) × <span class="frac"><span>±3</span><span>錨點 − 交叉點</span></span>　→　隸屬度 = <span class="frac"><span>e<sup>log odds</sup></span><span>1 + e<sup>log odds</sup></span></span>
+</div>
+
+<div class="widget" id="w-calc">
+  <div class="widget-head"><span class="wtag">互動</span> 直接校準計算器：逐步顯示每一步</div>
+  <div class="widget-body">
+    <div class="controls">
+      <div class="seg" data-preset>
+        <button data-v="dev" class="on">已開發國家（表 5-2）</button>
+        <button data-v="mod">至少中等已開發（表 5-3）</button>
+        <button data-v="dem">民主國家（表 5-5）</button>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="field"><label>完全隸屬門檻</label><input type="number" class="sm" data-a="full"></div>
+      <div class="field"><label>交叉點</label><input type="number" class="sm" data-a="cross"></div>
+      <div class="field"><label>完全不隸屬門檻</label><input type="number" class="sm" data-a="non"></div>
+      <div class="field"><label>案例的原始值 x</label><input type="number" class="sm" data-a="x"></div>
+    </div>
+    <div class="result-box" data-steps></div>
+    <div class="controls" style="margin-top:1rem;margin-bottom:0">
+      <div class="seg" data-yax>
+        <button data-v="m" class="on">縱軸：隸屬度</button>
+        <button data-v="l">縱軸：log odds（看折線）</button>
+      </div>
+    </div>
+    <svg class="plot calplot" data-plot role="img" aria-label="直接校準曲線"></svg>
+    <div class="legend-row"><span><i></i>校準函數</span><span><i class="d"></i>原書 24 國</span><span><i class="s"></i>你輸入的 x</span></div>
+    <p class="sc" style="text-align:center">提示：點圖上的國家可把它的數值帶入 x。</p>
+  </div>
+</div>
+
+<h3>原書表 5-2：已開發國家集合（直接法）</h3>
+<p>把四個步驟套用到 24 國，就是原書表 5-2。我們用 python 逐格重算，偏離值、標量、乘積與隸屬度<strong>全部與原書一致</strong>。下面的元件把整張表重建出來，你也可以改錨點，看整張表怎麼變。</p>
+
+<div class="widget" id="w-tab">
+  <div class="widget-head"><span class="wtag">互動</span> 重建原書表 5-2／5-3／5-5，並自己調錨點</div>
+  <div class="widget-body">
+    <div class="controls">
+      <div class="seg" data-preset>
+        <button data-v="dev" class="on">表 5-2 已開發</button>
+        <button data-v="mod">表 5-3 至少中等已開發</button>
+        <button data-v="dem">表 5-5 民主國家</button>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="field"><label>完全隸屬門檻</label><input type="number" class="sm" data-a="full"></div>
+      <div class="field"><label>交叉點</label><input type="number" class="sm" data-a="cross"></div>
+      <div class="field"><label>完全不隸屬門檻</label><input type="number" class="sm" data-a="non"></div>
+      <div class="field"><label>&nbsp;</label><button class="btn ghost" type="button" data-reset>還原原書錨點</button></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="k">隸屬度 ≥ 0.95 的國家</div><div class="v" data-n95>—</div></div>
+      <div class="stat"><div class="k">隸屬度 &gt; 0.5 的國家</div><div class="v gold" data-n50>—</div></div>
+      <div class="stat"><div class="k">平均隸屬度</div><div class="v ok" data-mean>—</div></div>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl compact" data-tbl>
+        <thead><tr><th>國家</th><th data-rawh>人均所得</th><th>偏離交叉點</th><th>標量</th><th>乘積<br>(log odds)</th><th>隸屬度</th><th>原書</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="result-box" data-note></div>
+  </div>
+</div>
+
+<p>原書圖 5-1 畫出全部 136 國的所得與隸屬度：曲線在接近 0 與 1 時<strong>逐漸變平</strong>，符合「集合隸屬」的概念——所得從 30,000 增加到 40,000，並不會讓一個國家「更屬於」已開發國家多少。圖也顯示世界上大多數國家擠在左下角：所得低、完全不屬於已開發國家（隸屬度 &lt; 0.05）。</p>
+
+<div class="callout key">
+  <div class="ct">🔑 這不只是機械性的重新刻度</div>
+  <p>表 5-2 第 5 欄（乘積）看起來只是「所得乘上一個數」，但它是依照三個<strong>定性錨點</strong>重新刻度的結果，等於把<strong>外部標準</strong>強加到原始數據上。這正是第 4 章所說「測量校準」的標誌。</p>
+</div>
+
+<h3>換一個目標集合，錨點就要換</h3>
+<p>為了說明外部標準的關鍵角色，Ragin 用<strong>同一份</strong>所得資料校準另一個集合：「<strong>至少中等已開發</strong>國家」。目標集合的定義變了，三個錨點也必須跟著變：完全隸屬 7,500、交叉點 2,500、完全不隸屬 1,000 美元。標量變成上方 3/5,000 = 0.0006、下方 −3/−1,500 = 0.002（原書表 5-3）。</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>土耳其（人均所得 2,980）在「已開發國家」</h4>
+    <p>偏離值 = 2,980 − 5,000 = −2,020<br>log odds = −2,020 × 0.0012 = −2.42<br>隸屬度 = <strong>0.08</strong>（相當不隸屬）</p>
+  </div>
+  <div class="new">
+    <h4>同一個土耳其在「至少中等已開發」</h4>
+    <p>偏離值 = 2,980 − 2,500 = 480<br>log odds = 480 × 0.0006 = 0.29<br>隸屬度 = <strong>0.57</strong>（已越過交叉點）</p>
+  </div>
+</div>
+
+<p>整體而言，表 5-3 中有更多國家的隸屬度接近 1.0——這符合常識：符合「至少中等已開發」的國家，本來就比「已開發」的國家多。兩張表的對比凸顯了：<strong>校準依賴知識</strong>，而同一個原始指標套用不同的外部標準，就會得到不同的集合。</p>
+
+<h3>練習：怎麼選錨點才合理？</h3>
+<div class="widget" id="w-anchor">
+  <div class="widget-head"><span class="wtag">練習</span> 錨點選擇：合理還是不合理？</div>
+  <div class="widget-body">
+    <p style="margin-top:0">以下是研究生常見的錨點設定方式。請判斷是否合理，按下後會看到解析。</p>
+    <div class="practice" data-practice></div>
+    <div class="result-box" data-score>已作答 0 / 5。</div>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s3">3. 間接校準法 <span class="en">· The indirect method</span></h2>
+
+<p>直接法需要你精確說出三個數值；間接法則只要求你把案例<strong>大致分組</strong>。做法是：先依案例在目標集合中的「推定隸屬程度」做<strong>定性分組</strong>，給每組一個初步分數，再用原始的定距數據去<strong>修飾（refine）</strong>這些分數。</p>
+
+<p>Ragin 使用六個定性類別（其他編碼方案也可以，只要至少有三類；重點是分組必須反映研究者對每個案例的初步判斷，並盡可能以理論與實質知識為依據）：</p>
+
+<div class="table-wrap">
+  <table class="tbl center compact">
+    <thead><tr><th>定性類別</th><th>完全隸屬</th><th>相當隸屬</th><th>有點隸屬</th><th>有點不隸屬</th><th>相當不隸屬</th><th>完全不隸屬</th></tr></thead>
+    <tbody><tr><td>初步分數</td><td>1.0</td><td>0.8</td><td>0.6</td><td>0.4</td><td>0.2</td><td>0.0</td></tr></tbody>
+  </table>
+</div>
+
+<p>原書表 5-4 的分組，刻意沿用直接法的大致標準（所得超過 20,000 編為完全隸屬、超過 5,000 編為偏隸屬……），方便比較兩種方法。</p>
+
+<div class="steps">
+  <div class="step"><div><h4>定性分組</h4><p>依實質知識把每個案例放進六類之一，並給初步分數（1.0, 0.8, …, 0.0）。這些分數是「粗略估計」，可以修改。</p></div></div>
+  <div class="step"><div><h4>以原始指標預測分組分數</h4><p>以人均所得為自變數、定性分數為依變數，做<strong>分數 logit 模型（fractional logit）</strong>。因為依變數介於 0～1，用 logit 連結函數最合適。Ragin 在 Stata 用分數多項式（fractional polynomial）迴歸：<code class="inline">fracpoly glm qualcode intervv, family(binomial) link(logit)</code>，再用 <code class="inline">predict</code> 取得預測值。</p></div></div>
+  <div class="step"><div><h4>預測值就是校準後的隸屬分數</h4><p>預測值會自動落在 0～1，且隨所得平滑變化；它結合了所得（定距資訊）與定性分組（外部知識）。Ragin 的預測值是用全部 136 國估計的，不只表中的 24 國。</p></div></div>
+</div>
+
+<div class="widget" id="w-ind">
+  <div class="widget-head"><span class="wtag">互動</span> 間接法示範：改定性分組 → 重新擬合</div>
+  <div class="widget-body">
+    <p style="margin-top:0">預設值是原書表 5-4 的定性編碼。你可以改任何國家的分組，或換一種預測式，網頁會即時用 IRLS 演算法擬合分數 logit 模型（僅用這 24 國，所以不會與原書 136 國的結果完全相同）。</p>
+    <div class="controls">
+      <div class="field"><label>預測式（logit 的右邊）</label>
+        <select data-form>
+          <option value="log">a + b·ln(所得)</option>
+          <option value="lin">a + b·所得</option>
+          <option value="loglin">a + b·ln(所得) + c·所得</option>
+        </select>
+      </div>
+      <div class="field"><label>&nbsp;</label><button class="btn ghost" type="button" data-reset>還原原書分組</button></div>
+    </div>
+    <svg class="plot calplot" data-plot role="img" aria-label="間接校準擬合曲線"></svg>
+    <div class="legend-row"><span><i class="q"></i>定性分組分數</span><span><i></i>間接法擬合曲線</span><span><i class="g"></i>直接法（表 5-2 錨點）</span></div>
+    <div class="result-box" data-note></div>
+    <div class="table-wrap">
+      <table class="tbl compact" data-tbl>
+        <thead><tr><th>國家</th><th>人均所得</th><th>定性編碼</th><th>本頁擬合</th><th>原書預測值</th><th>直接法</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="sc">※ 原書表 5-4 中紐西蘭（13,680 美元）的預測值印為 0.991，但它介於西班牙（15,320，0.977）與賽普勒斯（11,720，0.887）之間，平滑擬合曲線不太可能在此處突然升高，疑為誤植；本頁照錄原書數字並標示為黃底，請讀者留意。</p>
+  </div>
+</div>
+
+<h3>兩種方法的比較</h3>
+<p>比較表 5-2（直接法）與表 5-4（間接法），兩者整體非常相似，但有兩個重要差異：</p>
+<ol>
+  <li><strong>完全隸屬的位置不同</strong>：直接法忠實地把 20,000 美元當作 0.95 的門檻；間接法的 0.95 門檻則落在低得多的所得水準。</li>
+  <li><strong>差距被放大或縮小</strong>：間接法中，土耳其（0.397）與下一個國家玻利維亞（0.053）之間有很大落差；直接法中兩者只是 0.08 與 0.01。</li>
+</ol>
+<p>這些差異來自間接法本身的「間接性」，以及它必須依賴迴歸估計。不過，如果研究者<strong>說不出</strong>直接法所需的精確錨點，兩表的相似性證明：間接法同樣能產生有用的隸屬分數。</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>直接法</h4>
+    <ul>
+      <li>你要能精確說出三個數值錨點</li>
+      <li>完全透明：任何人都能用同樣錨點重算</li>
+      <li>曲線形狀固定（log odds 上是兩段直線）</li>
+    </ul>
+  </div>
+  <div class="new">
+    <h4>間接法</h4>
+    <ul>
+      <li>只需把案例粗分成幾組（至少三類）</li>
+      <li>分組判斷越有實質依據，校準越精確</li>
+      <li>曲線形狀由資料決定，受迴歸模型設定影響</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s4">4. 使用已校準的測量 <span class="en">· Using calibrated measures</span></h2>
+
+<p>校準好的模糊集最大的用途，是檢驗用<strong>集合關係</strong>表達的理論。第 1 章提過：多數社會科學理論是<strong>文字</strong>理論，而文字理論幾乎都是集合陳述。例如「已開發國家是民主國家」，意思是「已開發國家集合」是「民主國家集合」的<strong>子集合</strong>——就像「烏鴉是黑的」把子集合放在句首一樣。</p>
+
+<p>這個子集合關係可對應到一種因果論證：<strong>發展是民主的充分（但非必要）條件</strong>。有發展就應該有民主；但沒有發展卻有民主的案例並不推翻這個論點（只會拉低相關），因為通往民主還有其他路徑，例如由前殖民母國強加的民主體制。</p>
+
+<div class="callout info">
+  <div class="ct">ℹ️ 為什麼要模糊集，而不是二分法？</div>
+  <p>在模糊集出現之前（Zadeh 1965 等），想用集合方法檢驗這類命題，就得把所得硬切成「已開發／未開發」兩類。這常被批評：研究者可能挑一個<strong>對自己論點最有利</strong>的切點。校準後的模糊隸屬分數避開了任意的二分，使集合分析變得可行且可信。</p>
+</div>
+
+<h3>模糊子集合的一致性</h3>
+<p>在模糊集中，X ⊆ Y 的意思是：每個案例在 X 的隸屬度都<strong>小於或等於</strong>它在 Y 的隸屬度（第 2 章）。現實資料很少完美，所以用第 3 章的一致性公式衡量「有多接近」：</p>
+<div class="formula">
+  <span class="flabel">充分性一致性（Consistency）</span>
+  Consistency(X<sub>i</sub> ≤ Y<sub>i</sub>) = <span class="frac"><span>Σ min(X<sub>i</sub>, Y<sub>i</sub>)</span><span>Σ X<sub>i</sub></span></span>
+</div>
+
+<h3>原書表 5-5：民主國家集合（直接法）</h3>
+<p>民主的原始指標是 Polity IV 的民主／專制分數（−10 到 +10）。錨點：完全隸屬 9 分、交叉點 2 分、完全不隸屬 −3 分。上方標量 = 3/7 ≈ 0.43，下方標量 = −3/−5 = 0.60（重算確認與原書一致；原書表中標量顯示為四捨五入後的 0.43，乘積則用 3/7 精確值計算，例如 8 × 3/7 = 3.43）。你可以在上面兩個元件中切換到「民主國家」看完整計算。</p>
+
+<div class="table-wrap">
+  <table class="tbl center compact">
+    <thead><tr><th>例子</th><th>Polity 分數</th><th>偏離值</th><th>標量</th><th>log odds</th><th>隸屬度</th></tr></thead>
+    <tbody>
+      <tr><td>挪威</td><td>10</td><td>8</td><td>0.43</td><td>3.43</td><td>0.97</td></tr>
+      <tr><td>馬來西亞</td><td>3</td><td>1</td><td>0.43</td><td>0.43</td><td>0.61</td></tr>
+      <tr><td>柬埔寨</td><td>2</td><td>0</td><td>0.60</td><td>0.00</td><td>0.50</td></tr>
+      <tr><td>約旦</td><td>−2</td><td>−4</td><td>0.60</td><td>−2.40</td><td>0.08</td></tr>
+      <tr><td>不丹</td><td>−8</td><td>−10</td><td>0.60</td><td>−6.00</td><td>0.00</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>結果：相關看不出的差別，集合看得出</h3>
+<p>把一致性公式套用到全部 136 國（原書數字）：</p>
+<div class="table-wrap">
+  <table class="tbl center">
+    <thead><tr><th>命題</th><th>一致性</th><th>覆蓋度</th></tr></thead>
+    <tbody>
+      <tr><td>已開發國家 ⊆ 民主國家</td><td>0.99</td><td>0.35</td></tr>
+      <tr><td>至少中等已開發國家 ⊆ 民主國家</td><td>0.95</td><td class="hi">0.52</td></tr>
+    </tbody>
+  </table>
+</div>
+<p>兩個子集合關係都高度一致，都支持「發展是民主的充分不必要條件」。但請注意：「至少中等已開發」是<strong>更寬鬆、更包容</strong>的集合，平均隸屬度較高，要滿足 X<sub>i</sub> ≤ Y<sub>i</sub> 就比較難——所以它其實接受了<strong>更嚴格的檢驗</strong>。而<strong>覆蓋度（coverage）</strong>衡量實證上的重要性：它是條件「覆蓋」了多少結果隸屬度總和。「至少中等已開發」的覆蓋度 0.52 遠高於「已開發」的 0.35，表示它更能說明民主國家的隸屬。結論是：<strong>屬於「至少中等已開發」就足以成為民主國家；不必達到「已開發」</strong>。</p>
+
+<h3>用相關方法評估集合論點的三個困難</h3>
+<ol>
+  <li><strong>集合命題談的是案例類別，相關談的是變數</strong>。「已開發國家是民主國家」關心的是一類案例；相關係數只關心變異向度。極端地說，一份資料可能根本沒有任何已開發或民主國家，研究者照樣能算出發展與民主的相關——但這份資料完全無法檢驗那個命題。</li>
+  <li><strong>相關是對稱的，集合論點幾乎都是不對稱的</strong>。許多未開發國家也是民主國家，會削弱相關，但不會削弱「已開發 ⊆ 民主」的一致性。這個理論只對已開發國家下斷言，並沒有說未開發國家與高度開發國家的民主程度差多少。</li>
+  <li><strong>相關對研究者的校準不敏感</strong>。在全部 136 國中，「已開發」與「至少中等已開發」兩個模糊集的 Pearson 相關高達 <strong>0.911</strong>——從相關的角度看幾乎沒差；但從集合論看差很多（覆蓋度 0.35 vs. 0.52）。原因是相關依賴「離平均數多遠」，而平均數是從樣本歸納出來的。</li>
+</ol>
+
+<div class="widget" id="w-corr">
+  <div class="widget-head"><span class="wtag">互動</span> 相關係數對校準「視而不見」</div>
+  <div class="widget-body">
+    <p style="margin-top:0">X 軸固定是「已開發國家」（表 5-2 錨點）；Y 軸是你用<strong>同一份所得資料</strong>、自訂錨點校準出的另一個集合。觀察：錨點大幅改變時，Pearson r 幾乎不動，但平均隸屬度與子集合關係卻明顯改變。（以原書 24 國計算。）</p>
+    <div class="controls">
+      <div class="seg" data-preset>
+        <button data-v="mod" class="on">至少中等已開發</button>
+        <button data-v="rich">富裕國家（自訂示範）</button>
+        <button data-v="same">與 X 相同</button>
+      </div>
+    </div>
+    <div class="slider-row"><span class="sl-label">i</span><input type="range" min="3000" max="40000" step="500" data-s="full"><output data-o="full"></output><span>完全隸屬</span></div>
+    <div class="slider-row"><span class="sl-label">c</span><input type="range" min="1000" max="30000" step="250" data-s="cross"><output data-o="cross"></output><span>交叉點</span></div>
+    <div class="slider-row"><span class="sl-label">e</span><input type="range" min="250" max="20000" step="250" data-s="non"><output data-o="non"></output><span>完全不隸屬</span></div>
+    <div class="wgrid">
+      <svg class="plot" data-plot role="img" aria-label="兩個校準集合的 XY 圖"></svg>
+      <div>
+        <div class="stats">
+          <div class="stat"><div class="k">Pearson r(X, Y)</div><div class="v" data-r>—</div></div>
+          <div class="stat"><div class="k">平均隸屬 X / Y</div><div class="v gold" data-m>—</div></div>
+          <div class="stat"><div class="k">一致性 X ⊆ Y</div><div class="v ok" data-c1>—</div></div>
+          <div class="stat"><div class="k">一致性 Y ⊆ X</div><div class="v ok" data-c2>—</div></div>
+        </div>
+        <div class="result-box" data-note></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<details class="think">
+  <summary>想一想：為什麼「更包容的條件集合」是更嚴格的充分性檢驗？</summary>
+  <div class="ans">
+    <p>充分性要求每個案例 X<sub>i</sub> ≤ Y<sub>i</sub>。條件集合越包容，X<sub>i</sub> 普遍越大，越容易「超過」Y<sub>i</sub>，違反子集合關係的機會越多。例如土耳其在「已開發」只有 0.08，幾乎不可能違反；但在「至少中等已開發」有 0.57，如果土耳其的民主隸屬度低於 0.57，就會扣一致性分數。所以「至少中等已開發 ⊆ 民主」仍有 0.95 的一致性，是比 0.99 更有力的證據。</p>
+  </div>
+</details>
+
+<!-- ================================================= -->
+<h2 id="s5">5. 結論 <span class="en">· Conclusion</span></h2>
+
+<p>本章展示了模糊集的力量，以及校準對有效使用模糊集的重要性。未校準的測量只能告訴你「多一點／少一點」；校準後的測量還能告訴你「<strong>多很多還是少很多</strong>」——也就是相對於有意義門檻的位置。</p>
+
+<ul>
+  <li>校準讓社會科學扎根於<strong>實質知識</strong>，也讓研究結果與實務、政策問題更相關。模糊集是校準特別好用的載體，它超越了量化與質化的二分。</li>
+  <li>量化社會科學目前的做法削弱了對校準的關注：指標式測量只需要「案例之間有變異」，並把所有變異視為同樣重要；而相關方法又依賴離均差，<strong>常常抵消研究者所做的任何直接校準</strong>。</li>
+  <li>如果承認多數社會科學理論本質上是集合論的、而相關方法不能評估集合關係，研究者就必須<strong>忠於理論</strong>：清楚界定與核心概念對應的目標集合，並指定可以指導校準的外部標準。不經仔細校準就做集合分析，是徒勞的。</li>
+</ul>
+
+<!-- ================================================= -->
+<h2 id="s6">6. 實用附錄：在 fsQCA／R 中校準 <span class="en">· Practical appendix</span></h2>
+
+<div class="callout warn">
+  <div class="ct">⚠️ 最常見的坑：兩套軟體的錨點順序相反</div>
+  <p>fsQCA：<code class="inline">calibrate(x, 完全隸屬, 交叉點, 完全不隸屬)</code>（由高到低）<br>R 的 QCA 套件：<code class="inline">thresholds = c(完全不隸屬, 交叉點, 完全隸屬)</code>（e, c, i，由低到高）</p>
+</div>
+
+<div class="sw-tabs">
+  <div class="seg">
+    <button data-tab="fs" class="on">fsQCA 軟體</button>
+    <button data-tab="r">R（QCA 套件）</button>
+  </div>
+  <div class="sw-pane on" data-pane="fs">
+    <div class="steps">
+      <div class="step"><div><h4>準備資料</h4><p>在 fsQCA 建立或開啟資料集；SPSS、Excel 資料請存成逗號或 Tab 分隔檔，第一列放簡單的變數名稱。缺失值留白，不要用 −999 之類的特殊代碼。</p></div></div>
+      <div class="step"><div><h4>開啟計算視窗</h4><p>在資料表視窗點選 <span class="menu-path">Variables → Compute</span>。</p></div></div>
+      <div class="step"><div><h4>命名新的模糊集</h4><p>取一個 2～8 個字元的簡單名稱（例如 <code class="inline">fdev</code>），只用英文字母與數字，不要有空格、破折號或標點。</p></div></div>
+      <div class="step"><div><h4>插入 calibrate 函數</h4><p>在函數清單中點選 <code class="inline">calibrate(x,n1,n2,n3)</code>，再按函數按鈕旁的向上箭頭，運算式欄會出現 <code class="inline">calibrate(,,,)</code>。</p></div></div>
+      <div class="step"><div><h4>填入變數與三個錨點</h4><p>改成例如 <code class="inline">calibrate(gnpcap, 20000, 5000, 2500)</code>：第一個數字是完全隸屬門檻（0.95），第二個是交叉點（0.5），第三個是完全不隸屬門檻（0.05）。</p></div></div>
+      <div class="step"><div><h4>按 OK 並檢查</h4><p>點選某欄後用 <span class="menu-path">Cases → Sort Ascending</span>（或 Descending）排序，對照原始變數與新的模糊分數，確認結果符合你的預期。</p></div></div>
+    </div>
+  </div>
+  <div class="sw-pane" data-pane="r">
+    <p>直接法：QCA 套件的 <code class="inline">calibrate()</code>，<code class="inline">type = "fuzzy"</code>（預設即為 logistic 函數，對應 Ragin 的 log odds ±3 設定）。</p>
+<pre class="code"><span class="c-fn">library</span>(QCA)
+<span class="c-com"># 原書表 5-2 的 24 國（人均國民所得，美元）</span>
+gnp <span class="c-kw">&lt;-</span> <span class="c-fn">c</span>(<span class="c-num">40110</span>, <span class="c-num">34400</span>, <span class="c-num">25200</span>, <span class="c-num">24920</span>, <span class="c-num">20060</span>, <span class="c-num">17090</span>, <span class="c-num">15320</span>, <span class="c-num">13680</span>,
+         <span class="c-num">11720</span>, <span class="c-num">11290</span>, <span class="c-num">10940</span>, <span class="c-num">9800</span>, <span class="c-num">7470</span>, <span class="c-num">4670</span>, <span class="c-num">4100</span>, <span class="c-num">4070</span>,
+         <span class="c-num">3740</span>, <span class="c-num">3690</span>, <span class="c-num">3590</span>, <span class="c-num">2980</span>, <span class="c-num">1000</span>, <span class="c-num">650</span>, <span class="c-num">450</span>, <span class="c-num">110</span>)
+
+<span class="c-com"># 已開發國家：thresholds 依序為 e（完全不隸屬）, c（交叉點）, i（完全隸屬）</span>
+dev <span class="c-kw">&lt;-</span> <span class="c-fn">calibrate</span>(gnp, type = <span class="c-str">"fuzzy"</span>,
+                 thresholds = <span class="c-fn">c</span>(<span class="c-num">2500</span>, <span class="c-num">5000</span>, <span class="c-num">20000</span>))
+<span class="c-fn">round</span>(dev, <span class="c-num">2</span>)   <span class="c-com"># 1.00 1.00 0.98 0.98 0.95 0.92 0.89 0.85 ... 0.08 0.01 0.01 0.00 0.00</span>
+
+<span class="c-com"># 也可以寫成具名字串，比較不會弄錯順序</span>
+mod <span class="c-kw">&lt;-</span> <span class="c-fn">calibrate</span>(gnp, type = <span class="c-str">"fuzzy"</span>,
+                 thresholds = <span class="c-str">"e=1000, c=2500, i=7500"</span>)   <span class="c-com"># 表 5-3</span>
+
+<span class="c-com"># 手動驗算（與 Ragin 的四步驟完全相同）</span>
+dev_by_hand <span class="c-kw">&lt;-</span> <span class="c-kw">function</span>(x, i, c, e) {
+  d  <span class="c-kw">&lt;-</span> x <span class="c-kw">-</span> c
+  lo <span class="c-kw">&lt;-</span> <span class="c-fn">ifelse</span>(d <span class="c-kw">&gt;=</span> <span class="c-num">0</span>, d <span class="c-kw">*</span> <span class="c-num">3</span> <span class="c-kw">/</span> (i <span class="c-kw">-</span> c), d <span class="c-kw">*</span> <span class="c-num">-3</span> <span class="c-kw">/</span> (e <span class="c-kw">-</span> c))
+  <span class="c-fn">exp</span>(lo) <span class="c-kw">/</span> (<span class="c-num">1</span> <span class="c-kw">+</span> <span class="c-fn">exp</span>(lo))
+}
+<span class="c-fn">all.equal</span>(dev, <span class="c-fn">dev_by_hand</span>(gnp, <span class="c-num">20000</span>, <span class="c-num">5000</span>, <span class="c-num">2500</span>))
+
+<span class="c-com"># 兩個集合的相關 vs. 平均隸屬度（呼應第 4 節）</span>
+<span class="c-fn">cor</span>(dev, mod); <span class="c-fn">mean</span>(dev); <span class="c-fn">mean</span>(mod)</pre>
+
+    <p>間接法：先依實質知識給定性分數，再用<strong>分數 logit</strong>（quasibinomial GLM）預測。以下用 ln(所得) 作預測式；Ragin 原本用的是 Stata 的分數多項式，形式更有彈性。</p>
+<pre class="code"><span class="c-com"># 原書表 5-4 的定性編碼（六類：1, .8, .6, .4, .2, 0）</span>
+qual <span class="c-kw">&lt;-</span> <span class="c-fn">c</span>(<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>, <span class="c-num">.8</span>,<span class="c-num">.8</span>,<span class="c-num">.8</span>,<span class="c-num">.8</span>,<span class="c-num">.8</span>,<span class="c-num">.8</span>, <span class="c-num">.6</span>,<span class="c-num">.6</span>,
+          <span class="c-num">.4</span>,<span class="c-num">.4</span>,<span class="c-num">.4</span>, <span class="c-num">.2</span>,<span class="c-num">.2</span>,<span class="c-num">.2</span>,<span class="c-num">.2</span>, <span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">0</span>)
+
+fit <span class="c-kw">&lt;-</span> <span class="c-fn">glm</span>(qual <span class="c-kw">~</span> <span class="c-fn">log</span>(gnp), family = <span class="c-fn">quasibinomial</span>(link = <span class="c-str">"logit"</span>))
+dev_ind <span class="c-kw">&lt;-</span> <span class="c-fn">predict</span>(fit, type = <span class="c-str">"response"</span>)   <span class="c-com"># 間接法的模糊隸屬分數</span>
+<span class="c-fn">round</span>(<span class="c-fn">cbind</span>(gnp, qual, direct = dev, indirect = dev_ind), <span class="c-num">3</span>)
+
+<span class="c-com"># QCA 套件也內建間接法：calibrate(..., method = "indirect")，</span>
+<span class="c-com"># 依 thresholds 把原始值切成組，再以分數多項式 logit 擬合；細節見 ?calibrate</span></pre>
+    <p>想看更完整的 R 校準教學（含 <code class="inline">findTh()</code> 與 <code class="inline">XYplot()</code>），可參考本站主教材〈<a href="../chapters/ch4.html">Ch.4 模糊集 fsQCA</a>〉。</p>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s7">7. 本章重點、名詞與自我測驗 <span class="en">· Review</span></h2>
+
+<ol class="takeaways">
+  <li>模糊集必須用<strong>外部標準</strong>校準，標準來自研究者對目標集合的概念化與實質知識，而不是樣本平均數與標準差。</li>
+  <li>隸屬度、勝算、log odds 是同一數值的三種寫法；log odds 以 0 對稱、無上下限，換回隸屬度永遠在 0～1 之間。</li>
+  <li><strong>直接法</strong>：三錨點對應 log odds +3／0／−3（≈ 0.95／0.5／0.05）；偏離值 × 上方或下方標量 = log odds，再用 exp/(1+exp) 換回隸屬度。</li>
+  <li>目標集合變了（已開發 → 至少中等已開發），錨點就要變；同一個土耳其可從 0.08 變成 0.57。</li>
+  <li><strong>間接法</strong>：先依知識把案例分成六類（1, .8, .6, .4, .2, 0），再以原始指標做分數 logit 迴歸，預測值即為隸屬分數。</li>
+  <li>校準後的集合可用一致性與覆蓋度檢驗集合論命題；兩個集合即使相關高達 0.911，集合論結論仍可能差很多——<strong>相關對校準不敏感</strong>。</li>
+  <li>fsQCA 的 <code class="inline">calibrate(x, 完全, 交叉, 不隸屬)</code> 與 R 的 <code class="inline">thresholds = c(e, c, i)</code> 順序相反。</li>
+</ol>
+
+<h3>名詞對照</h3>
+<div class="table-wrap">
+  <table class="tbl gloss">
+    <thead><tr><th>本教材用語</th><th>簡中譯本</th><th>英文</th><th>白話說明</th></tr></thead>
+    <tbody>
+      <tr><td>校準</td><td>校准</td><td>calibration</td><td>依外部標準把原始數值轉成有意義的隸屬分數</td></tr>
+      <tr><td>直接法</td><td>直接法</td><td>direct method</td><td>指定三個數值錨點，用 log odds 換算</td></tr>
+      <tr><td>間接法</td><td>间接法</td><td>indirect method</td><td>先定性分組給分，再用迴歸擬合</td></tr>
+      <tr><td>定性錨點</td><td>定性锚点</td><td>qualitative anchors</td><td>完全隸屬、交叉點、完全不隸屬三個門檻</td></tr>
+      <tr><td>交叉點</td><td>交叉点</td><td>crossover point</td><td>隸屬度 0.5，最模糊的位置</td></tr>
+      <tr><td>對數勝算</td><td>对数概率</td><td>log odds</td><td>ln(隸屬度 / (1 − 隸屬度))，以 0 對稱</td></tr>
+      <tr><td>勝算</td><td>相关概率</td><td>odds</td><td>隸屬度 / (1 − 隸屬度)</td></tr>
+      <tr><td>偏離值</td><td>交叉点偏差</td><td>deviation from crossover</td><td>原始值減交叉點</td></tr>
+      <tr><td>標量</td><td>标量</td><td>scalar</td><td>把偏離值換成 log odds 的乘數（兩段各一）</td></tr>
+      <tr><td>口語標籤</td><td>口头标签</td><td>verbal label</td><td>「相當隸屬」等描述隸屬程度的文字</td></tr>
+      <tr><td>真值</td><td>真值</td><td>truth value</td><td>命題為真的程度；不是機率</td></tr>
+      <tr><td>分數多項式</td><td>分段多项式</td><td>fractional polynomial</td><td>間接法中用來擬合的彈性迴歸形式</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>自我測驗</h3>
+<p class="quiz-score" data-quiz-score></p>
+
+<div class="quiz" data-answer="2">
+  <p class="q">在直接法中，「完全隸屬門檻」對應的 log odds 是 +3，換成隸屬度大約是？</p>
+  <div class="opts">
+    <button class="opt">0.750</button>
+    <button class="opt">0.881</button>
+    <button class="opt">0.953</button>
+    <button class="opt">1.000</button>
+  </div>
+  <div class="explain">exp(3) = 20.09，20.09 / 21.09 ≈ 0.953。隸屬度永遠到不了 1.0，所以 Ragin 以 0.95 作為「（幾乎）完全隸屬」的門檻。0.881 是 log odds = 2。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">「已開發國家」的錨點為 20,000／5,000／2,500 美元。交叉點<strong>下方</strong>案例使用的標量是？</p>
+  <div class="opts">
+    <button class="opt">0.0012（= −3 / −2,500）</button>
+    <button class="opt">0.0002（= 3 / 15,000）</button>
+    <button class="opt">0.0006（= 3 / 5,000）</button>
+    <button class="opt">−0.0012</button>
+  </div>
+  <div class="explain">下方標量 = −3 ÷（2,500 − 5,000）= −3 / −2,500 = 0.0012，是正數；乘上負的偏離值後得到負的 log odds。0.0002 是上方標量，0.0006 是表 5-3 的上方標量。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">同樣的錨點下，人均所得剛好 5,000 美元的國家，在已開發國家集合的隸屬度是？</p>
+  <div class="opts">
+    <button class="opt">0.05</button>
+    <button class="opt">0.95</button>
+    <button class="opt">0.62</button>
+    <button class="opt">0.50</button>
+  </div>
+  <div class="explain">5,000 就是交叉點，偏離值 = 0 → log odds = 0 → 隸屬度 = 0.5，最模糊的位置。0.62 是阿根廷（7,470 美元）。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">土耳其在表 5-2 的隸屬度是 0.08，在表 5-3 卻是 0.57。主要原因是？</p>
+  <div class="opts">
+    <button class="opt">兩張表用的所得資料年份不同</button>
+    <button class="opt">目標集合的定義改變（已開發 → 至少中等已開發），三個錨點也隨之改變</button>
+    <button class="opt">表 5-3 改用了間接法</button>
+    <button class="opt">表 5-2 計算錯誤</button>
+  </div>
+  <div class="explain">兩表使用同一份所得資料、同一種直接法。差別只在外部標準：表 5-3 的交叉點是 2,500，土耳其的 2,980 已在交叉點之上。這正說明校準依賴知識與概念定義。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">間接校準法的第一個、也是最重要的步驟是？</p>
+  <div class="opts">
+    <button class="opt">計算樣本平均數與標準差</button>
+    <button class="opt">指定完全隸屬、交叉點、完全不隸屬三個數值</button>
+    <button class="opt">直接用原始所得跑 logit 迴歸</button>
+    <button class="opt">依實質知識把案例定性分組，並給予初步隸屬分數</button>
+  </div>
+  <div class="explain">間接法的外部標準就是研究者對案例的定性評估（例如六類：1, .8, .6, .4, .2, 0）；之後才用迴歸把原始指標調整到符合這些評估。指定三個數值是直接法。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">「啤酒是致命毒藥」這個命題的模糊隸屬分數約 0.05，正確的讀法是？</p>
+  <div class="opts">
+    <button class="opt">這個命題幾乎（但不完全）不屬於「真命題」集合</button>
+    <button class="opt">每 20 瓶啤酒有 1 瓶會致命</button>
+    <button class="opt">喝啤酒致死的機率是 5%</button>
+    <button class="opt">95% 的人認為啤酒無害</button>
+  </div>
+  <div class="explain">模糊隸屬分數是<strong>真值</strong>，不是機率。把 0.05 讀成機率會得出荒謬結論。</div>
+</div>
+
+<div class="quiz" data-answer="2">
+  <p class="q">「已開發」與「至少中等已開發」兩個模糊集的相關高達 0.911，但對民主國家的覆蓋度分別是 0.35 與 0.52。這說明了什麼？</p>
+  <div class="opts">
+    <button class="opt">相關這麼高，兩個集合可以互換使用</button>
+    <button class="opt">覆蓋度的計算一定有誤</button>
+    <button class="opt">相關係數對研究者的校準不敏感，集合論指標才能反映校準的差別</button>
+    <button class="opt">應該改用間接法</button>
+  </div>
+  <div class="explain">相關依賴樣本的離均差，會抵消直接校準的效果；而集合論的一致性、覆蓋度直接使用隸屬分數，對校準高度敏感。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">在 fsQCA 中輸入 <code class="inline">calibrate(intvar, 25, 10, 2)</code>，三個數字依序代表？</p>
+  <div class="opts">
+    <button class="opt">完全不隸屬、交叉點、完全隸屬</button>
+    <button class="opt">完全隸屬（0.95）、交叉點（0.5）、完全不隸屬（0.05）</button>
+    <button class="opt">交叉點、上方標量、下方標量</button>
+    <button class="opt">平均數、標準差、樣本數</button>
+  </div>
+  <div class="explain">fsQCA 由高到低：完全隸屬、交叉點、完全不隸屬。R 的 QCA 套件 <code class="inline">thresholds</code> 則是 e, c, i 由低到高，寫成 <code class="inline">c(2, 10, 25)</code>。</div>
+</div>
+
+<p><button class="btn ghost" data-quiz-reset type="button">重新作答</button></p>
+
+<div class="done-box" data-ch="5">
+  <span class="msg"></span>
+  <button class="btn" type="button">標記本章為已讀</button>
+</div>
+
+<nav class="chap-nav">
+  <a class="prev" href="ch4.html"><div class="dir">← 上一章</div><div class="ttl">第 4 章 為什麼要校準</div></a>
+  <a class="next" href="ch6.html"><div class="dir">下一章 →</div><div class="ttl">第 6 章 組態思維</div></a>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Charles C. Ragin, <em>Redesigning Social Inquiry: Fuzzy Sets and Beyond</em> (University of Chicago Press, 2008)<br>
+  以學習為目的之概念整理與重新詮釋，非原書譯文 · <a href="index.html">回本書首頁</a></p>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="js/ragin.js"></script>
+<script>
+/* ---------- 共用資料與函式 ---------- */
+const CH5 = (function () {
+  // 原書表 5-2／5-3（人均國民所得，美元）
+  const INC = [['瑞士',40110],['美國',34400],['荷蘭',25200],['芬蘭',24920],['澳洲',20060],['以色列',17090],['西班牙',15320],['紐西蘭',13680],['賽普勒斯',11720],['希臘',11290],['葡萄牙',10940],['韓國',9800],['阿根廷',7470],['匈牙利',4670],['委內瑞拉',4100],['愛沙尼亞',4070],['巴拿馬',3740],['模里西斯',3690],['巴西',3590],['土耳其',2980],['玻利維亞',1000],['象牙海岸',650],['塞內加爾',450],['蒲隆地',110]];
+  const B52 = [1.00,1.00,.98,.98,.95,.92,.89,.85,.79,.78,.77,.72,.62,.40,.25,.25,.18,.17,.16,.08,.01,.01,0,0];
+  const B53 = [1,1,1,1,1,1,1,1,1,.99,.99,.99,.95,.79,.72,.72,.68,.67,.66,.57,.05,.02,.02,.01];
+  // 原書表 5-5（Polity IV 民主分數）
+  const DEM = [['挪威',10],['美國',10],['法國',9],['韓國',8],['哥倫比亞',7],['克羅埃西亞',7],['孟加拉',6],['厄瓜多',6],['阿爾巴尼亞',5],['亞美尼亞',5],['奈及利亞',4],['馬來西亞',3],['柬埔寨',2],['坦尚尼亞',2],['尚比亞',1],['賴比瑞亞',0],['塔吉克',-1],['約旦',-2],['阿爾及利亞',-3],['盧安達',-4],['甘比亞',-5],['埃及',-6],['亞塞拜然',-7],['不丹',-8]];
+  const B55 = [.97,.97,.95,.93,.89,.89,.85,.85,.78,.78,.70,.61,.50,.50,.35,.23,.14,.08,.05,.03,.01,.01,0,0];
+  const PRESET = {
+    dev: { full: 20000, cross: 5000, non: 2500, data: INC, book: B52, raw: '人均所得', unit: '美元', xmin: 0, xmax: 42000, x: 7470, name: '已開發國家' },
+    mod: { full: 7500, cross: 2500, non: 1000, data: INC, book: B53, raw: '人均所得', unit: '美元', xmin: 0, xmax: 42000, x: 2980, name: '至少中等已開發國家' },
+    dem: { full: 9, cross: 2, non: -3, data: DEM, book: B55, raw: 'Polity 分數', unit: '分', xmin: -10, xmax: 10, x: 3, name: '民主國家' },
+  };
+  // 直接法：回傳每一步
+  function direct(x, full, cross, non) {
+    const dev = x - cross;
+    const up = full > non ? dev >= 0 : dev <= 0;
+    const scalar = up ? 3 / (full - cross) : -3 / (non - cross);
+    const lo = dev * scalar;
+    return { dev, up, scalar, lo, m: inv(lo) };
+  }
+  const inv = (lo) => 1 / (1 + Math.exp(-lo));
+  const valid = (f, c, n) => isFinite(f) && isFinite(c) && isFinite(n) && ((f > c && c > n) || (f < c && c < n));
+  function pearson(a, b) {
+    const n = a.length, ma = a.reduce((s, v) => s + v, 0) / n, mb = b.reduce((s, v) => s + v, 0) / n;
+    let sab = 0, saa = 0, sbb = 0;
+    for (let i = 0; i < n; i++) { sab += (a[i] - ma) * (b[i] - mb); saa += (a[i] - ma) ** 2; sbb += (b[i] - mb) ** 2; }
+    return saa && sbb ? sab / Math.sqrt(saa * sbb) : NaN;
+  }
+  // 分數 logit（IRLS）
+  function fracLogit(X, y, iter = 100) {
+    const k = X[0].length; let b = new Array(k).fill(0);
+    for (let t = 0; t < iter; t++) {
+      const A = Array.from({ length: k }, () => new Array(k).fill(0)), r = new Array(k).fill(0);
+      X.forEach((row, i) => {
+        const eta = row.reduce((s, v, j) => s + v * b[j], 0), p = inv(eta), w = Math.max(p * (1 - p), 1e-10);
+        const z = eta + (y[i] - p) / w;
+        for (let a = 0; a < k; a++) { r[a] += w * row[a] * z; for (let c = 0; c < k; c++) A[a][c] += w * row[a] * row[c]; }
+      });
+      for (let a = 0; a < k; a++) A[a][a] += 1e-9;
+      const nb = solve(A, r);
+      const diff = nb.reduce((s, v, j) => s + Math.abs(v - b[j]), 0);
+      b = nb; if (diff < 1e-10) break;
+    }
+    return b;
+  }
+  function solve(A, r) {
+    const n = r.length, M = A.map((row, i) => [...row, r[i]]);
+    for (let i = 0; i < n; i++) {
+      let p = i; for (let j = i + 1; j < n; j++) if (Math.abs(M[j][i]) > Math.abs(M[p][i])) p = j;
+      [M[i], M[p]] = [M[p], M[i]];
+      for (let j = i + 1; j < n; j++) { const f = M[j][i] / M[i][i]; for (let c = i; c <= n; c++) M[j][c] -= f * M[i][c]; }
+    }
+    const x = new Array(n).fill(0);
+    for (let i = n - 1; i >= 0; i--) { let s = M[i][n]; for (let c = i + 1; c < n; c++) s -= M[i][c] * x[c]; x[i] = s / M[i][i]; }
+    return x;
+  }
+  // 通用座標圖（非單位正方形）
+  function plot(svg, o) {
+    const W = 560, H = 330, m = { l: 52, r: 16, t: 14, b: 44 };
+    const pw = W - m.l - m.r, ph = H - m.t - m.b, ns = 'http://www.w3.org/2000/svg';
+    const sx = (v) => m.l + (v - o.xmin) / (o.xmax - o.xmin) * pw;
+    const sy = (v) => m.t + (1 - (Math.max(o.ymin, Math.min(o.ymax, v)) - o.ymin) / (o.ymax - o.ymin)) * ph;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.innerHTML = '';
+    const el = (tag, at, txt) => { const e = document.createElementNS(ns, tag); for (const k in at) e.setAttribute(k, at[k]); if (txt != null) e.textContent = txt; svg.appendChild(e); return e; };
+    o.xticks.forEach((v) => { el('line', { class: 'grid', x1: sx(v), y1: sy(o.ymin), x2: sx(v), y2: sy(o.ymax) }); el('text', { class: 'lbl', x: sx(v), y: sy(o.ymin) + 16, 'text-anchor': 'middle' }, o.xfmt ? o.xfmt(v) : v); });
+    o.yticks.forEach((v) => { el('line', { class: 'grid', x1: sx(o.xmin), y1: sy(v), x2: sx(o.xmax), y2: sy(v) }); el('text', { class: 'lbl', x: sx(o.xmin) - 7, y: sy(v) + 4, 'text-anchor': 'end' }, v); });
+    el('line', { class: 'axis', x1: sx(o.xmin), y1: sy(o.ymin), x2: sx(o.xmax), y2: sy(o.ymin) });
+    el('line', { class: 'axis', x1: sx(o.xmin), y1: sy(o.ymin), x2: sx(o.xmin), y2: sy(o.ymax) });
+    (o.vlines || []).forEach((a) => { if (a.x < o.xmin || a.x > o.xmax) return; el('line', { class: 'anchor', x1: sx(a.x), y1: sy(o.ymin), x2: sx(a.x), y2: sy(o.ymax) }); el('text', { class: 'alab', x: sx(a.x) + 3, y: m.t + 10 + (a.dy || 0) }, a.label); });
+    el('text', { class: 'ttl', x: sx((o.xmin + o.xmax) / 2), y: H - 6, 'text-anchor': 'middle' }, o.xlab);
+    el('text', { class: 'ttl', x: 14, y: sy((o.ymin + o.ymax) / 2), 'text-anchor': 'middle', transform: `rotate(-90 14 ${sy((o.ymin + o.ymax) / 2)})` }, o.ylab);
+    (o.curves || []).forEach((c) => { const d = c.pts.map((p, i) => `${i ? 'L' : 'M'}${sx(p[0]).toFixed(1)},${sy(p[1]).toFixed(1)}`).join(' '); el('path', { class: c.cls || 'curve', d }); });
+    (o.pts || []).forEach((p) => {
+      const c = el('circle', { class: 'pt ' + (p.cls || ''), cx: sx(p.x), cy: sy(p.y), r: p.r || 5 });
+      if (p.label) { const t = document.createElementNS(ns, 'title'); t.textContent = p.label; c.appendChild(t); }
+      if (p.onclick) { c.style.cursor = 'pointer'; c.addEventListener('click', p.onclick); }
+    });
+  }
+  const f2 = (v) => RG.fz.fmt(v, 2);
+  const money = (v) => Number(v).toLocaleString('en-US');
+  return { INC, B52, B53, DEM, B55, PRESET, direct, inv, valid, pearson, fracLogit, plot, f2, money };
+})();
+
+/* ---------- log odds ↔ 隸屬度 ---------- */
+(function () {
+  const root = document.getElementById('w-lo');
+  const sl = root.querySelector('[data-lo]'), mem = root.querySelector('[data-mem]');
+  const rows = [...document.querySelectorAll('#t51 tbody tr')];
+  const labels = rows.map((r) => [+r.dataset.lo, r.cells[0].textContent]);
+  function show(lo, fromMem) {
+    const m = CH5.inv(lo), odds = Math.exp(lo);
+    root.querySelector('[data-loout]').textContent = lo.toFixed(1);
+    root.querySelector('[data-s1]').textContent = lo.toFixed(2);
+    root.querySelector('[data-s2]').textContent = odds >= 100 ? odds.toFixed(0) : odds.toFixed(2);
+    root.querySelector('[data-s3]').textContent = m.toFixed(3);
+    if (!fromMem) mem.value = m.toFixed(3);
+    let best = 0; labels.forEach((l, i) => { if (Math.abs(l[0] - lo) < Math.abs(labels[best][0] - lo)) best = i; });
+    rows.forEach((r, i) => [...r.cells].forEach((td) => td.classList.toggle('hi', i === best)));
+    let txt = `隸屬度 ${m.toFixed(3)} → 勝算 = ${m.toFixed(3)} / ${(1 - m).toFixed(3)} = ${odds.toFixed(2)} → ln(${odds.toFixed(2)}) = ${lo.toFixed(2)}\n`;
+    txt += `最接近的口語標籤：<span class="hl">${labels[best][1]}</span>\n`;
+    if (lo >= 3) txt += '已達「完全隸屬門檻」（≥ 0.95）：可視為（幾乎）完全屬於目標集合。';
+    else if (lo <= -3) txt += '已達「完全不隸屬門檻」（≤ 0.05）：可視為（幾乎）完全不屬於目標集合。';
+    else if (Math.abs(lo) < 0.05) txt += '交叉點：最模糊，說不上在集合內或外。';
+    else txt += lo > 0 ? '在交叉點之上：偏向「在集合內」，但還不算完全隸屬。' : '在交叉點之下：偏向「在集合外」，但還不算完全不隸屬。';
+    txt += `\n對稱性：log odds ${(-lo).toFixed(1)} 對應隸屬度 ${(1 - m).toFixed(3)}（= 1 − ${m.toFixed(3)}）。`;
+    root.querySelector('[data-out]').innerHTML = txt;
+  }
+  sl.addEventListener('input', () => show(+sl.value, false));
+  mem.addEventListener('input', () => {
+    const m = Math.min(0.999, Math.max(0.001, +mem.value || 0.5));
+    const lo = Math.log(m / (1 - m));
+    sl.value = Math.max(-7, Math.min(7, lo)); show(lo, true);
+  });
+  rows.forEach((r) => { r.style.cursor = 'pointer'; r.addEventListener('click', () => { sl.value = r.dataset.lo; show(+r.dataset.lo, false); }); });
+  show(3, false);
+})();
+
+/* ---------- 直接校準計算器 ---------- */
+(function () {
+  const root = document.getElementById('w-calc');
+  const inp = {}; root.querySelectorAll('[data-a]').forEach((el) => (inp[el.dataset.a] = el));
+  let cur = 'dev', yax = 'm';
+  function setPreset(k) {
+    cur = k; const p = CH5.PRESET[k];
+    inp.full.value = p.full; inp.cross.value = p.cross; inp.non.value = p.non; inp.x.value = p.x;
+    run();
+  }
+  function run() {
+    const p = CH5.PRESET[cur];
+    const f = +inp.full.value, c = +inp.cross.value, n = +inp.non.value, x = +inp.x.value;
+    const out = root.querySelector('[data-steps]');
+    if (!CH5.valid(f, c, n) || !isFinite(x)) {
+      out.innerHTML = '⚠️ 錨點必須依序排列：完全隸屬 &gt; 交叉點 &gt; 完全不隸屬（或全部反過來，用於「數值越小越隸屬」的集合）。';
+      root.querySelector('[data-plot]').innerHTML = ''; return;
+    }
+    const r = CH5.direct(x, f, c, n);
+    const anchor = r.up ? f : n, sign = r.up ? '3' : '−3';
+    const fmtS = (v) => Math.abs(v) < 0.01 ? v.toPrecision(3) : v.toFixed(4);
+    let t = `① 偏離值 = x − 交叉點 = ${x} − ${c} = ${+(r.dev.toFixed(4))}\n`;
+    t += `② ${r.dev === 0 ? '剛好在交叉點' : r.up ? '在交叉點「隸屬」的一側' : '在交叉點「不隸屬」的一側'} → 標量 = ${sign} ÷ (${anchor} − ${c}) = ${fmtS(r.scalar)}\n`;
+    t += `③ log odds = ${+(r.dev.toFixed(4))} × ${fmtS(r.scalar)} = ${r.lo.toFixed(3)}\n`;
+    t += `④ 隸屬度 = exp(${r.lo.toFixed(3)}) / (1 + exp(${r.lo.toFixed(3)})) = <span class="hl">${r.m.toFixed(3)}</span>\n\n`;
+    t += r.m >= 0.95 ? `解讀：已越過完全隸屬門檻，可視為「完全屬於」目標集合。` :
+         r.m <= 0.05 ? `解讀：已越過完全不隸屬門檻，可視為「完全不屬於」目標集合。` :
+         Math.abs(r.m - 0.5) < 0.005 ? '解讀：剛好在交叉點，最模糊。' :
+         r.m > 0.5 ? `解讀：偏向屬於（比較像在集合內），但還不到完全隸屬。` : `解讀：偏向不屬於（比較像在集合外），但還不到完全不隸屬。`;
+    out.innerHTML = t;
+    // 圖
+    const lo = Math.min(p.xmin, x), hi = Math.max(p.xmax, x);
+    const curve = [];
+    for (let i = 0; i <= 240; i++) { const v = lo + (hi - lo) * i / 240; const d = CH5.direct(v, f, c, n); curve.push([v, yax === 'm' ? d.m : d.lo]); }
+    // 讓折線在交叉點有精確轉折
+    if (yax === 'l') { curve.push([c, 0]); curve.sort((a, b) => a[0] - b[0]); }
+    const pts = p.data.map(([nm, v]) => { const d = CH5.direct(v, f, c, n); return { x: v, y: yax === 'm' ? d.m : d.lo, label: `${nm}：${CH5.money(v)} → ${d.m.toFixed(2)}`, onclick: () => { inp.x.value = v; run(); } }; });
+    pts.push({ x, y: yax === 'm' ? r.m : r.lo, cls: 'sel', r: 7, label: `x = ${x} → ${r.m.toFixed(3)}` });
+    const isInc = p.data === CH5.INC;
+    CH5.plot(root.querySelector('[data-plot]'), {
+      xmin: lo, xmax: hi, ymin: yax === 'm' ? 0 : -6, ymax: yax === 'm' ? 1 : 6,
+      xticks: isInc ? [0, 10000, 20000, 30000, 40000].filter((v) => v >= lo && v <= hi) : [-10, -5, 0, 5, 10].filter((v) => v >= lo && v <= hi),
+      yticks: yax === 'm' ? [0, 0.25, 0.5, 0.75, 1] : [-6, -3, 0, 3, 6],
+      xfmt: isInc ? (v) => (v / 1000) + 'k' : null,
+      xlab: p.raw + (isInc ? '（美元）' : ''), ylab: yax === 'm' ? '隸屬度' : 'log odds',
+      vlines: [{ x: n, label: '不隸屬', dy: 0 }, { x: c, label: '交叉', dy: 12 }, { x: f, label: '完全隸屬', dy: 0 }],
+      curves: [{ pts: curve }], pts,
+    });
+  }
+  root.querySelectorAll('[data-preset] button').forEach((b) => b.addEventListener('click', () => {
+    root.querySelectorAll('[data-preset] button').forEach((x) => x.classList.toggle('on', x === b)); setPreset(b.dataset.v);
+  }));
+  root.querySelectorAll('[data-yax] button').forEach((b) => b.addEventListener('click', () => {
+    root.querySelectorAll('[data-yax] button').forEach((x) => x.classList.toggle('on', x === b)); yax = b.dataset.v; run();
+  }));
+  Object.values(inp).forEach((el) => el.addEventListener('input', run));
+  setPreset('dev');
+})();
+
+/* ---------- 表 5-2／5-3／5-5 重建 ---------- */
+(function () {
+  const root = document.getElementById('w-tab');
+  const inp = {}; root.querySelectorAll('[data-a]').forEach((el) => (inp[el.dataset.a] = el));
+  const tb = root.querySelector('tbody');
+  let cur = 'dev';
+  function setPreset(k) { cur = k; const p = CH5.PRESET[k]; inp.full.value = p.full; inp.cross.value = p.cross; inp.non.value = p.non; run(); }
+  function run() {
+    const p = CH5.PRESET[cur], f = +inp.full.value, c = +inp.cross.value, n = +inp.non.value;
+    root.querySelector('[data-rawh]').textContent = p.raw;
+    const note = root.querySelector('[data-note]');
+    if (!CH5.valid(f, c, n)) { tb.innerHTML = ''; note.innerHTML = '⚠️ 錨點必須依序排列（完全隸屬 &gt; 交叉點 &gt; 完全不隸屬）。'; return; }
+    const same = f === p.full && c === p.cross && n === p.non;
+    let n95 = 0, n50 = 0, sum = 0, mism = 0;
+    const isInc = p.data === CH5.INC;
+    tb.innerHTML = p.data.map(([nm, v], i) => {
+      const r = CH5.direct(v, f, c, n);
+      if (r.m >= 0.95) n95++; if (r.m > 0.5) n50++; sum += r.m;
+      const bk = p.book[i], diff = Math.abs(+r.m.toFixed(2) - bk) > 0.001;
+      if (same && diff) mism++;
+      const sc = Math.abs(r.scalar) < 0.01 ? r.scalar.toFixed(4) : r.scalar.toFixed(2);
+      return `<tr><td>${nm}</td><td class="num">${isInc ? CH5.money(v) : v}</td><td class="num">${isInc ? CH5.money(+r.dev.toFixed(2)) : r.dev.toFixed(2)}</td>` +
+        `<td class="num">${sc}</td><td class="num">${r.lo.toFixed(2)}</td><td class="num ${r.m >= .95 ? 'hi' : r.m > .5 ? '' : 'lo'}">${r.m.toFixed(2)}</td>` +
+        `<td class="num ${same ? '' : (diff ? 'warnc' : '')}">${bk.toFixed(2)}</td></tr>`;
+    }).join('');
+    root.querySelector('[data-n95]').textContent = `${n95} / 24`;
+    root.querySelector('[data-n50]').textContent = `${n50} / 24`;
+    root.querySelector('[data-mean]').textContent = (sum / 24).toFixed(3);
+    note.innerHTML = same
+      ? `目前是原書的錨點（${p.name}）：本頁重算的隸屬度${mism ? `有 ${mism} 格` : '與原書<span class="hl">逐格一致</span>'}。\n` +
+        `粗體藍底 = 已達完全隸屬（≥ 0.95）；灰字 = 在交叉點以下。`
+      : `你已改動錨點：「原書」欄中黃底的格子，代表和你的新校準結果不同（四捨五入到兩位後）。\n` +
+        `同一份原始資料，只因外部標準改變，就有 ${p.data.filter(([, v], i) => Math.abs(+CH5.direct(v, f, c, n).m.toFixed(2) - p.book[i]) > 0.001).length} 國的隸屬度改變——這就是「校準依賴知識」。`;
+  }
+  root.querySelectorAll('[data-preset] button').forEach((b) => b.addEventListener('click', () => {
+    root.querySelectorAll('[data-preset] button').forEach((x) => x.classList.toggle('on', x === b)); setPreset(b.dataset.v);
+  }));
+  root.querySelector('[data-reset]').addEventListener('click', () => setPreset(cur));
+  Object.values(inp).forEach((el) => el.addEventListener('input', run));
+  setPreset('dev');
+})();
+
+/* ---------- 錨點選擇練習 ---------- */
+(function () {
+  const root = document.getElementById('w-anchor');
+  const items = [
+    { q: '校準「已開發國家」時，用樣本平均所得當交叉點、平均 ± 1 個標準差當兩端錨點。', ok: false,
+      why: '這是第 4 章批評的「樣本特定、歸納推導」的標準：換一個樣本（例如只看 OECD 國家），錨點就跟著跑。錨點應該來自對「已開發」這個概念的外部、實質知識。' },
+    { q: '把樣本中所得最高的國家設為完全隸屬門檻、所得最低的國家設為完全不隸屬門檻。', ok: false,
+      why: '錨點是概念上的門檻，不是資料的端點。這樣做會讓只有最富的一國剛好 0.95，荷蘭、芬蘭等明顯已開發的國家反而被壓到門檻以下。' },
+    { q: '目標集合從「已開發國家」改成「至少中等已開發國家」，三個錨點跟著下修為 7,500／2,500／1,000 美元。', ok: true,
+      why: '正確。目標集合的定義改變，外部標準就必須改變（原書表 5-3）。錨點要配合你對集合的命名與定義。' },
+    { q: '把交叉點設成剛好等於某個國家的所得，而且這個國家是你研究的關鍵案例。', ok: false,
+      why: '該國的隸屬度會剛好是 0.5，是「最模糊」的位置——既不能算在集合內、也不能算在集合外，之後分析時很難處理。實務上會避免讓重要案例剛好落在交叉點上；Ragin 選的 5,000 美元剛好沒有國家落在上面。' },
+    { q: '說不出精確的數值門檻，但能依文獻把國家大致分成「完全、相當、有點隸屬／不隸屬」六類，於是改用間接法。', ok: true,
+      why: '正確。間接法正是為這種情況設計的：外部標準來自研究者的定性分組，再用迴歸把原始指標調整到符合分組。' },
+  ];
+  const box = root.querySelector('[data-practice]'), score = root.querySelector('[data-score]');
+  let done = 0, right = 0;
+  items.forEach((it, i) => {
+    const d = document.createElement('div'); d.className = 'item';
+    d.innerHTML = `<p><strong>${i + 1}.</strong> ${it.q}</p><div class="seg"><button type="button" data-v="1">合理</button><button type="button" data-v="0">不合理</button></div><div class="fb"></div>`;
+    d.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+      if (d.classList.contains('done')) return;
+      d.classList.add('done'); b.classList.add('on');
+      const ok = (b.dataset.v === '1') === it.ok; done++; if (ok) right++;
+      d.querySelector('.fb').innerHTML = `<b class="${ok ? 'ok' : 'bad'}">${ok ? '✔ 答對' : '✘ 再想想'}</b>（${it.ok ? '合理' : '不合理'}）${it.why}`;
+      score.textContent = `已作答 ${done} / ${items.length}，答對 ${right} 題。` + (done === items.length ? (right === items.length ? '\n全對！你已掌握錨點選擇的原則：依概念、靠外部知識、避開樣本統計量。' : '\n記住原則：錨點依概念而定、靠外部知識，不靠樣本統計量。') : '');
+    }));
+    box.appendChild(d);
+  });
+})();
+
+/* ---------- 間接法示範 ---------- */
+(function () {
+  const root = document.getElementById('w-ind');
+  const BOOKQ = [1,1,1,1,1,.8,.8,.8,.8,.8,.8,.6,.6,.4,.4,.4,.2,.2,.2,.2,0,0,0,0];
+  const BOOKP = [1,1,1,1,.999,.991,.977,.991,.887,.868,.852,.793,.653,.495,.465,.463,.445,.442,.436,.397,.053,.002,0,0];
+  const LV = [1, .8, .6, .4, .2, 0], LN = ['1.0 完全隸屬', '0.8 相當隸屬', '0.6 有點隸屬', '0.4 有點不隸屬', '0.2 相當不隸屬', '0.0 完全不隸屬'];
+  const tb = root.querySelector('tbody'), form = root.querySelector('[data-form]');
+  let q = BOOKQ.slice();
+  const feat = (inc, f) => { const k = inc / 1000; return f === 'lin' ? [1, k] : f === 'log' ? [1, Math.log(k)] : [1, Math.log(k), k]; };
+  tb.innerHTML = CH5.INC.map(([nm, v], i) => `<tr><td>${nm}</td><td class="num">${CH5.money(v)}</td><td><select data-i="${i}">${LV.map((l, j) => `<option value="${l}">${LN[j]}</option>`).join('')}</select></td><td class="num" data-fit="${i}"></td><td class="num ${i === 7 ? 'warnc' : ''}">${BOOKP[i].toFixed(3)}</td><td class="num">${CH5.B52[i].toFixed(2)}</td></tr>`).join('');
+  const sels = [...tb.querySelectorAll('select')];
+  function sync() { sels.forEach((s, i) => (s.value = String(q[i]))); }
+  function run() {
+    const f = form.value, X = CH5.INC.map(([, v]) => feat(v, f));
+    const b = CH5.fracLogit(X, q);
+    const pred = (inc) => CH5.inv(feat(inc, f).reduce((s, v, j) => s + v * b[j], 0));
+    const p = CH5.INC.map(([, v]) => pred(v));
+    p.forEach((v, i) => (tb.querySelector(`[data-fit="${i}"]`).textContent = v.toFixed(3)));
+    const sse = p.reduce((s, v, i) => s + (v - q[i]) ** 2, 0);
+    // 找出擬合曲線越過 0.5、0.95 的所得
+    const cross = (t) => { let prev = pred(100); for (let x = 200; x <= 60000; x += 100) { const v = pred(x); if ((prev - t) * (v - t) <= 0) return x; prev = v; } return null; };
+    const c50 = cross(0.5), c95 = cross(0.95);
+    const curve = [], dcurve = [];
+    for (let x = 100; x <= 42000; x += 175) { curve.push([x, pred(x)]); dcurve.push([x, CH5.direct(x, 20000, 5000, 2500).m]); }
+    CH5.plot(root.querySelector('[data-plot]'), {
+      xmin: 0, xmax: 42000, ymin: 0, ymax: 1, xticks: [0, 10000, 20000, 30000, 40000], yticks: [0, 0.2, 0.4, 0.6, 0.8, 1],
+      xfmt: (v) => (v / 1000) + 'k', xlab: '人均所得（美元）', ylab: '隸屬度',
+      curves: [{ pts: dcurve, cls: 'curve2' }, { pts: curve }],
+      pts: CH5.INC.map(([nm, v], i) => ({ x: v, y: q[i], cls: 'q', label: `${nm}：定性 ${q[i]}，擬合 ${p[i].toFixed(3)}` })),
+    });
+    const fmla = f === 'lin' ? `logit(m) = ${b[0].toFixed(3)} + ${b[1].toFixed(4)}·(所得/1000)` :
+      f === 'log' ? `logit(m) = ${b[0].toFixed(3)} + ${b[1].toFixed(3)}·ln(所得/1000)` :
+      `logit(m) = ${b[0].toFixed(3)} + ${b[1].toFixed(3)}·ln(所得/1000) + ${b[2].toFixed(4)}·(所得/1000)`;
+    const changed = q.some((v, i) => v !== BOOKQ[i]);
+    let t = `擬合結果：${fmla}\n與定性分數的殘差平方和 SSE = ${sse.toFixed(4)}\n`;
+    t += `擬合曲線越過 0.5（交叉點）約在 ${c50 ? CH5.money(c50) : '—'} 美元；越過 0.95 約在 ${c95 ? CH5.money(c95) : '（範圍內未達）'} 美元。\n`;
+    t += `對照直接法：交叉點 5,000、完全隸屬 20,000 美元。\n`;
+    t += changed ? '你改動了定性分組：曲線會被「拉」向新的分數——間接法的校準完全取決於研究者的定性判斷。'
+                 : '提示：試著把「土耳其」改成 0.4，或把「韓國」改成 0.8，看曲線如何移動。換成線性式，會發現低所得國家的分數被抬高——模型設定也會影響校準。';
+    root.querySelector('[data-note]').textContent = t;
+  }
+  sels.forEach((s) => s.addEventListener('input', () => { q[+s.dataset.i] = +s.value; run(); }));
+  form.addEventListener('input', run);
+  root.querySelector('[data-reset]').addEventListener('click', () => { q = BOOKQ.slice(); sync(); run(); });
+  sync(); run();
+})();
+
+/* ---------- 相關 vs 集合 ---------- */
+(function () {
+  const root = document.getElementById('w-corr');
+  const sl = {}; root.querySelectorAll('[data-s]').forEach((el) => (sl[el.dataset.s] = el));
+  const P = { mod: [7500, 2500, 1000], rich: [30000, 15000, 8000], same: [20000, 5000, 2500] };
+  const X = CH5.INC.map(([, v]) => CH5.direct(v, 20000, 5000, 2500).m);
+  function set(k) { [sl.full.value, sl.cross.value, sl.non.value] = P[k]; run(); }
+  function run() {
+    const f = +sl.full.value, c = +sl.cross.value, n = +sl.non.value;
+    ['full', 'cross', 'non'].forEach((k) => (root.querySelector(`[data-o="${k}"]`).textContent = CH5.money(sl[k].value)));
+    const note = root.querySelector('[data-note]');
+    if (!CH5.valid(f, c, n)) { note.innerHTML = '⚠️ 需要 完全隸屬 &gt; 交叉點 &gt; 完全不隸屬。'; return; }
+    const Y = CH5.INC.map(([, v]) => CH5.direct(v, f, c, n).m);
+    const r = CH5.pearson(X, Y), mx = X.reduce((s, v) => s + v, 0) / 24, my = Y.reduce((s, v) => s + v, 0) / 24;
+    const c1 = RG.fz.consSuf(X, Y), c2 = RG.fz.consSuf(Y, X);
+    root.querySelector('[data-r]').textContent = RG.fz.fmt(r, 3);
+    root.querySelector('[data-m]').textContent = `${mx.toFixed(2)} / ${my.toFixed(2)}`;
+    root.querySelector('[data-c1]').textContent = RG.fz.fmt(c1, 3);
+    root.querySelector('[data-c2]').textContent = RG.fz.fmt(c2, 3);
+    RG.xy(root.querySelector('[data-plot]'), CH5.INC.map(([nm], i) => ({ x: X[i], y: Y[i], label: nm })), { xlab: '已開發國家（表 5-2）', ylab: '自訂錨點的集合', cross: true });
+    const flips = X.filter((x, i) => (x > 0.5) !== (Y[i] > 0.5)).length;
+    let t = `r = ${r.toFixed(3)}：從相關的角度看，兩個集合${r > 0.85 ? '「幾乎一樣」' : r > 0.6 ? '「頗為相似」' : '有些不同'}。\n`;
+    t += `但平均隸屬度 ${mx.toFixed(2)} vs. ${my.toFixed(2)}，有 ${flips} 國落在交叉點的不同側。\n`;
+    t += my > mx + 0.02 ? `Y 是更「包容」的集合：點大多在對角線上方，X ⊆ Y 的一致性高（${c1.toFixed(2)}）。用 Y 當條件去檢驗「Y ⊆ 民主」，會是更嚴格的測試。`
+       : my < mx - 0.02 ? `Y 是更「嚴格」的集合：點大多在對角線下方，Y ⊆ X 的一致性高（${c2.toFixed(2)}）。`
+       : 'Y 與 X 幾乎相同。';
+    t += '\n相關係數只看「離平均數多遠」，所以錨點怎麼移動它都不太在乎；集合論指標則會反映出來。（全部 136 國時，原書報告 r = 0.911。）';
+    note.textContent = t;
+  }
+  root.querySelectorAll('[data-preset] button').forEach((b) => b.addEventListener('click', () => {
+    root.querySelectorAll('[data-preset] button').forEach((x) => x.classList.toggle('on', x === b)); set(b.dataset.v);
+  }));
+  Object.values(sl).forEach((el) => el.addEventListener('input', () => { root.querySelectorAll('[data-preset] button').forEach((x) => x.classList.remove('on')); run(); }));
+  set('mod');
+})();
+</script>
+</body>
+</html>

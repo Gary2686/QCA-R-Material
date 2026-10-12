@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 6 章 組態思維 · 重新設計社會科學研究</title>
+<meta name="description" content="Ragin《重新設計社會科學研究》第 6 章互動教材：組態思維、前因配方、模糊集交集（最弱環節）、否定、比較配方的一致性與覆蓋度">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="css/ragin.css">
+<style>
+  .cond-row { display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr) auto; gap: .5rem .9rem; align-items: center; padding: .55rem 0; border-bottom: 1px dashed var(--border); }
+  .cond-row:last-of-type { border-bottom: 0; }
+  .cond-row .cname { font-weight: 700; font-size: .92rem; }
+  .cond-row .cname small { display: block; font-weight: 400; color: var(--ink-faint); font-size: .78rem; }
+  .cond-row .slider-row { margin: 0; flex-wrap: wrap; }
+  .cond-row input[type=range] { width: 100%; max-width: 200px; flex: 1 1 120px; }
+  .cond-row .eff { grid-column: 1 / -1; display: flex; align-items: center; gap: .6rem; font-family: var(--mono); font-size: .82rem; color: var(--ink-soft); }
+  .cond-row .bar { flex: 1; height: 10px; background: var(--bg-soft); border-radius: 5px; overflow: hidden; border: 1px solid var(--border); }
+  .cond-row .bar > i { display: block; height: 100%; background: var(--accent2); transition: width .15s; }
+  .cond-row.weak .bar > i { background: var(--rose); }
+  .cond-row.weak .cname { color: var(--rose); }
+  .cond-row.off { opacity: .45; }
+  @media (max-width: 600px) { .cond-row { grid-template-columns: 1fr; } }
+  .rec-pick { display: flex; flex-wrap: wrap; gap: .5rem .8rem; align-items: center; margin: .3rem 0 .6rem; }
+  .rec-pick .lab { font-weight: 700; font-size: .9rem; min-width: 3.6rem; }
+  .rec-pick .seg button { padding: .3rem .55rem; font-size: .8rem; }
+  .rec-name { font-family: var(--mono); font-weight: 700; color: var(--gold); }
+  table.tbl tr.pick td { background: var(--gold-soft) !important; }
+  table.tbl tr.clk { cursor: pointer; }
+  .judge { display: grid; gap: .5rem; }
+  .judge .item { border: 1px solid var(--border); border-radius: 8px; padding: .55rem .8rem; background: var(--bg); display: flex; flex-wrap: wrap; gap: .4rem .8rem; align-items: center; justify-content: space-between; }
+  .judge .item p { margin: 0; flex: 1 1 260px; font-size: .92rem; }
+  .judge .item .fb { flex-basis: 100%; font-size: .85rem; color: var(--ink-soft); display: none; }
+  .judge .item.done .fb { display: block; }
+  .judge .item.ok { border-color: var(--ok); background: var(--ok-soft); }
+  .judge .item.no { border-color: var(--bad); background: var(--bad-soft); }
+  .plot-cap { text-align: center; font-size: .85rem; color: var(--ink-soft); margin-top: .3rem; }
+</style>
+</head>
+<body>
+<div id="readbar"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="logo rg">R</span><span>重新設計社會科學研究<small>Ragin (2008) 互動教材</small></span></a>
+    <nav class="topnav">
+      <a href="index.html">本書首頁</a>
+      <a href="ch0.html">導讀</a>
+      <a href="ch1.html">第一篇</a>
+      <a href="ch4.html">第二篇</a>
+      <a href="ch6.html">第三篇</a>
+      <a href="ch8.html">第四篇</a>
+      <a href="../index.html">QCA with R ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="chapter-head">
+  <div class="part">第三篇　條件組態與「自」變數</div>
+  <div class="eyebrow">CHAPTER 6</div>
+  <h1>組態思維</h1>
+  <div class="en">Thinking about Causal Configurations: Recipes, Intersections, and Their Assessment</div>
+  <div class="src">對應原書第 6 章（中譯本頁 75–85）</div>
+</div>
+
+<p class="lead">一道菜好不好吃，很少是「鹽放多少」單獨決定的：鹽、火候、食材新鮮度要<strong>湊在一起</strong>才成立；而少了其中任何一樣，整道菜就垮了。社會現象也常是這樣——Ragin 把這種「條件湊在一起才產生結果」的組合叫做<strong>前因配方（causal recipe）</strong>。本章要教你：如何用模糊集<strong>直接測量</strong>一個案例符合某個配方的程度，以及如何比較不同配方的解釋力。</p>
+
+<div class="objectives">
+  <div class="ct">🎯 讀完本章，你應該能夠……</div>
+  <ol>
+    <li>說明組態思維為何是案例導向研究的核心，以及它與「明確連結案例」的關係。</li>
+    <li>指出傳統迴歸用<strong>交互作用項</strong>處理條件組合時的三大困難。</li>
+    <li>用模糊集<strong>交集（取最小值）</strong>與<strong>否定（1 − x）</strong>，算出案例在某配方中的隸屬度，並找出「最弱環節」。</li>
+    <li>解釋為什麼條件越多的配方，隸屬分數只會越低，以及這對一致性與覆蓋度的影響。</li>
+    <li>比較兩個競爭配方的一致性與覆蓋度，判斷何時該選較簡單、何時該保留較完整的配方。</li>
+    <li>在 fsQCA 與 R 中計算配方隸屬度並評估其集合關係。</li>
+  </ol>
+</div>
+
+<nav class="toc">
+  <strong>本章目錄</strong>
+  <ol>
+    <li><a href="#s1">組態思維與案例導向研究</a></li>
+    <li><a href="#s2">組態與傳統定量分析</a></li>
+    <li><a href="#s3">評估案例在組態中的隸屬度</a></li>
+    <li><a href="#s4">比較前因配方</a></li>
+    <li><a href="#s5">實用附錄：如何評估前因配方（fsQCA／R）</a></li>
+    <li><a href="#s6">本章重點、名詞與自我測驗</a></li>
+  </ol>
+</nav>
+
+<!-- ================================================= -->
+<h2 id="s1">1. 組態思維與案例導向研究 <span class="en">· Configurational thinking and case-oriented research</span></h2>
+
+<p><strong>組態（configuration）</strong>指的是一組條件<em>同時</em>出現的特定組合。質性研究者特別習慣用組態來思考，因為他們重視<strong>情境</strong>，喜歡把一個社會現象當作一個整體來理解；他們想知道的往往不是「哪個因素影響最大」，而是「事情<strong>如何</strong>發生」。從配方的角度思考，就是把相關的條件看成一起推動事件發生的力量的<strong>交集</strong>。</p>
+
+<h3>例子：秘魯的反緊縮抗議</h3>
+<p>Ragin 用一個案例研究說明。假設一位研究者主張：1980 年代秘魯之所以爆發大規模抗議、反對國際貨幣基金組織（IMF）要求的緊縮計畫，是因為以下四個條件<strong>同時成立</strong>：</p>
+
+<div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th>代號</th><th>條件</th><th>性質</th></tr></thead>
+    <tbody>
+      <tr><td><strong>A</strong></td><td>IMF 緊縮措施很嚴厲（Austerity）</td><td>短期、事件性的條件</td></tr>
+      <tr><td><strong>S</strong></td><td>窮人高度集中在都市貧民窟（Slums）</td><td>長期、結構性的條件</td></tr>
+      <tr><td><strong>P</strong></td><td>民眾感受到政府官員腐敗（Perceived corruption）</td><td>認知、政治性的條件</td></tr>
+      <tr><td><strong>M</strong></td><td>近期有大量政治動員與抗爭的歷史（Mobilization）</td><td>歷史性的條件</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>這個解釋有典型的「配方」性格：它混合了長期條件與短期條件，四者在秘魯<strong>剛好湊齊</strong>，才共同解釋了抗議的爆發。</p>
+
+<div class="callout key">
+  <div class="ct">🔑 案例研究的論點幾乎都是「非對稱」的</div>
+  <p>秘魯的配方解釋的是<strong>「抗議為什麼發生」</strong>，不是「所有反緊縮抗議的完整解釋」，也不是「抗議為什麼沒發生」。其他國家的抗議很可能來自<strong>別的配方</strong>，所以就算很多抗議案例沒有秘魯的四條件組合，也<strong>推翻不了</strong>「秘魯配方是大規模抗議的<em>充分（但非必要）</em>組合」這個主張。反過來說，政府若只避開秘魯這個組合，也不保證就不會有抗議。</p>
+</div>
+
+<h3>從秘魯出發的兩條研究路線</h3>
+<p>研究者手上有秘魯這個案例之後，可以往兩個方向擴展，它們正好對應第 1 章的兩種集合論策略：</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>路線一：從「結果」選案例</h4>
+    <ul>
+      <li>找其他<strong>發生了</strong>反緊縮抗議的國家</li>
+      <li>問：它們是不是全都（或幾乎都）具備這四個條件？</li>
+      <li>集合關係：<strong>結果 ⊆ 配方</strong> → 檢驗<strong>必要性</strong></li>
+    </ul>
+    <p>這就是常被量化研究者批評的「依依變數選樣」——但在集合論邏輯下，它是正當的研究設計。</p>
+  </div>
+  <div class="new">
+    <h4>路線二：從「配方」選案例</h4>
+    <ul>
+      <li>找其他<strong>同樣湊齊</strong>四個條件的國家</li>
+      <li>問：它們是不是全都（或大多）爆發了抗議？</li>
+      <li>集合關係：<strong>配方 ⊆ 結果</strong> → 檢驗<strong>充分性</strong></li>
+    </ul>
+    <p>這裡的「自變數」不是單一變數，而是整個配方。</p>
+  </div>
+</div>
+
+<p>兩條路線可以並用。若兩種子集合關係<strong>同時成立</strong>，「秘魯配方的案例」和「抗議案例」兩個集合就會<strong>重合</strong>。這看起來很像相關分析，但請回想第 1 章：相關要高，還需要大量「既沒有配方、也沒有抗議」的（0, 0）案例；而上面兩條路線都<strong>不直接依賴</strong>這類案例。</p>
+
+<div class="callout tip">
+  <div class="ct">📌 組態思維最重要的特徵：直接連回案例</div>
+  <p>「某個條件組合產生某結果」的論點，<strong>指向具體的案例</strong>以及這些案例的<strong>具體特徵</strong>。因果關係最終只能在案例層次觀察到；一個配方會清楚告訴你：到案例裡該去看什麼、該去追哪一段因果過程與機制。也因此，配方本身必須<strong>內在一致、說得通</strong>——它要像一道合理的食譜，而不是一串隨意湊合的材料。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s2">2. 組態與傳統定量分析 <span class="en">· Configurations and conventional quantitative analysis</span></h2>
+
+<p>傳統定量研究把每個自變數看成<strong>各自獨立</strong>影響依變數的原因。多數應用假設效果是<strong>線性且可加（linear and additive）</strong>的：不論其他變數取什麼值、怎麼組合，某個自變數的效果都一樣。這就是<strong>淨效應（net effect）</strong>的意思。</p>
+
+<p>要估計淨效應，迴歸會把每個變數與其他變數「共同解釋」的那部分變異扣掉，只留下它<strong>不重疊</strong>的貢獻。重疊多少取決於自變數之間的相關：<strong>某變數與其他競爭變數越相關，它的淨效應就越小</strong>。換句話說，在這個框架下，自變數彼此是在<strong>搶</strong>解釋力。</p>
+
+<h3>標準建議：加交互作用項</h3>
+<p>如果理論說「條件要組合在一起才有用」，教科書的標準建議是加入<strong>交互作用項（interaction term）</strong>，例如 A×P，再檢定它是否顯著增加解釋力。交互作用的意思是：緊縮（A）對抗議的影響大小，<strong>取決於</strong>腐敗感知（P）的程度——也許腐敗讓緊縮的社會後果更具爆炸性。</p>
+
+<p>問題是，為「線性可加模型」設計的估計技術，拿來估計複雜交互作用時往往捉襟見肘：</p>
+
+<ol>
+  <li><strong>資料需求暴增</strong>：要估秘魯那種四個條件的四階交互作用，模型需要的項數與案例數會急遽膨脹（見下方互動）。</li>
+  <li><strong>變數缺乏有意義的零點</strong>：乘積項 A×P 的意義會隨變數的量尺原點改變（例如把變數平移、中心化後，主效應的係數就整個變了），解讀爭議很多（Allison, 1977）。</li>
+  <li><strong>難以表達「多個配方」</strong>：專門估計淨效應的工具，本來就不擅長評估配方；若結果有好幾條不同的配方路徑，更是難上加難。</li>
+</ol>
+
+<div class="widget" id="w-explode">
+  <div class="widget-head"><span class="wtag">互動</span> 交互作用項爆炸 vs. 一個交集就搞定</div>
+  <div class="widget-body">
+    <p style="margin-top:0">拖動滑桿改變條件數 k。左邊是「完全交互作用迴歸模型」需要估計的項；右邊是集合論做法需要的東西。</p>
+    <div class="slider-row"><span class="sl-label">k</span><input type="range" min="2" max="8" value="4" data-k><output data-kout>4</output><span>個條件</span></div>
+    <div class="wgrid">
+      <div>
+        <div class="table-wrap" style="margin:.6rem 0">
+          <table class="tbl center">
+            <thead><tr><th>項的階數</th><th>例子</th><th>項數</th></tr></thead>
+            <tbody data-terms></tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <div class="stats">
+          <div class="stat"><div class="k">迴歸要同時估計的係數（不含截距）</div><div class="v bad" data-nterm>—</div></div>
+          <div class="stat"><div class="k">粗略需要的案例數（每係數約 10 案例）</div><div class="v" data-nobs>—</div></div>
+          <div class="stat"><div class="k">集合論：測量一個配方需要</div><div class="v ok">1 欄 min()</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="result-box" data-kres></div>
+  </div>
+</div>
+
+<div class="callout key">
+  <div class="ct">🔑 組態思維的挑戰：條件是「合作者」，不是「對手」</div>
+  <p>關鍵問題不再是「哪個變數最強（淨效應最大）」，而是：<strong>條件如何組合？</strong>產生同一結果的組合是<strong>只有一個</strong>，還是<strong>有好幾個</strong>？一旦找出這些組合，就能說清楚某個條件在什麼<strong>情境</strong>下才有作用。例如研究者可能發現：嚴厲緊縮與腐敗感知的組合，<em>只有</em>在有政治抗爭歷史的國家才會引爆大規模抗議——換句話說，當緊縮與腐敗湊在一起時，抗爭史是那根「引信」。</p>
+</div>
+
+<div class="widget" id="w-judge">
+  <div class="widget-head"><span class="wtag">練習</span> 這句話是「淨效應思維」還是「組態思維」？</div>
+  <div class="widget-body">
+    <p style="margin-top:0">逐句判斷，點下按鈕立即看解析。</p>
+    <div class="judge" data-list></div>
+    <div class="result-box" data-jscore>尚未作答。</div>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s3">3. 評估案例在組態中的隸屬度 <span class="en">· Assessing membership in configurations</span></h2>
+
+<p>Ragin 提出一個關鍵的轉念：與其在線性模型裡檢定交互作用，不如把組態問題當成<strong>測量問題</strong>——直接算出「這個配方在這個案例中被滿足到什麼程度」，也就是案例在配方上的<strong>隸屬度</strong>。模糊集正好適合做這件事。</p>
+
+<h3>交集 = 取最小值：「最弱環節」原則</h3>
+<p>在模糊集中，案例隸屬於一個條件組合的程度，等於它在各構成條件中的<strong>最低分</strong>。這就是「<strong>最弱環節（weakest link）</strong>」的觀點：一條鏈子的強度取決於最弱的那一環；一個案例符合配方的程度，也取決於它最不符合的那個條件。</p>
+
+<div class="formula">
+  <span class="flabel">案例 i 在秘魯四條件配方中的隸屬度（模糊集交集，邏輯 AND）</span>
+  R<sub>i</sub> = min( A<sub>i</sub>, S<sub>i</sub>, P<sub>i</sub>, M<sub>i</sub> )
+</div>
+
+<p>前提是：所有條件都已經用相同方式<strong>校準</strong>成 0（完全不隸屬）到 1（完全隸屬）的模糊集（見第 5 章）。公式要對<strong>每個案例分別</strong>計算。</p>
+
+<h3>否定 = 1 − 隸屬分數</h3>
+<p>配方裡也可能需要某條件「<strong>不存在</strong>」，例如「嚴厲緊縮 × <em>沒有</em>腐敗感知」。模糊集的<strong>否定（negation）</strong>很簡單：案例在「非 P」（記為 <code class="inline">~P</code>）中的隸屬度 = 1 − P。算好否定後再一起取最小值即可（第 2 章已介紹這些模糊代數）。</p>
+
+<div class="formula">
+  <span class="flabel">例：配方 A·~P 的隸屬度</span>
+  min( A<sub>i</sub>, 1 − P<sub>i</sub> )
+</div>
+
+<div class="callout info">
+  <div class="ct">✍️ 逐步算一次</div>
+  <p>某國：A = 0.90、S = 0.70、P = 0.40、M = 0.80。</p>
+  <p>① 四條件配方 A·S·P·M：min(0.90, 0.70, 0.40, 0.80) = <strong>0.40</strong>，最弱環節是 P（腐敗感知）。此國「比較不在」秘魯配方裡（低於 0.5 的交叉點）。</p>
+  <p>② 拿掉 P 的三條件配方 A·S·M：min(0.90, 0.70, 0.80) = <strong>0.70</strong>，最弱環節換成 S。</p>
+  <p>③ 配方 A·~P：~P = 1 − 0.40 = 0.60，min(0.90, 0.60) = <strong>0.60</strong>。</p>
+</div>
+
+<div class="widget" id="w-recipe">
+  <div class="widget-head"><span class="wtag">互動</span> 配方隸屬度計算器：找出最弱環節</div>
+  <div class="widget-body">
+    <p style="margin-top:0">調整一個案例在四個條件上的隸屬分數；每個條件可設為「存在」（用 x）、「否定」（用 1 − x）或「不納入」配方。</p>
+    <div class="controls">
+      <div class="seg" data-preset>
+        <button data-v="peru" class="on">類似秘魯</button>
+        <button data-v="ex">上面的例子</button>
+        <button data-v="half">全部 0.5</button>
+      </div>
+    </div>
+    <div data-rows></div>
+    <div class="stats">
+      <div class="stat"><div class="k">目前配方</div><div class="v gold" data-rname style="font-size:1.05rem">—</div></div>
+      <div class="stat"><div class="k">配方隸屬度 = min(…)</div><div class="v" data-rval>—</div></div>
+      <div class="stat"><div class="k">對照：若改用乘積</div><div class="v bad" data-prod>—</div></div>
+    </div>
+    <div class="result-box" data-rout></div>
+  </div>
+</div>
+
+<details class="think">
+  <summary>想一想：為什麼不用「平均」或「乘積」來代表配方隸屬度？</summary>
+  <div class="ans">
+    <p><strong>平均</strong>允許「互相補償」：緊縮很嚴厲（1.0）可以抵銷完全沒有腐敗感知（0.0），平均 0.5——但配方的意思是<em>缺一不可</em>，缺了 P 這個配方就不成立，補償違反配方邏輯。</p>
+    <p><strong>乘積</strong>不允許補償，但它會隨條件數<strong>機械式縮水</strong>：四個條件都是 0.8 的案例，乘積只剩 0.41，好像它「不太在」配方裡；用最小值則是 0.8，忠實反映「每個條件都相當程度地成立」。這也是迴歸交互作用項（乘積）與集合交集在精神上的根本差異。</p>
+  </div>
+</details>
+
+<p>算出每個國家在秘魯配方中的隸屬度後，就能拿它與結果（在「大規模反 IMF 抗議」集合中的隸屬度）比較。如果秘魯配方是<strong>好幾條路之一</strong>（充分但非必要），那麼符合配方的案例應該是抗議案例的<strong>子集合</strong>：在以抗議為 Y 軸、配方為 X 軸的 XY 圖上，點應該集中在<strong>對角線上方的左上三角形</strong>。</p>
+
+<!-- ================================================= -->
+<h2 id="s4">4. 比較前因配方 <span class="en">· Comparing causal recipes</span></h2>
+
+<p>用模糊集處理配方非常靈活：要提出並比較<strong>競爭的配方</strong>，或比較簡單與複雜的組合，都只是多算幾欄最小值的事。例如另一位研究者認為腐敗感知（P）並非必需，主張較簡單的三條件配方：</p>
+
+<div class="formula">
+  <span class="flabel">去掉 P 的三條件配方</span>
+  R<sub>i</sub> = min( A<sub>i</sub>, S<sub>i</sub>, M<sub>i</sub> )
+</div>
+
+<h3>一個必然成立的數學性質</h3>
+<p>三條件配方是四條件配方的簡化，所以是<strong>更具包容性</strong>的組合。因為多取一個條件的最小值只可能讓分數<strong>持平或變低</strong>，<strong>每個案例在四條件配方中的隸屬度一定 ≤ 在三條件配方中的隸屬度</strong>。從集合論來看：往交集裡多加一個集合，產生的是原交集的<strong>子集合</strong>。</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>條件越多（越複雜）</h4>
+    <ul>
+      <li>隸屬分數越低（X 變小）</li>
+      <li>點往左移 → 較容易落在對角線上方</li>
+      <li><strong>一致性通常 ↑</strong></li>
+      <li><strong>覆蓋度必然 ↓（或持平）</strong></li>
+    </ul>
+  </div>
+  <div class="new">
+    <h4>條件越少（越簡單）</h4>
+    <ul>
+      <li>隸屬分數越高（X 變大）</li>
+      <li>點往右移 → 較可能跑到對角線下方</li>
+      <li><strong>一致性通常 ↓</strong></li>
+      <li><strong>覆蓋度必然 ↑（或持平）</strong></li>
+    </ul>
+  </div>
+</div>
+
+<p>這就是第 3 章所說的一致性與覆蓋度之間的<strong>此消彼長</strong>。覆蓋度的方向是數學上必然的（分子 Σmin(X,Y) 會隨 X 變小而不增，分母 ΣY 不變）；一致性的方向則只是「通常如此」——Ragin 在註腳中指出，可以造出簡單配方一致性反而較高的資料，只是實際上很少見。</p>
+
+<h3>六步驟比較法</h3>
+<div class="steps">
+  <div class="step"><div><h4>測量每個案例在四條件配方中的隸屬度</h4><p>min(A, S, P, M)</p></div></div>
+  <div class="step"><div><h4>測量每個案例在三條件配方中的隸屬度</h4><p>min(A, S, M)</p></div></div>
+  <div class="step"><div><h4>測量每個案例在結果中的隸屬度</h4><p>大規模反 IMF 抗議（校準後的模糊集）</p></div></div>
+  <div class="step"><div><h4>評估四條件配方 ⊆ 結果的一致性；若一致，再看覆蓋度</h4><p>一致性 = Σmin(X,Y)/ΣX；覆蓋度 = Σmin(X,Y)/ΣY</p></div></div>
+  <div class="step"><div><h4>評估三條件配方 ⊆ 結果的一致性；若一致，再看覆蓋度</h4><p>同上公式，換成三條件配方的 X</p></div></div>
+  <div class="step"><div><h4>比較兩組結果</h4><p>一致性差多少？覆蓋度多多少？哪個在案例層次更說得通？</p></div></div>
+</div>
+
+<h3>原書的假想結果（圖 6-1、圖 6-2）</h3>
+<div class="table-wrap">
+  <table class="tbl center">
+    <thead><tr><th>配方</th><th>一致性</th><th>覆蓋度</th><th>Ragin 的解讀</th></tr></thead>
+    <tbody>
+      <tr><td>四條件 A·S·P·M（圖 6-1）</td><td>0.93</td><td>0.53</td><td style="text-align:left">大多數點在對角線上方，少數略低於對角線 → 配方近乎是結果的子集合（充分）；覆蓋了結果隸屬總和的一半以上</td></tr>
+      <tr><td>三條件 A·S·M（圖 6-2）</td><td>0.79</td><td>0.66</td><td style="text-align:left">更多點跑到對角線下方；拿掉 P 讓不一致大增。一致性已接近臨界，此時去解讀 0.66 的覆蓋度有風險</td></tr>
+      <tr><td>兩條件 A·P（假設）</td><td>0.90</td><td>0.71</td><td style="text-align:left">只犧牲一點一致性（0.93 → 0.90），覆蓋度卻大增（0.53 → 0.71）→ 可考慮採用更簡潔的配方</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="callout warn">
+  <div class="ct">⚠️ 先看一致性，再看覆蓋度</div>
+  <p>一致性回答「這個配方是不是結果的子集合」；只有在一致性夠高時，覆蓋度（「這個配方解釋了多少結果」）才有意義。一致性低的配方即使覆蓋度很漂亮，也只是「涵蓋很多案例，但不是穩定的充分路徑」。</p>
+</div>
+
+<h3>從一個完整配方延伸出 15 個版本</h3>
+<p>這套程序可以推廣：以四條件配方為起點，它所有非空的條件子集合共有 <strong>15</strong> 個——1 個四條件、4 個三條件、6 個兩條件、4 個單條件（2<sup>4</sup> − 1 = 15）。對每一個都算隸屬度、一致性與覆蓋度，就能系統地比較簡化版與完整版。原則是：</p>
+<div class="callout key">
+  <div class="ct">🔑 選擇配方的兩條原則</div>
+  <p><strong>① 簡單配方的一致性若跟複雜配方差不多，覆蓋度又明顯較大，就選簡單的。</strong>（例：A·P 的 0.90／0.71 勝過 A·S·P·M 的 0.93／0.53）</p>
+  <p><strong>② 但不要為簡約而簡約。</strong>如果四條件配方是 0.93／0.80、三條件是 0.91／0.81，差異微不足道。追求簡約的科學習慣會偏好三條件，但從組態角度看，四條件配方可能<strong>更完整地連結到觀察到的因果過程</strong>、更有助理解因果機制——分數相近時，有實質與理論依據的較複雜解釋可能更好。</p>
+</div>
+
+<p>下面的互動元件使用一份<strong>本教材自建的假想資料</strong>（19 個國家）。原書圖 6-1、圖 6-2 只畫出散佈圖、沒有提供數值表，因此我們參照兩張圖的點位排列，自行設定 A、S、P、M 的分數，使四條件與三條件配方的結果大致重現原書數字（四條件 0.93／0.53；三條件 0.79／0.67；A·P 0.90／0.71）。</p>
+
+<div class="widget" id="w-compare">
+  <div class="widget-head"><span class="wtag">互動</span> 配方比較實驗室：一致性、覆蓋度與 XY 圖</div>
+  <div class="widget-body">
+    <p style="margin-top:0">為「配方甲」「配方乙」各自設定每個條件：<strong>—</strong> 不納入、<strong>有</strong> 存在、<strong>非</strong> 否定（1 − x）。紅點代表落在對角線下方（X &gt; Y）的不一致案例。</p>
+    <div class="controls">
+      <div class="seg" data-cpreset>
+        <button data-v="book" class="on">原書：四條件 vs 三條件</button>
+        <button data-v="ap">四條件 vs A·P</button>
+        <button data-v="foot">註腳：A·S·P vs 四條件</button>
+        <button data-v="neg">試試否定：A·~P</button>
+      </div>
+    </div>
+    <div class="rec-pick" data-slot="0"><span class="lab">配方甲</span></div>
+    <div class="rec-pick" data-slot="1"><span class="lab">配方乙</span></div>
+    <div class="wgrid">
+      <div>
+        <svg class="plot" data-plot="0"></svg>
+        <div class="plot-cap" data-cap="0"></div>
+      </div>
+      <div>
+        <svg class="plot" data-plot="1"></svg>
+        <div class="plot-cap" data-cap="1"></div>
+      </div>
+    </div>
+    <div class="result-box" data-cout></div>
+    <details style="margin-top:.8rem">
+      <summary style="cursor:pointer;font-weight:600">看資料表：每個國家的條件分數與配方隸屬度</summary>
+      <div class="table-wrap">
+        <table class="tbl center" data-dtab>
+          <thead><tr><th>國家</th><th>A</th><th>S</th><th>P</th><th>M</th><th>抗議 Y</th><th>配方甲</th><th>配方乙</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p style="font-size:.85rem;color:var(--ink-soft)">橘底 = 該配方隸屬度大於結果（X &gt; Y），拉低一致性的案例。假想資料，國名以代號表示。</p>
+    </details>
+  </div>
+</div>
+
+<div class="widget" id="w-all15">
+  <div class="widget-head"><span class="wtag">互動</span> 一次看完 15 個配方版本</div>
+  <div class="widget-body">
+    <p style="margin-top:0">以 A·S·P·M 為起點的所有子配方（只用「存在」）。點標題可排序；點任一列會把它載入上方的「配方甲」。</p>
+    <div class="controls">
+      <div class="field"><label>一致性門檻（只看 ≥ 門檻者標綠）</label>
+        <select data-thr><option value="0.75">0.75</option><option value="0.8">0.80</option><option value="0.85" selected>0.85</option><option value="0.9">0.90</option></select>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl center" data-t15>
+        <thead><tr><th data-sort="n" style="cursor:pointer">條件數 ⇅</th><th>配方</th><th data-sort="cons" style="cursor:pointer">一致性 ⇅</th><th data-sort="cov" style="cursor:pointer">覆蓋度 ⇅</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="result-box" data-t15out></div>
+  </div>
+</div>
+
+<details class="think">
+  <summary>想一想：能不能對一致性做統計檢定？</summary>
+  <div class="ans">
+    <p>可以。一致性是一個<strong>比例</strong>，所以能套用比例的機率檢定。Ragin（2000）的做法是：計算前先設定<strong>基準一致性</strong>與 α 水準，再檢定觀察到的一致性是否顯著高於基準。</p>
+    <p>例如書中的問題：「有 50 個案例、α = 0.05，觀察到 0.93 是否顯著高於 0.75？」用常態近似：z = (0.93 − 0.75) / √(0.75 × 0.25 / 50) ≈ 2.94，單尾 p ≈ 0.002，答案是「是」。同樣的方法也能比較兩個一致性、或兩個覆蓋度。不過本章的重點是<strong>描述性</strong>地理解一致性與覆蓋度。</p>
+  </div>
+</details>
+
+<div class="callout tip">
+  <div class="ct">📌 最後的考驗永遠在案例裡</div>
+  <p>任何配方真正的試金石，是它能否和<strong>案例資訊產生共鳴</strong>。集合論分析很重要的一步就是<strong>回到案例</strong>：配方指出了該在哪些案例裡、找哪些特徵與因果過程。當研究的產出是「前因配方」而不是「自變數的淨效應」時，分析結果與實際案例之間的連結會強得多——這也讓「跨案例分析」與「案例內分析」能夠對話。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s5">5. 實用附錄：如何評估前因配方 <span class="en">· Practical appendix: assessing causal recipes</span></h2>
+
+<p>當你心中有一個特定配方，或想比較幾個配方的一致性與覆蓋度時，流程是：<strong>定義配方 → 把每個條件校準為模糊集（第 5 章）→ 用交集算出配方隸屬度 → 用 XY 圖與一致性／覆蓋度評估它與結果的集合關係</strong>。</p>
+
+<div class="sw-tabs">
+  <div class="seg">
+    <button data-tab="fs" class="on">fsQCA 軟體</button>
+    <button data-tab="r">R（QCA 套件）</button>
+  </div>
+  <div class="sw-pane on" data-pane="fs">
+    <div class="steps">
+      <div class="step"><div><h4>定義配方</h4><p>決定配方由哪些條件（成分）組成，例如四個條件 A、S、P、M。目標是評估每個案例符合這個特定組合的程度。</p></div></div>
+      <div class="step"><div><h4>把每個條件校準為模糊集</h4><p>必要時用第 5 章的直接校準法，把等距／比率尺度的原始變數轉成 0–1 的模糊集。</p></div></div>
+      <div class="step"><div><h4>開啟計算對話框</h4><p>匯入資料後，在資料試算表視窗點 <span class="menu-path">Variables → Compute</span>，出現 Compute Variable 對話框。為新變數命名：用 2–8 個英數字元、不要空格、破折號或標點，例如 <code class="inline">recipe1</code>。</p></div></div>
+      <div class="step"><div><h4>插入 fuzzyand()</h4><p>在函數清單中點 <code class="inline">fuzzyand(x,...,)</code>，再按 Functions 旁的向上箭頭，它就會出現在運算式欄位。fuzzyand 執行模糊集交集：對每個案例取括號內各集合的<strong>最小</strong>隸屬分數。</p></div></div>
+      <div class="step"><div><h4>編輯運算式後按 OK</h4><p>改成 <code class="inline">fuzzyand(A, S, P, M)</code>（用你資料檔中的模糊集變數名）。若某條件要取否定，可先用 <code class="inline">fuzzynot(P)</code> 另算一欄（或直接計算 1 − P），再放進 fuzzyand。</p></div></div>
+      <div class="step"><div><h4>檢查結果</h4><p>回到資料試算表確認新欄位是否如預期。點新欄位任一格，再用 <span class="menu-path">Cases → Sort Ascending / Descending</span> 排序，快速看看哪些案例最符合配方。</p></div></div>
+      <div class="step"><div><h4>畫 XY 圖</h4><p>點 <span class="menu-path">Graphs → Fuzzy → XY Plot</span>（新版為 <span class="menu-path">Graphs → XY Plot</span>）。Y 軸選結果的模糊集，X 軸選剛算出的配方隸屬度；可另指定 Case Id 變數，以辨識圖上的點是哪個案例。</p></div></div>
+      <div class="step"><div><h4>按 Plot 並解讀</h4><p>若預期配方是「充分但非必要」，點應落在主對角線上或上方。圖<strong>左上角</strong>方框的數字是子集合關係 X<sub>i</sub> ≤ Y<sub>i</sub> 的<strong>一致性</strong>；<strong>右下角</strong>方框的數字是配方對結果的<strong>覆蓋度</strong>。</p></div></div>
+    </div>
+  </div>
+  <div class="sw-pane" data-pane="r">
+    <p>以下用本章自建的假想資料（19 國）示範。<code class="inline">fuzzyand()</code>、<code class="inline">fuzzyor()</code> 是 QCA 套件提供的交集／聯集函數；<code class="inline">compute()</code> 可直接計算一個布林運算式（<code class="inline">*</code> = AND、<code class="inline">~</code> = 否定）；<code class="inline">pof()</code> 回報一致性（inclS）與覆蓋度（covS）。</p>
+<pre class="code"><span class="c-fn">library</span>(QCA)
+
+<span class="c-com"># 假想資料：A 緊縮、S 貧民窟、P 腐敗感知、M 動員史、Y 大規模抗議</span>
+dat <span class="c-kw">&lt;-</span> <span class="c-fn">data.frame</span>(
+  A = <span class="c-fn">c</span>(<span class="c-num">.92</span>,<span class="c-num">.85</span>,<span class="c-num">.51</span>,<span class="c-num">.95</span>,<span class="c-num">.62</span>,<span class="c-num">.94</span>,<span class="c-num">.85</span>,<span class="c-num">.81</span>,<span class="c-num">.97</span>,<span class="c-num">.80</span>,<span class="c-num">.57</span>,<span class="c-num">.15</span>,<span class="c-num">.62</span>,<span class="c-num">.02</span>,<span class="c-num">.12</span>,<span class="c-num">.07</span>,<span class="c-num">.60</span>,<span class="c-num">.74</span>,<span class="c-num">.55</span>),
+  S = <span class="c-fn">c</span>(<span class="c-num">.04</span>,<span class="c-num">.70</span>,<span class="c-num">.83</span>,<span class="c-num">.59</span>,<span class="c-num">.77</span>,<span class="c-num">.88</span>,<span class="c-num">.92</span>,<span class="c-num">.78</span>,<span class="c-num">.99</span>,<span class="c-num">.86</span>,<span class="c-num">.72</span>,<span class="c-num">.04</span>,<span class="c-num">.38</span>,<span class="c-num">.40</span>,<span class="c-num">.03</span>,<span class="c-num">.35</span>,<span class="c-num">.04</span>,<span class="c-num">.78</span>,<span class="c-num">.10</span>),
+  P = <span class="c-fn">c</span>(<span class="c-num">.70</span>,<span class="c-num">.90</span>,<span class="c-num">.49</span>,<span class="c-num">.86</span>,<span class="c-num">.95</span>,<span class="c-num">.93</span>,<span class="c-num">.13</span>,<span class="c-num">.87</span>,<span class="c-num">.22</span>,<span class="c-num">.84</span>,<span class="c-num">.49</span>,<span class="c-num">.55</span>,<span class="c-num">.07</span>,<span class="c-num">.01</span>,<span class="c-num">.62</span>,<span class="c-num">.70</span>,<span class="c-num">.02</span>,<span class="c-num">.05</span>,<span class="c-num">.42</span>),
+  M = <span class="c-fn">c</span>(<span class="c-num">.75</span>,<span class="c-num">.24</span>,<span class="c-num">.66</span>,<span class="c-num">.91</span>,<span class="c-num">.80</span>,<span class="c-num">.90</span>,<span class="c-num">.88</span>,<span class="c-num">.95</span>,<span class="c-num">.98</span>,<span class="c-num">.95</span>,<span class="c-num">.81</span>,<span class="c-num">.33</span>,<span class="c-num">.45</span>,<span class="c-num">.12</span>,<span class="c-num">.55</span>,<span class="c-num">.21</span>,<span class="c-num">.40</span>,<span class="c-num">.75</span>,<span class="c-num">.30</span>),
+  Y = <span class="c-fn">c</span>(<span class="c-num">.99</span>,<span class="c-num">.99</span>,<span class="c-num">.99</span>,<span class="c-num">.97</span>,<span class="c-num">.97</span>,<span class="c-num">.99</span>,<span class="c-num">.88</span>,<span class="c-num">.88</span>,<span class="c-num">.75</span>,<span class="c-num">.59</span>,<span class="c-num">.36</span>,<span class="c-num">.15</span>,<span class="c-num">.09</span>,<span class="c-num">.02</span>,<span class="c-num">.02</span>,<span class="c-num">.02</span>,<span class="c-num">.02</span>,<span class="c-num">.03</span>,<span class="c-num">.12</span>),
+  row.names = <span class="c-fn">sprintf</span>(<span class="c-str">"C%02d"</span>, <span class="c-num">1</span>:<span class="c-num">19</span>)
+)
+
+<span class="c-com"># 1. 交集（最小值）：三種等價寫法</span>
+dat$R4 <span class="c-kw">&lt;-</span> <span class="c-fn">fuzzyand</span>(dat$A, dat$S, dat$P, dat$M)
+dat$R4 <span class="c-kw">&lt;-</span> <span class="c-fn">pmin</span>(dat$A, dat$S, dat$P, dat$M)       <span class="c-com"># base R</span>
+dat$R4 <span class="c-kw">&lt;-</span> <span class="c-fn">compute</span>(<span class="c-str">"A*S*P*M"</span>, data = dat)
+dat$R3 <span class="c-kw">&lt;-</span> <span class="c-fn">compute</span>(<span class="c-str">"A*S*M"</span>, data = dat)
+
+<span class="c-com"># 2. 否定 = 1 - x</span>
+dat$AnP <span class="c-kw">&lt;-</span> <span class="c-fn">fuzzyand</span>(dat$A, <span class="c-num">1</span> - dat$P)            <span class="c-com"># 等同 compute("A*~P", data = dat)</span>
+
+<span class="c-com"># 3. 最弱環節：每個案例是被哪個條件「卡住」？</span>
+<span class="c-fn">colnames</span>(dat[, <span class="c-fn">c</span>(<span class="c-str">"A"</span>,<span class="c-str">"S"</span>,<span class="c-str">"P"</span>,<span class="c-str">"M"</span>)])[<span class="c-fn">apply</span>(dat[, <span class="c-fn">c</span>(<span class="c-str">"A"</span>,<span class="c-str">"S"</span>,<span class="c-str">"P"</span>,<span class="c-str">"M"</span>)], <span class="c-num">1</span>, which.min)]
+
+<span class="c-com"># 4. 一致性與覆蓋度（充分性）</span>
+<span class="c-fn">pof</span>(<span class="c-str">"A*S*P*M"</span>, outcome = <span class="c-str">"Y"</span>, data = dat, relation = <span class="c-str">"sufficiency"</span>)  <span class="c-com"># inclS ≈ 0.93, covS ≈ 0.53</span>
+<span class="c-fn">pof</span>(<span class="c-str">"A*S*M"</span>,   outcome = <span class="c-str">"Y"</span>, data = dat, relation = <span class="c-str">"sufficiency"</span>)  <span class="c-com"># inclS ≈ 0.79, covS ≈ 0.67</span>
+<span class="c-fn">pof</span>(<span class="c-str">"A*P"</span>,     outcome = <span class="c-str">"Y"</span>, data = dat, relation = <span class="c-str">"sufficiency"</span>)  <span class="c-com"># inclS ≈ 0.90, covS ≈ 0.71</span>
+
+<span class="c-com"># 5. XY 圖（X = 配方隸屬度、Y = 結果）</span>
+<span class="c-fn">XYplot</span>(dat$R4, dat$Y, xlab = <span class="c-str">"Recipe A*S*P*M"</span>, ylab = <span class="c-str">"Protest"</span>)
+
+<span class="c-com"># 6. 一次評估 15 個子配方</span>
+conds <span class="c-kw">&lt;-</span> <span class="c-fn">c</span>(<span class="c-str">"A"</span>, <span class="c-str">"S"</span>, <span class="c-str">"P"</span>, <span class="c-str">"M"</span>)
+recipes <span class="c-kw">&lt;-</span> <span class="c-fn">unlist</span>(<span class="c-fn">lapply</span>(<span class="c-num">4</span>:<span class="c-num">1</span>, <span class="c-kw">function</span>(k)
+  <span class="c-fn">apply</span>(<span class="c-fn">combn</span>(conds, k), <span class="c-num">2</span>, paste, collapse = <span class="c-str">"*"</span>)))
+res <span class="c-kw">&lt;-</span> <span class="c-fn">t</span>(<span class="c-fn">sapply</span>(recipes, <span class="c-kw">function</span>(r) {
+  x <span class="c-kw">&lt;-</span> <span class="c-fn">compute</span>(r, data = dat)
+  <span class="c-fn">c</span>(cons = <span class="c-fn">sum</span>(<span class="c-fn">pmin</span>(x, dat$Y)) / <span class="c-fn">sum</span>(x),
+    cov  = <span class="c-fn">sum</span>(<span class="c-fn">pmin</span>(x, dat$Y)) / <span class="c-fn">sum</span>(dat$Y))
+}))
+<span class="c-fn">round</span>(res, <span class="c-num">3</span>)</pre>
+    <p>小提醒：<code class="inline">pof()</code> 的輸出除了 inclS（一致性）與 covS（覆蓋度），還有 PRI，這會在第 7 章談真值表時用到。想看主教材更完整的 R 操作，可參考〈<a href="../chapters/ch4.html">Ch.4</a>〉、〈<a href="../chapters/ch5.html">Ch.5</a>〉。</p>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s6">6. 本章重點、名詞與自我測驗 <span class="en">· Review</span></h2>
+
+<ol class="takeaways">
+  <li><strong>組態思維</strong>把條件看成一起產生結果的「配方」，而不是各自獨立的力量；它直接指向具體案例與因果機制，是案例導向研究的核心。</li>
+  <li>案例研究的配方論點通常是<strong>非對稱</strong>的：解釋「為何發生」，不保證「沒有這個配方就不會發生」。從結果選案例 → 檢驗必要性；從配方選案例 → 檢驗充分性。</li>
+  <li>傳統迴歸假設<strong>線性可加的淨效應</strong>，自變數之間互相「搶」解釋力；用交互作用項處理配方有三個困難：資料需求暴增、缺乏有意義的零點、難以處理多條配方路徑。</li>
+  <li>Ragin 的替代方案：把組態當成<strong>測量</strong>問題。案例在配方中的隸屬度 = 各條件隸屬分數的<strong>最小值</strong>（最弱環節）；需要「不存在」的條件先取<strong>否定 1 − x</strong>。</li>
+  <li>條件越多的配方，隸屬分數只會<strong>持平或變低</strong>（是較簡單配方的子集合）→ 一致性通常較高、覆蓋度必然較低。</li>
+  <li>比較配方：簡單配方一致性相差不大、覆蓋度明顯較高 → 選簡單的；但分數差不多時，<strong>更能連結案例因果過程</strong>的複雜配方可能更好。</li>
+  <li>最後的試金石永遠是：配方能否與<strong>案例</strong>產生共鳴。</li>
+</ol>
+
+<h3>名詞對照</h3>
+<div class="table-wrap">
+  <table class="tbl gloss">
+    <thead><tr><th>本教材用語</th><th>簡中譯本</th><th>英文</th><th>白話說明</th></tr></thead>
+    <tbody>
+      <tr><td>組態</td><td>组态</td><td>configuration</td><td>一組條件同時出現的特定組合</td></tr>
+      <tr><td>組態思維</td><td>组态思维</td><td>configurational thinking</td><td>從「條件如何組合」而非「哪個變數最強」來思考因果</td></tr>
+      <tr><td>前因配方</td><td>前因配方</td><td>causal recipe</td><td>湊在一起才足以產生結果的條件組合</td></tr>
+      <tr><td>模糊集交集</td><td>模糊集交集</td><td>fuzzy-set intersection (logical AND)</td><td>對各條件取最小值</td></tr>
+      <tr><td>最弱環節</td><td>最弱链</td><td>weakest link</td><td>案例在配方中的隸屬度取決於它最不符合的條件</td></tr>
+      <tr><td>否定</td><td>否定／非</td><td>negation</td><td>~X 的隸屬度 = 1 − X</td></tr>
+      <tr><td>淨效應</td><td>净效应</td><td>net effect</td><td>扣除與其他變數重疊部分後，單一變數的獨立效果</td></tr>
+      <tr><td>線性可加</td><td>线性可加</td><td>linear and additive</td><td>每個變數的效果固定、不受其他變數影響，可以直接相加</td></tr>
+      <tr><td>交互作用項</td><td>交互项</td><td>interaction term</td><td>迴歸中變數相乘的項，用來表示「效果取決於另一變數」</td></tr>
+      <tr><td>一致性</td><td>一致性</td><td>consistency</td><td>配方作為結果子集合的程度：Σmin(X,Y)/ΣX</td></tr>
+      <tr><td>覆蓋度</td><td>覆盖度</td><td>coverage</td><td>配方解釋了多少結果：Σmin(X,Y)/ΣY</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>自我測驗</h3>
+<p class="quiz-score" data-quiz-score></p>
+
+<div class="quiz" data-answer="2">
+  <p class="q">某案例：A = 0.8、S = 0.6、P = 0.9、M = 0.3。它在配方 A·S·P·M 中的隸屬度是？</p>
+  <div class="opts">
+    <button class="opt">0.65（平均）</button>
+    <button class="opt">0.13（乘積）</button>
+    <button class="opt">0.3</button>
+    <button class="opt">0.9</button>
+  </div>
+  <div class="explain">模糊集交集取最小值：min(0.8, 0.6, 0.9, 0.3) = 0.3。最弱環節是 M（動員史）。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">同一個案例（A = 0.8、P = 0.9），它在配方 A·~P 中的隸屬度是？</p>
+  <div class="opts">
+    <button class="opt">0.1</button>
+    <button class="opt">0.8</button>
+    <button class="opt">0.9</button>
+    <button class="opt">0.2</button>
+  </div>
+  <div class="explain">~P = 1 − 0.9 = 0.1；min(0.8, 0.1) = 0.1。這個案例腐敗感知很高，因此幾乎不屬於「緊縮但沒有腐敗感知」的配方。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">把配方從 A·S·M 擴充為 A·S·P·M（多加一個條件），下列何者<strong>必然</strong>成立？</p>
+  <div class="opts">
+    <button class="opt">一致性一定上升</button>
+    <button class="opt">每個案例的隸屬度一定上升</button>
+    <button class="opt">覆蓋度一定上升</button>
+    <button class="opt">每個案例的隸屬度一定不會上升，覆蓋度也不會上升</button>
+  </div>
+  <div class="explain">多取一個最小值只會讓分數持平或下降，所以四條件配方是三條件配方的子集合，覆蓋度也只會持平或下降。一致性「通常」上升，但不是必然（原書註腳指出例外存在，本章假想資料中 A·S·P 的一致性就略高於 A·S·P·M）。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">研究者從秘魯案例出發，去找其他<strong>發生了</strong>反緊縮抗議的國家，檢查它們是否都具備四個條件。這是在檢驗什麼？</p>
+  <div class="opts">
+    <button class="opt">配方是否為結果的充分條件</button>
+    <button class="opt">配方是否為結果的必要條件（結果 ⊆ 配方）</button>
+    <button class="opt">配方與結果的相關係數</button>
+    <button class="opt">配方的覆蓋度</button>
+  </div>
+  <div class="explain">從結果選案例、看它們是否共享條件，是在檢驗「結果 ⊆ 配方」，也就是必要性。從配方選案例、看結果是否都出現，才是檢驗充分性。</div>
+</div>
+
+<div class="quiz" data-answer="2">
+  <p class="q">下列哪一項<strong>不是</strong> Ragin 指出用交互作用項處理配方的困難？</p>
+  <div class="opts">
+    <button class="opt">高階交互作用需要大量資料</button>
+    <button class="opt">變數缺乏有意義的零點，使乘積項解讀困難</button>
+    <button class="opt">交互作用項無法用電腦計算</button>
+    <button class="opt">專為淨效應設計的技術，不擅長評估（多個）配方</button>
+  </div>
+  <div class="explain">交互作用項當然算得出來；問題在於資料需求、零點的意義以及估計淨效應的工具本質上不適合評估配方，尤其是多條配方並存時。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">四條件配方：一致性 0.93、覆蓋度 0.53；兩條件配方 A·P：一致性 0.90、覆蓋度 0.71。依 Ragin 的原則，較合理的判斷是？</p>
+  <div class="opts">
+    <button class="opt">一定選四條件，因為一致性最高</button>
+    <button class="opt">可考慮選 A·P：一致性只犧牲一點，覆蓋度明顯提高</button>
+    <button class="opt">兩者都不行，因為一致性都不是 1</button>
+    <button class="opt">選覆蓋度最高的單條件配方</button>
+  </div>
+  <div class="explain">簡單配方的一致性與複雜配方相差不大、覆蓋度又明顯較大時，簡單配方較合適。但仍要回到案例檢查它是否說得通。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">四條件配方 0.93／0.80，三條件配方 0.91／0.81。Ragin 的看法是？</p>
+  <div class="opts">
+    <button class="opt">一定選三條件，因為越簡約越科學</button>
+    <button class="opt">一定選四條件，因為一致性較高</button>
+    <button class="opt">必須先做顯著性檢定才能決定</button>
+    <button class="opt">差異微不足道；若四條件配方更能連結觀察到的因果過程，它可能是更好的選擇</button>
+  </div>
+  <div class="explain">要避免為簡約而簡約。分數大致相同時，從組態角度看更完整、更能與案例因果過程對應的複雜配方可能更優。</div>
+</div>
+
+<p><button class="btn ghost" data-quiz-reset type="button">重新作答</button></p>
+
+<div class="done-box" data-ch="6">
+  <span class="msg"></span>
+  <button class="btn" type="button">標記本章為已讀</button>
+</div>
+
+<nav class="chap-nav">
+  <a class="prev" href="ch5.html"><div class="dir">← 上一章</div><div class="ttl">第 5 章 校準模糊集</div></a>
+  <a class="next" href="ch7.html"><div class="dir">下一章 →</div><div class="ttl">第 7 章 使用模糊集與真值表進行組態分析</div></a>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Charles C. Ragin, <em>Redesigning Social Inquiry: Fuzzy Sets and Beyond</em> (University of Chicago Press, 2008)<br>
+  以學習為目的之概念整理與重新詮釋，非原書譯文 · <a href="index.html">回本書首頁</a></p>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="js/ragin.js"></script>
+<script>
+/* ---------- 共用：假想資料（本教材自建，仿圖 6-1、6-2） ---------- */
+const CH6 = (function () {
+  const C = ['A', 'S', 'P', 'M'];
+  const CN = { A: '嚴厲緊縮', S: '貧民窟集中', P: '腐敗感知', M: '動員史' };
+  // [A, S, P, M, Y]
+  const D = [
+    [.92, .04, .70, .75, .99], [.85, .70, .90, .24, .99], [.51, .83, .49, .66, .99], [.95, .59, .86, .91, .97],
+    [.62, .77, .95, .80, .97], [.94, .88, .93, .90, .99], [.85, .92, .13, .88, .88], [.81, .78, .87, .95, .88],
+    [.97, .99, .22, .98, .75], [.80, .86, .84, .95, .59], [.57, .72, .49, .81, .36], [.15, .04, .55, .33, .15],
+    [.62, .38, .07, .45, .09], [.02, .40, .01, .12, .02], [.12, .03, .62, .55, .02], [.07, .35, .70, .21, .02],
+    [.60, .04, .02, .40, .02], [.74, .78, .05, .75, .03], [.55, .10, .42, .30, .12],
+  ];
+  const ids = D.map((_, i) => 'C' + String(i + 1).padStart(2, '0'));
+  const Y = D.map((r) => r[4]);
+  // rec: [狀態 x4]，0 = 不納入、1 = 存在、-1 = 否定
+  function memb(rec) {
+    if (!rec.some((s) => s)) return null;
+    return D.map((r) => Math.min(...rec.map((s, j) => s === 1 ? r[j] : s === -1 ? 1 - r[j] : Infinity)));
+  }
+  function name(rec) {
+    const p = rec.map((s, j) => s === 1 ? C[j] : s === -1 ? '~' + C[j] : '').filter(Boolean);
+    return p.length ? p.join('·') : '（空）';
+  }
+  return { C, CN, D, ids, Y, memb, name };
+})();
+
+/* ---------- 交互作用項爆炸 ---------- */
+(function () {
+  const root = document.getElementById('w-explode');
+  const k = root.querySelector('[data-k]');
+  const L = 'ASPMEGHJ';
+  const comb = (n, r) => { let v = 1; for (let i = 1; i <= r; i++) v = v * (n - r + i) / i; return Math.round(v); };
+  const orderName = ['', '主效應', '二階交互', '三階交互', '四階交互', '五階交互', '六階交互', '七階交互', '八階交互'];
+  function run() {
+    const n = +k.value;
+    root.querySelector('[data-kout]').textContent = n;
+    let rows = '';
+    for (let j = 1; j <= n; j++) {
+      const ex = j === 1 ? L[0] : L.slice(0, j).split('').join('×');
+      rows += `<tr><td>${orderName[j]}</td><td>${ex}${comb(n, j) > 1 ? '…' : ''}</td><td>${comb(n, j)}</td></tr>`;
+    }
+    root.querySelector('[data-terms]').innerHTML = rows;
+    const tot = 2 ** n - 1;
+    root.querySelector('[data-nterm]').textContent = tot;
+    root.querySelector('[data-nobs]').textContent = '≈ ' + (tot * 10).toLocaleString();
+    root.querySelector('[data-kres]').innerHTML =
+      `完全交互作用模型：${n} 個主效應 + 各階交互項 = 2<sup>${n}</sup> − 1 = <span class="hl">${tot}</span> 個係數要同時估計。\n` +
+      `而且每個係數都是「在其他變數為 0 時」的條件效果——如果變數沒有有意義的零點，這些係數很難解讀。\n` +
+      `集合論做法：想知道案例符不符合 ${n} 條件配方，只要算 1 欄 min(${L.slice(0, n).split('').join(', ')})，再看它與結果的一致性與覆蓋度。` +
+      (n >= 4 ? `\n若結果有好幾條配方路徑，迴歸要靠多個高階交互項的係數「拼湊」出來；集合論則是每條配方各算一欄、分別評估。` : '');
+  }
+  k.addEventListener('input', run); run();
+})();
+
+/* ---------- 淨效應 vs 組態 判斷練習 ---------- */
+(function () {
+  const root = document.getElementById('w-judge');
+  const items = [
+    ['控制其他變數後，貧民窟集中程度每增加 1 單位，抗議強度平均增加 0.3。', 'net', '「控制其他變數」「每增加 1 單位」是典型的淨效應語言：假設這個效果在任何情境下都一樣。'],
+    ['嚴厲緊縮與腐敗感知同時出現時，只有在曾有抗爭動員史的國家才會爆發大規模抗議。', 'conf', '條件的作用取決於其他條件是否同時存在——這是在描述一個配方。'],
+    ['要知道哪個因素最重要，就比較標準化迴歸係數的大小。', 'net', '「哪個變數最強」正是淨效應思維的核心問題；組態思維問的是條件「如何組合」。'],
+    ['通往大規模抗議至少有兩條路：緊縮×腐敗，或貧民窟×動員史。', 'conf', '同一結果可由多個不同配方產生（等效性），這是組態思維的招牌主張。'],
+    ['腐敗感知與緊縮高度相關，所以腐敗的效果被「吃掉」了，看起來不顯著。', 'net', '淨效應扣掉與其他變數重疊的部分；越相關、淨效應越小——條件被當成彼此競爭的對手。'],
+    ['秘魯的四個條件缺一不可：某國若完全沒有腐敗感知，它就幾乎不屬於這個配方。', 'conf', '這就是交集（最小值）的「最弱環節」邏輯。'],
+    ['不論其他條件為何，緊縮措施對抗議的效果都一樣大。', 'net', '這正是線性可加模型的假設：一個變數的效果不受其他變數的值影響。'],
+    ['把各條件看成一起產生結果的夥伴，而不是爭奪解釋變異的對手。', 'conf', 'Ragin 對組態思維的核心描述：條件是合作者（collaborators），不是對手（rivals）。'],
+  ];
+  const list = root.querySelector('[data-list]'), sc = root.querySelector('[data-jscore]');
+  let done = 0, right = 0;
+  items.forEach(([txt, ans, why]) => {
+    const d = document.createElement('div');
+    d.className = 'item';
+    d.innerHTML = `<p>${txt}</p><div class="seg"><button type="button" data-v="net">淨效應思維</button><button type="button" data-v="conf">組態思維</button></div><div class="fb"></div>`;
+    d.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+      if (d.classList.contains('done')) return;
+      const ok = b.dataset.v === ans;
+      d.classList.add('done', ok ? 'ok' : 'no');
+      b.classList.add('on');
+      d.querySelector('.fb').textContent = (ok ? '✔ 正確：' : `✘ 應為「${ans === 'net' ? '淨效應思維' : '組態思維'}」：`) + why;
+      done++; if (ok) right++;
+      sc.textContent = `已判斷 ${done} / ${items.length} 句，答對 ${right} 句。` +
+        (done === items.length ? (right >= 7 ? '\n很好！你已經能分辨兩種思考因果的方式。' : '\n建議回頭重讀第 2 節「條件是合作者，不是對手」。') : '');
+    }));
+    list.appendChild(d);
+  });
+})();
+
+/* ---------- 配方隸屬度計算器 ---------- */
+(function () {
+  const root = document.getElementById('w-recipe');
+  const { C, CN } = CH6;
+  const presets = {
+    peru: { v: [.92, .85, .88, .80], s: [1, 1, 1, 1] },
+    ex: { v: [.90, .70, .40, .80], s: [1, 1, 1, 1] },
+    half: { v: [.5, .5, .5, .5], s: [1, 1, 1, 1] },
+  };
+  const st = { v: presets.peru.v.slice(), s: presets.peru.s.slice() };
+  const box = root.querySelector('[data-rows]');
+  const rows = C.map((c, j) => {
+    const r = document.createElement('div');
+    r.className = 'cond-row';
+    r.innerHTML = `<div class="cname">${c}　${CN[c]}<small>原始隸屬分數 ${c}</small></div>
+      <div class="slider-row"><input type="range" min="0" max="1" step="0.01"><output></output></div>
+      <div class="seg"><button type="button" data-s="1">存在</button><button type="button" data-s="-1">否定</button><button type="button" data-s="0">不納入</button></div>
+      <div class="eff"><span data-lab></span><div class="bar"><i></i></div><span data-val></span></div>`;
+    const sl = r.querySelector('input');
+    sl.addEventListener('input', () => { st.v[j] = +sl.value; clearPreset(); draw(); });
+    r.querySelectorAll('[data-s]').forEach((b) => b.addEventListener('click', () => { st.s[j] = +b.dataset.s; clearPreset(); draw(); }));
+    box.appendChild(r);
+    return r;
+  });
+  const pbtn = root.querySelectorAll('[data-preset] button');
+  function clearPreset() { pbtn.forEach((x) => x.classList.remove('on')); }
+  pbtn.forEach((b) => b.addEventListener('click', () => {
+    pbtn.forEach((x) => x.classList.toggle('on', x === b));
+    st.v = presets[b.dataset.v].v.slice(); st.s = presets[b.dataset.v].s.slice(); draw();
+  }));
+  const f = RG.fz.fmt;
+  function draw() {
+    const eff = st.v.map((v, j) => st.s[j] === 1 ? v : st.s[j] === -1 ? 1 - v : null);
+    const inc = eff.map((e, j) => e === null ? -1 : j).filter((j) => j >= 0);
+    const m = inc.length ? Math.min(...inc.map((j) => eff[j])) : NaN;
+    const weak = inc.filter((j) => Math.abs(eff[j] - m) < 1e-9);
+    rows.forEach((r, j) => {
+      r.querySelector('input').value = st.v[j];
+      r.querySelector('output').textContent = f(st.v[j]);
+      r.querySelectorAll('[data-s]').forEach((b) => b.classList.toggle('on', +b.dataset.s === st.s[j]));
+      r.classList.toggle('off', st.s[j] === 0);
+      r.classList.toggle('weak', inc.length > 0 && weak.includes(j));
+      const e = eff[j];
+      r.querySelector('[data-lab]').textContent = st.s[j] === 1 ? `${C[j]} =` : st.s[j] === -1 ? `~${C[j]} = 1 − ${f(st.v[j])} =` : '不納入';
+      r.querySelector('[data-val]').textContent = e === null ? '' : f(e);
+      r.querySelector('.bar > i').style.width = e === null ? '0%' : (e * 100) + '%';
+    });
+    const nm = st.s.map((s, j) => s === 1 ? C[j] : s === -1 ? '~' + C[j] : '').filter(Boolean).join('·');
+    root.querySelector('[data-rname]').textContent = nm || '（空）';
+    root.querySelector('[data-rval]').textContent = f(m);
+    const prod = inc.length ? inc.reduce((p, j) => p * eff[j], 1) : NaN;
+    root.querySelector('[data-prod]').textContent = f(prod);
+    const out = root.querySelector('[data-rout]');
+    if (!inc.length) { out.textContent = '配方裡至少要納入一個條件。'; return; }
+    const parts = inc.map((j) => (st.s[j] === -1 ? '~' : '') + C[j] + '=' + f(eff[j]));
+    let msg = `min(${parts.join(', ')}) = <span class="hl">${f(m)}</span>\n`;
+    msg += `最弱環節：${weak.map((j) => (st.s[j] === -1 ? '非' : '') + CN[C[j]]).join('、')}` + (weak.length > 1 ? '（並列）' : '') + '\n';
+    msg += m > .5 ? `此案例「比較在」配方 ${nm} 裡（> 0.5）。` : m < .5 ? `此案例「比較不在」配方 ${nm} 裡（< 0.5）——就算其他條件再高，也補不回最弱的那一環。` : '此案例正好在交叉點 0.5，最模糊、無法判定在內或在外。';
+    if (inc.length > 1) {
+      const others = inc.filter((j) => !weak.includes(j));
+      if (others.length) {
+        const second = Math.min(...others.map((j) => eff[j]));
+        msg += `\n提高非最弱的條件不會改變結果；把最弱環節提高到 ${f(second)} 以上，配方隸屬度才會升到 ${f(second)}。`;
+      }
+      msg += `\n若用乘積（迴歸交互項的做法）只剩 ${f(prod)}：條件越多，乘積會機械式縮水。`;
+    }
+    out.innerHTML = msg;
+  }
+  draw();
+})();
+
+/* ---------- 配方比較實驗室 + 15 個配方 ---------- */
+(function () {
+  const root = document.getElementById('w-compare');
+  const { C, ids, Y, memb, name, D } = CH6;
+  const fz = RG.fz, f = fz.fmt;
+  const presets = {
+    book: [[1, 1, 1, 1], [1, 1, 0, 1]],
+    ap: [[1, 1, 1, 1], [1, 0, 1, 0]],
+    foot: [[1, 1, 1, 0], [1, 1, 1, 1]],
+    neg: [[1, 0, 1, 0], [1, 0, -1, 0]],
+  };
+  const recs = [presets.book[0].slice(), presets.book[1].slice()];
+  const pbtn = root.querySelectorAll('[data-cpreset] button');
+  const slots = [...root.querySelectorAll('.rec-pick')];
+  slots.forEach((sl, k) => {
+    C.forEach((c, j) => {
+      const g = document.createElement('div');
+      g.className = 'seg';
+      g.innerHTML = `<button type="button" data-s="0">${c} —</button><button type="button" data-s="1">有</button><button type="button" data-s="-1">非</button>`;
+      g.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+        recs[k][j] = +b.dataset.s; pbtn.forEach((x) => x.classList.remove('on')); draw();
+      }));
+      sl.appendChild(g);
+    });
+  });
+  pbtn.forEach((b) => b.addEventListener('click', () => {
+    pbtn.forEach((x) => x.classList.toggle('on', x === b));
+    recs[0] = presets[b.dataset.v][0].slice(); recs[1] = presets[b.dataset.v][1].slice(); draw();
+  }));
+  // 乙 是否為 甲 的子集合（乙 包含甲 所有條件且同號）
+  const contains = (big, small) => small.every((s, j) => !s || big[j] === s);
+  const verdictCons = (c) => c >= .9 ? '高' : c >= .8 ? '尚可' : c >= .75 ? '接近臨界' : '偏低';
+  function draw() {
+    const res = recs.map((r) => {
+      const X = memb(r);
+      return X ? { X, cons: fz.consSuf(X, Y), cov: fz.covSuf(X, Y), nm: name(r), n: r.filter(Boolean).length } : null;
+    });
+    if (window.__ch6t15) window.__ch6t15(recs[0]);
+    slots.forEach((sl, k) => sl.querySelectorAll('.seg').forEach((g, j) =>
+      g.querySelectorAll('button').forEach((b) => b.classList.toggle('on', +b.dataset.s === recs[k][j]))));
+    res.forEach((r, k) => {
+      const svg = root.querySelector(`[data-plot="${k}"]`), cap = root.querySelector(`[data-cap="${k}"]`);
+      const lab = k ? '配方乙' : '配方甲';
+      if (!r) { RG.xy(svg, [], { xlab: lab, ylab: '大規模抗議 Y', shade: 'suf' }); cap.textContent = `${lab}：請至少選一個條件`; return; }
+      const pts = r.X.map((x, i) => ({ x, y: Y[i], label: ids[i], cls: x > Y[i] + 1e-9 ? 'off' : '' }));
+      RG.xy(svg, pts, { xlab: `${lab}：${r.nm}`, ylab: '大規模抗議 Y', shade: 'suf' });
+      cap.innerHTML = `<span class="rec-name">${r.nm}</span>　一致性 <strong>${f(r.cons)}</strong>　覆蓋度 <strong>${f(r.cov)}</strong>`;
+    });
+    // 資料表
+    const tb = root.querySelector('[data-dtab] tbody');
+    tb.innerHTML = D.map((d, i) => {
+      const c = res.map((r) => r ? `<td class="${r.X[i] > Y[i] + 1e-9 ? 'warnc' : ''}">${f(r.X[i])}</td>` : '<td>—</td>').join('');
+      return `<tr><td>${ids[i]}</td>${d.slice(0, 4).map((v) => `<td>${f(v)}</td>`).join('')}<td><strong>${f(d[4])}</strong></td>${c}</tr>`;
+    }).join('');
+    // 解讀
+    const out = root.querySelector('[data-cout]');
+    if (!res[0] || !res[1]) { out.textContent = '兩個配方都至少要選一個條件，才能比較。'; return; }
+    const [a, b] = res;
+    let msg = `配方甲 ${a.nm}：一致性 ${f(a.cons)}（${verdictCons(a.cons)}）、覆蓋度 ${f(a.cov)}\n`;
+    msg += `配方乙 ${b.nm}：一致性 ${f(b.cons)}（${verdictCons(b.cons)}）、覆蓋度 ${f(b.cov)}\n`;
+    const same = recs[0].every((s, j) => s === recs[1][j]);
+    if (same) { out.innerHTML = msg + '兩個配方相同，試著改掉其中一個條件。'; return; }
+    let simple = null, complex = null;
+    if (contains(recs[1], recs[0])) { simple = a; complex = b; }
+    else if (contains(recs[0], recs[1])) { simple = b; complex = a; }
+    if (simple) {
+      msg += `\n${complex.nm} 是 ${simple.nm} 的子集合：每個國家在前者的隸屬度都 ≤ 後者，所以覆蓋度 ${f(complex.cov)} ≤ ${f(simple.cov)}（必然）。`;
+      if (simple.cons > complex.cons + 1e-9) msg += `\n<span class="hl">注意：</span>較簡單的 ${simple.nm} 一致性反而較高——這正是原書註腳說的「可能但罕見」的情況。`;
+      const dc = complex.cons - simple.cons, dv = simple.cov - complex.cov;
+      if (simple.cons < .8) msg += `\n較簡單的 ${simple.nm} 一致性只有 ${f(simple.cons)}，已接近或低於臨界；拿掉條件讓不一致大增，此時解讀它的覆蓋度有風險 → 保留較完整的配方。`;
+      else if (dc <= .04 && dv >= .1) msg += `\n一致性只差 ${f(Math.max(dc, 0))}，覆蓋度卻多了 ${f(dv)} → 依 Ragin 的原則，可考慮採用較簡單的 <span class="hl">${simple.nm}</span>（仍需回到案例檢查）。`;
+      else if (dc <= .04 && dv < .1) msg += `\n兩者分數相差不大 → 不要為簡約而簡約；看哪一個在案例層次更能對應因果過程。`;
+      else msg += `\n簡化讓一致性下降 ${f(dc)}，代價不小 → 被拿掉的條件可能是配方中重要的一環。`;
+    } else {
+      msg += '\n兩個配方沒有子集合關係（是不同的路徑）。可比較它們各自是否夠一致；若都一致，它們可能是通往結果的兩條不同配方。';
+    }
+    const off = a.X.filter((x, i) => x > Y[i] + 1e-9).length, offb = b.X.filter((x, i) => x > Y[i] + 1e-9).length;
+    msg += `\n對角線下方（X > Y）的國家：甲 ${off} 個、乙 ${offb} 個（紅點）。`;
+    out.innerHTML = msg;
+  }
+
+  /* 15 個配方表 */
+  const t15 = root.parentNode.querySelector('#w-all15');
+  const tb15 = t15.querySelector('[data-t15] tbody'), thr = t15.querySelector('[data-thr]');
+  const all = [];
+  for (let mask = 1; mask < 16; mask++) {
+    const r = C.map((_, j) => (mask >> (3 - j)) & 1);
+    const X = memb(r);
+    all.push({ r, nm: name(r), n: r.filter(Boolean).length, cons: fz.consSuf(X, Y), cov: fz.covSuf(X, Y) });
+  }
+  let sortKey = 'n', desc = true, cur = null;
+  function draw15() {
+    const t = +thr.value;
+    const arr = all.slice().sort((p, q) => desc ? (q[sortKey] - p[sortKey]) || (q.cons - p.cons) : (p[sortKey] - q[sortKey]) || (q.cons - p.cons));
+    tb15.innerHTML = '';
+    arr.forEach((o) => {
+      const tr = document.createElement('tr');
+      tr.className = 'clk' + (cur && o.r.every((s, j) => s === cur[j]) ? ' pick' : '');
+      tr.innerHTML = `<td>${o.n}</td><td><strong>${o.nm}</strong></td><td class="${o.cons >= t ? 'hi' : 'lo'}">${f(o.cons, 3)}</td><td>${f(o.cov, 3)}</td>`;
+      tr.addEventListener('click', () => {
+        recs[0] = o.r.slice(); pbtn.forEach((x) => x.classList.remove('on')); draw();
+        root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      tb15.appendChild(tr);
+    });
+    const ok = all.filter((o) => o.cons >= t);
+    const best = ok.slice().sort((p, q) => q.cov - p.cov)[0];
+    t15.querySelector('[data-t15out]').innerHTML = ok.length
+      ? `一致性 ≥ ${f(t)} 的配方有 ${ok.length} 個：${ok.map((o) => o.nm).join('、')}\n其中覆蓋度最高的是 <span class="hl">${best.nm}</span>（一致性 ${f(best.cons)}、覆蓋度 ${f(best.cov)}）。\n` +
+        `單條件配方覆蓋度都很高，但一致性都不到 0.80——單一條件不足以構成穩定的充分路徑，正說明「配方」的必要。`
+      : `沒有任何配方的一致性達到 ${f(t)}。`;
+  }
+  window.__ch6t15 = (r) => { cur = r; draw15(); };
+  t15.querySelectorAll('[data-sort]').forEach((th) => th.addEventListener('click', () => {
+    if (sortKey === th.dataset.sort) desc = !desc; else { sortKey = th.dataset.sort; desc = true; }
+    draw15();
+  }));
+  thr.addEventListener('input', draw15);
+  draw();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 1 章 集合關係的基本概念 · 重新設計社會科學研究</title>
+<meta name="description" content="Ragin《重新設計社會科學研究》第 1 章互動教材：集合關係、非對稱性、必要與充分、真值表">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="css/ragin.css">
+</head>
+<body>
+<div id="readbar"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="logo rg">R</span><span>重新設計社會科學研究<small>Ragin (2008) 互動教材</small></span></a>
+    <nav class="topnav">
+      <a href="index.html">本書首頁</a>
+      <a href="ch0.html">導讀</a>
+      <a href="ch1.html">第一篇</a>
+      <a href="ch4.html">第二篇</a>
+      <a href="ch6.html">第三篇</a>
+      <a href="ch8.html">第四篇</a>
+      <a href="../index.html">QCA with R ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="chapter-head">
+  <div class="part">第一篇　集合關係與相關關係</div>
+  <div class="eyebrow">CHAPTER 1</div>
+  <h1>社會科學研究中的集合關係：基本概念</h1>
+  <div class="en">Set Relations in Social Research: Fundamental Principles</div>
+  <div class="src">對應原書第 1 章（中譯本頁 3–14）</div>
+</div>
+
+<p class="lead">「小農戶是風險規避的」「民主國家彼此不打仗」——社會科學的理論大多用文字表達，而這些文字背後其實是<strong>集合</strong>的語言。本章要帶你看見：這類主張應該用<strong>集合關係</strong>來檢驗，而不是被硬改寫成「兩個變數有沒有相關」。</p>
+
+<div class="objectives">
+  <div class="ct">🎯 讀完本章，你應該能夠……</div>
+  <ol>
+    <li>把一句文字理論改寫成「A 是 B 的子集合」的形式。</li>
+    <li>說明為什麼集合關係是<strong>非對稱</strong>的，而相關係數是<strong>對稱</strong>的。</li>
+    <li>分辨兩種案例導向的研究策略，並對應到<strong>必要條件</strong>與<strong>充分條件</strong>。</li>
+    <li>在 2×2 交叉表中，指出檢驗必要性、充分性時各自該看哪兩格。</li>
+    <li>讀懂一張清晰集真值表，並理解「只差一個條件」就能簡化的邏輯。</li>
+  </ol>
+</div>
+
+<nav class="toc">
+  <strong>本章目錄</strong>
+  <ol>
+    <li><a href="#s1">集合關係的本質</a></li>
+    <li><a href="#s2">集合關係是非對稱的</a></li>
+    <li><a href="#s3">兩種重要的集合關係：必要與充分</a></li>
+    <li><a href="#s4">相關方法為什麼會錯過關係</a></li>
+    <li><a href="#s5">QCA 與真值表</a></li>
+    <li><a href="#s6">實作：建構真值表（fsQCA／R）</a></li>
+    <li><a href="#s7">本章重點、名詞與自我測驗</a></li>
+  </ol>
+</nav>
+
+<!-- ================================================= -->
+<h2 id="s1">1. 集合關係的本質 <span class="en">· The nature of set relations</span></h2>
+
+<p>最基本的集合關係是<strong>子集合（subset）</strong>：如果 A 裡的每一個成員也都是 B 的成員，我們就說 A 是 B 的子集合，記作 <code class="inline">A ⊆ B</code>。</p>
+
+<p>有些子集合關係是「定義上」就成立的：狗一定是哺乳動物、新教徒一定是基督徒。這類關係不需要研究，查字典就知道。<strong>社會科學真正關心的是另一種</strong>：子集合關係背後反映了某種<em>因果</em>或<em>構成</em>上的連結，因此需要被<strong>解釋</strong>。</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>定義性的子集合</h4>
+    <ul>
+      <li>狗 ⊆ 哺乳動物</li>
+      <li>新教徒 ⊆ 基督徒 ⊆ 有神論者</li>
+    </ul>
+    <p>成立的理由是「定義如此」，不需要理論解釋。</p>
+  </div>
+  <div class="new">
+    <h4>需要解釋的子集合（本書焦點）</h4>
+    <ul>
+      <li>宗教基本教義派 ⊆ 政治保守派</li>
+      <li>已開發國家 ⊆ 擁有強大公民社會的國家</li>
+      <li>第三波民主化中採議會制的國家 ⊆ 民主化失敗的國家</li>
+    </ul>
+    <p>它是巧合，還是背後有因果機制？這需要<strong>理論與案例知識</strong>來詮釋。</p>
+  </div>
+</div>
+
+<div class="callout key">
+  <div class="ct">🔑 核心觀念：文字理論 = 集合陳述</div>
+  <p>當理論說「小農戶是風險規避者」，它的意思其實是：<strong>「小農戶」這個集合，被包含在「風險規避者」這個集合裡面</strong>。Ragin 主張：既然理論是用集合的語言講的，就應該用集合的方式去檢驗它，而不是先把它翻譯成「農地大小與風險態度有負相關」再丟進迴歸模型。</p>
+</div>
+
+<div class="widget" id="w-translate">
+  <div class="widget-head"><span class="wtag">互動</span> 練習：把文字理論翻譯成集合關係</div>
+  <div class="widget-body">
+    <p style="margin-top:0">選一句理論陳述，再選出它對應的集合關係。</p>
+    <div class="controls">
+      <div class="field"><label>理論陳述</label>
+        <select data-st style="min-width:280px">
+          <option value="0">小農戶是風險規避的</option>
+          <option value="1">民主國家之間不會彼此開戰</option>
+          <option value="2">每一場社會革命之前，都先出現國家崩潰</option>
+          <option value="3">要成為已開發國家，必須先有強大的公民社會</option>
+          <option value="4">厭食症少女幾乎都有非常挑剔的母親</option>
+        </select>
+      </div>
+      <div class="field"><label>你的答案</label>
+        <select data-ans style="min-width:280px">
+          <option value="">— 請選擇 —</option>
+          <option value="a">A：條件集合 ⊆ 結果集合（條件是結果的子集）</option>
+          <option value="b">B：結果集合 ⊆ 條件集合（結果是條件的子集）</option>
+        </select>
+      </div>
+    </div>
+    <div class="result-box" data-out>請先選擇答案。</div>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s2">2. 集合關係是非對稱的 <span class="en">· Set relations are asymmetric</span></h2>
+
+<p>集合關係與相關關係最大的差別在於<strong>對稱性</strong>。</p>
+
+<ul>
+  <li>「已開發國家是民主國家」（已開發 ⊆ 民主）這句話，<strong>並沒有說</strong>未開發國家就不民主。即使世界上有很多貧窮但民主的國家，這句話依然成立。</li>
+  <li>但如果你把它改寫成相關假設——「開發程度與民主程度正相關」——那些「貧窮但民主」的國家就會<strong>拉低</strong>相關係數，看起來像是反證。</li>
+</ul>
+
+<div class="callout warn">
+  <div class="ct">⚠️ 社會科學最常見的錯誤之一</div>
+  <p>把<strong>非對稱</strong>的集合論主張，默默改寫成<strong>對稱</strong>的相關假設。改寫後的版本其實多說了一句原本沒說的話（「未開發國家就不民主」），然後再用這句多出來的話去否定原本的理論。</p>
+</div>
+
+<p>Ragin 用「第三波民主化」的假想資料說明這一點。下面兩張表都是 2×2 交叉表：條件是「採用議會制」，結果是「民主化失敗」。</p>
+
+<div class="widget" id="w-two-tables">
+  <div class="widget-head"><span class="wtag">互動</span> 兩張表、兩種眼光：相關 vs. 集合</div>
+  <div class="widget-body">
+    <div class="controls">
+      <div class="seg" data-pick>
+        <button data-v="t1" class="on">表 1-1（相關型）</button>
+        <button data-v="t2">表 1-2（集合型）</button>
+        <button data-v="custom">自己輸入</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl center">
+        <thead><tr><th></th><th>總統制<br><small>（條件缺席）</small></th><th>議會制<br><small>（條件存在）</small></th></tr></thead>
+        <tbody>
+          <tr><th>民主化失敗<br><small>（結果存在）</small></th><td><input type="number" min="0" data-c="1"></td><td><input type="number" min="0" data-c="2"></td></tr>
+          <tr><th>民主化成功<br><small>（結果缺席）</small></th><td><input type="number" min="0" data-c="3"></td><td><input type="number" min="0" data-c="4"></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="k">相關係數 φ（對稱）</div><div class="v" data-phi>—</div></div>
+      <div class="stat"><div class="k">議會制國家中失敗的比例<br>（充分性：議會制 ⊆ 失敗？）</div><div class="v gold" data-suf>—</div></div>
+      <div class="stat"><div class="k">失敗國家中採議會制的比例<br>（必要性：失敗 ⊆ 議會制？）</div><div class="v" data-nec>—</div></div>
+    </div>
+    <div class="result-box" data-note></div>
+  </div>
+</div>
+
+<p>觀察重點：兩張表的相關係數其實<strong>差不多</strong>（約 0.39 與 0.44，都只算中等），但從集合的角度看卻<strong>天差地別</strong>：</p>
+<ul>
+  <li>表 1-1 中，議會制國家有 11 個失敗、5 個成功——「議會制 ⊆ 失敗」不成立。</li>
+  <li>表 1-2 中，16 個議會制國家<strong>全部</strong>失敗——「議會制 ⊆ 失敗」完美成立。至於總統制國家也有很多失敗（15 個），那只表示<em>通往失敗還有別條路</em>，並不推翻原主張。</li>
+</ul>
+
+<div class="callout tip">
+  <div class="ct">📌 Ragin 歸納的五個特徵</div>
+  <p>社會科學中的集合關係：① 連結的是因果或整體性的關係（不只是定義）；② 依賴理論與知識來詮釋；③ 是社會科學理論化的核心（因為理論多是文字陳述）；④ 是非對稱的，不該被改寫成相關論證；⑤ <strong>即使相關很弱，集合關係也可能非常強</strong>。</p>
+</div>
+
+<details class="think">
+  <summary>想一想：「民主和平論」說的是哪一種關係？</summary>
+  <div class="ans">
+    <p>「民主國家彼此不打仗」的意思是：<strong>「雙方都是民主國家」的國家配對 ⊆ 「沒有發生戰爭」的國家配對</strong>。重點不在民主配對與非民主配對的戰爭比率「差多少」，而在於民主配對的戰爭比率是不是<strong>趨近於零</strong>。當然，和平還有很多其他途徑，所以「民主」與「和平」的相關係數可能不高——但這不影響民主和平論本身。</p>
+  </div>
+</details>
+
+<!-- ================================================= -->
+<h2 id="s3">3. 兩種重要的集合關係：必要與充分 <span class="en">· Two kinds of set relations</span></h2>
+
+<p>做質性或案例導向研究的學者，雖然很少用集合論的術語，卻天天在找「<strong>共同點（commonalities）</strong>」。Ragin 稱他們是「<strong>隱性的布林主義者（implicit Booleans）</strong>」。找共同點有兩種策略：</p>
+
+<div class="wgrid">
+  <figure class="diagram" style="margin:0">
+    <svg viewBox="0 0 300 220" style="max-width:300px" aria-label="結果是條件的子集合">
+      <circle cx="150" cy="110" r="95" fill="var(--accent)" fill-opacity=".14" stroke="var(--accent)" stroke-width="2"/>
+      <circle cx="150" cy="125" r="50" fill="var(--gold)" fill-opacity=".28" stroke="var(--gold)" stroke-width="2"/>
+      <text x="150" y="40" text-anchor="middle" font-size="13" fill="var(--accent)" font-weight="700">共享前因條件的案例</text>
+      <text x="150" y="130" text-anchor="middle" font-size="13" fill="var(--gold)" font-weight="700">呈現結果的案例</text>
+    </svg>
+    <figcaption>策略一：結果 ⊆ 條件 →「必要條件」</figcaption>
+  </figure>
+  <figure class="diagram" style="margin:0">
+    <svg viewBox="0 0 300 220" style="max-width:300px" aria-label="條件是結果的子集合">
+      <circle cx="150" cy="110" r="95" fill="var(--gold)" fill-opacity=".18" stroke="var(--gold)" stroke-width="2"/>
+      <circle cx="150" cy="125" r="50" fill="var(--accent)" fill-opacity=".22" stroke="var(--accent)" stroke-width="2"/>
+      <text x="150" y="40" text-anchor="middle" font-size="13" fill="var(--gold)" font-weight="700">呈現結果的案例</text>
+      <text x="150" y="130" text-anchor="middle" font-size="13" fill="var(--accent)" font-weight="700">共享前因條件的案例</text>
+    </svg>
+    <figcaption>策略二：條件 ⊆ 結果 →「充分條件」</figcaption>
+  </figure>
+</div>
+
+<div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th></th><th>策略一：從結果出發</th><th>策略二：從條件出發</th></tr></thead>
+    <tbody>
+      <tr><td><strong>研究者的問題</strong></td><td>「有這個結果的案例，有什麼共同的前因？」</td><td>「有這組前因的案例，是否都出現同樣的結果？」</td></tr>
+      <tr><td><strong>集合關係</strong></td><td>結果 ⊆ 條件</td><td>條件（或條件組合）⊆ 結果</td></tr>
+      <tr><td><strong>對應概念</strong></td><td>必要條件（necessary）</td><td>充分條件（sufficient），尤其是<strong>條件組合</strong>的充分性</td></tr>
+      <tr><td><strong>例子</strong></td><td>Skocpol：每場社會革命之前都有國家崩潰 → 國家崩潰可能是革命的必要條件</td><td>經濟低度發展＋黨派分化＋行政權弱的國家是否全都民主崩潰？</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="callout info">
+  <div class="ct">ℹ️ 兩個重要的補充</div>
+  <p><strong>① 不必完美：</strong>如果「幾乎所有」民主存續的國家都採總統制，研究者通常也會把它當作兩者有整體關聯的證據。第 3 章會教你如何用「一致性」來量化「幾乎」。</p>
+  <p><strong>② 不一定要講因果：</strong>建立「明確連結（explicit connection）」本身就是社會科學的核心工作。例如觀察到「民主崩潰的國家都是前殖民地」，不一定要立刻宣稱殖民經驗是原因。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s4">4. 相關方法為什麼會錯過關係 <span class="en">· Correlational methods sometimes miss connections</span></h2>
+
+<p>把條件與結果的有／無交叉，就得到最常見的 2×2 表。Ragin 把四個格子編號如下：</p>
+
+<div class="widget" id="w-cells">
+  <div class="widget-head"><span class="wtag">互動</span> 不同的問題，看不同的格子</div>
+  <div class="widget-body">
+    <div class="controls">
+      <div class="seg" data-lens>
+        <button data-v="corr" class="on">相關係數</button>
+        <button data-v="nec">必要性</button>
+        <button data-v="suf">充分性</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl center" data-celltable>
+        <thead><tr><th></th><th>前因條件缺席</th><th>前因條件存在</th></tr></thead>
+        <tbody>
+          <tr><th>結果存在</th><td data-cell="1"><strong>格 1</strong><br><small>削弱研究者論點</small></td><td data-cell="2"><strong>格 2</strong><br><small>支持研究者論點</small></td></tr>
+          <tr><th>結果缺席</th><td data-cell="3"><strong>格 3</strong><br><small>支持研究者論點</small></td><td data-cell="4"><strong>格 4</strong><br><small>削弱研究者論點</small></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="result-box" data-lensnote></div>
+  </div>
+</div>
+
+<p>從「明確連結」的角度看，相關係數有兩個缺點：</p>
+<ol>
+  <li><strong>它只處理相對差異</strong>：例如總統制存活率 60% vs. 議會制 35%，兩者確實有相關，但這<em>不是</em>集合關係——兩組都有大量例外。</li>
+  <li><strong>它把兩種不同的因果評估混在一起</strong>：必要性與充分性被揉成一個數字。更奇怪的是，在相關分析裡很重要的<strong>格 3</strong>（條件與結果都不存在），對兩種集合關係的評估<strong>都沒有直接幫助</strong>。</li>
+</ol>
+
+<div class="callout key">
+  <div class="ct">🔑 為什麼這件事很重要？</div>
+  <p>相關係數不只是一個雙變數統計量——多元迴歸、因素分析、結構方程模型，全都建立在「相關矩陣＋平均數＋標準差」之上。所以這些複雜的量化技術，<strong>從根本上就繞過了「明確連結」的研究</strong>。這也是許多質性研究者對相關方法敬而遠之的根源。研究明確連結，等於是把變數導向研究最基本的單位——相關——<strong>拆解</strong>開來。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s5">5. QCA 與真值表 <span class="en">· QCA and the truth table</span></h2>
+
+<p>QCA（質性比較分析）以集合論為基礎，特別擅長處理<strong>因果複雜性（causal complexity）</strong>：同一個結果，可能來自<strong>好幾種不同的條件組合</strong>——Ragin 稱之為不同的「<strong>前因配方（recipes）</strong>」。</p>
+
+<p>QCA 的核心工具是<strong>真值表（truth table）</strong>：列出前因條件在邏輯上所有可能的組合，以及每一種組合對應的經驗結果。它直接落實了前面的「策略二」（充分性）：把條件組合相同的案例放在一起，看它們的結果是否一致。</p>
+
+<div class="widget" id="w-2k">
+  <div class="widget-head"><span class="wtag">互動</span> 條件越多，組合爆炸得越快</div>
+  <div class="widget-body">
+    <div class="slider-row"><span class="sl-label">k</span><input type="range" min="1" max="12" value="4" data-k><output data-kout>4</output><span>個前因條件</span></div>
+    <div class="result-box" data-kres></div>
+  </div>
+</div>
+
+<p>下表是 Ragin 舉的假想例子：學者根據理論，認為民主存續的關鍵涉及四個條件——總統制、強而有力的行政、低度政黨分化、非共產主義的過去。四個條件 → 2<sup>4</sup> = 16 種組合。</p>
+
+<div class="widget" id="w-tt">
+  <div class="widget-head"><span class="wtag">互動</span> 真值表與「只差一個條件」的簡化邏輯（原書表 1-4）</div>
+  <div class="widget-body">
+    <p style="margin-top:0">點選任一列<strong>結果為「是」</strong>的列，系統會找出和它<strong>只差一個條件</strong>、且結果也為「是」的列，並示範如何合併。</p>
+    <div class="table-wrap">
+      <table class="tbl center" data-tt>
+        <thead><tr><th>#</th><th>總統制<br>P</th><th>強行政<br>S</th><th>低分化<br>L</th><th>非共產<br>N</th><th>民主存續</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="result-box" data-ttout>請點選一列「是」。</div>
+  </div>
+</div>
+
+<p>「—」表示該組合<strong>沒有任何經驗案例</strong>（這在第 8、9 章會成為「有限多樣性」與「反事實」的核心議題）。</p>
+
+<p>簡化的邏輯是這樣的：如果某案例具備全部四個條件且民主存續，另一個案例具備其中三個（第四個不具備）也民主存續，那麼<strong>兩者不同的那個條件，對結果來說就不重要</strong>；真正的關鍵是兩者共有的那三個條件。這種「逐步合併」就是布林最小化的直覺基礎。</p>
+
+<h3>真值表是會「長大」的</h3>
+<p>從假設的配方到真值表，常常會反過來<strong>刺激研究者修改配方</strong>。假設最後一列（四條件齊備）的案例結果不一致：有的存續、有的崩潰。研究者應該回頭比較這兩群案例。若發現崩潰的案例都有<strong>嚴重的菁英分裂</strong>，就可以把「沒有菁英分裂」加進配方，用 5 個條件（32 列）重建真值表。</p>
+
+<div class="callout tip">
+  <div class="ct">📌 真值表的真正價值</div>
+  <p>它<strong>把研究過程形式化</strong>：提供一個把案例當作「有異同的組態」來比較的框架，並讓你看清楚哪裡一致、哪裡矛盾。這需要深厚的案例知識，以及理論、案例與真值表之間的<strong>反覆來回</strong>。</p>
+</div>
+
+<h3>展望</h3>
+<p>到目前為止談的都是<strong>清晰集（crisp set）</strong>：一個案例要嘛在集合內（1），要嘛不在（0）。這看起來很粗糙，也是很多人誤以為集合論只適用於名義變數的原因。下一章將引入<strong>模糊集（fuzzy set）</strong>，讓隸屬分數可以落在 0 到 1 之間。</p>
+
+<!-- ================================================= -->
+<h2 id="s6">6. 實作：建構清晰集真值表 <span class="en">· Practical appendix</span></h2>
+
+<p>假設你有一個由 0／1 變數組成的資料集（1 = 存在，0 = 缺席）。建構真值表有兩個目的：① 看案例如何分布在各種條件組合上；② 看每種組合中的案例，在結果上有多一致。</p>
+
+<div class="sw-tabs">
+  <div class="seg">
+    <button data-tab="fs" class="on">fsQCA 軟體</button>
+    <button data-tab="r">R（QCA 套件）</button>
+  </div>
+  <div class="sw-pane on" data-pane="fs">
+    <div class="steps">
+      <div class="step"><div><h4>建立資料集</h4><p>在 fsQCA 直接輸入，或匯入 Excel 的 CSV（逗號分隔）、SPSS 的 Tab 分隔檔。第一列放變數名稱，名稱不可有空格或標點；缺失值留空白。</p></div></div>
+      <div class="step"><div><h4>開啟真值表演算法</h4><p>點選 <span class="menu-path">Analyze → Truth Table Algorithm</span>（舊版需先選 Crisp Sets，新版已不需要），在對話框指定結果與前因條件。也可以分析結果的「否定」。</p></div></div>
+      <div class="step"><div><h4>看「number」欄：設定頻數門檻</h4><p>真值表依頻數排序並顯示累積百分比。案例少時，門檻設為「至少 1 個案例」，把 0 案例的列刪除；案例很多時可提高門檻，以避免測量誤差造成的雜訊。刪除方式：點選要刪除的第一列 → <span class="menu-path">Edit → Delete current row to last row</span>。</p></div></div>
+      <div class="step"><div><h4>看「consistency」欄：編碼結果</h4><p>清晰集的一致性 = 該列中呈現結果的案例比例。接近 1.0 表示高度一致；0.30–0.70 表示這列案例結果分歧（矛盾列）。依此在結果欄手動輸入 1 或 0。</p></div></div>
+      <div class="step"><div><h4>用矛盾列引導下一步研究</h4><p>找出矛盾列裡的案例深入比較，常能發現一個可加入真值表的新條件來解決矛盾，然後重新設定真值表。</p></div></div>
+    </div>
+  </div>
+  <div class="sw-pane" data-pane="r">
+    <p>本網站主教材使用 R 的 <code class="inline">QCA</code> 套件（Duşa），以下是同樣的流程：</p>
+<pre class="code"><span class="c-com"># 假想資料：每列一個國家，0/1 編碼</span>
+<span class="c-fn">library</span>(QCA)
+dem <span class="c-kw">&lt;-</span> <span class="c-fn">data.frame</span>(
+  P    = <span class="c-fn">c</span>(<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">1</span>),   <span class="c-com"># 總統制</span>
+  S    = <span class="c-fn">c</span>(<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">1</span>,<span class="c-num">1</span>),   <span class="c-com"># 強行政</span>
+  L    = <span class="c-fn">c</span>(<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">1</span>),   <span class="c-com"># 低政黨分化</span>
+  N    = <span class="c-fn">c</span>(<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">1</span>,<span class="c-num">1</span>),   <span class="c-com"># 非共產過去</span>
+  SURV = <span class="c-fn">c</span>(<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">1</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">0</span>,<span class="c-num">0</span>)    <span class="c-com"># 民主存續</span>
+)
+
+<span class="c-com"># 建立真值表：n.cut = 頻數門檻、incl.cut = 一致性門檻</span>
+tt <span class="c-kw">&lt;-</span> <span class="c-fn">truthTable</span>(dem, outcome = <span class="c-str">"SURV"</span>,
+                 conditions = <span class="c-fn">c</span>(<span class="c-str">"P"</span>, <span class="c-str">"S"</span>, <span class="c-str">"L"</span>, <span class="c-str">"N"</span>),
+                 n.cut = <span class="c-num">1</span>, incl.cut = <span class="c-num">0.8</span>,
+                 show.cases = <span class="c-kw">TRUE</span>, sort.by = <span class="c-str">"n"</span>)
+tt   <span class="c-com"># incl = 該列一致性；OUT = 1 表示通過門檻、0 表示未通過</span></pre>
+    <p>注意第 1 個與第 8 個國家條件完全相同（四條件齊備），結果卻一個存續、一個崩潰——這一列的一致性只有 0.5，低於門檻，OUT 會是 0。這正是「回頭研究案例」的訊號。想看完整的 R 操作，可參考本站主教材〈<a href="../chapters/ch3.html">Ch.3 清晰集 csQCA</a>〉。</p>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s7">7. 本章重點、名詞與自我測驗 <span class="en">· Review</span></h2>
+
+<ol class="takeaways">
+  <li>社會科學理論多以文字表達，而文字陳述本質上是<strong>集合陳述</strong>（例如「A 是 B」＝ A ⊆ B）。</li>
+  <li>集合關係是<strong>非對稱</strong>的；把它改寫成對稱的相關假設，會不當擴張原理論，是常見錯誤。</li>
+  <li><strong>相關弱，集合關係仍可能很強</strong>（表 1-2：φ 只有 0.44，但議會制 ⊆ 失敗完美成立）。</li>
+  <li>結果 ⊆ 條件 → 評估<strong>必要性</strong>（看格 1、格 2）；條件 ⊆ 結果 → 評估<strong>充分性</strong>（看格 2、格 4）。格 3 對兩者都不直接相關。</li>
+  <li><strong>真值表</strong>列出 2<sup>k</sup> 種條件組合，把「相同組合的案例結果是否一致」系統化，是處理因果複雜性的關鍵工具。</li>
+</ol>
+
+<h3>名詞對照</h3>
+<div class="table-wrap">
+  <table class="tbl gloss">
+    <thead><tr><th>本教材用語</th><th>簡中譯本</th><th>英文</th><th>白話說明</th></tr></thead>
+    <tbody>
+      <tr><td>集合關係</td><td>集合关系</td><td>set relation</td><td>集合之間的包含、交集等關係，最常見是子集合</td></tr>
+      <tr><td>子集合</td><td>子集</td><td>subset</td><td>A 的所有成員都屬於 B</td></tr>
+      <tr><td>非對稱</td><td>不对称</td><td>asymmetric</td><td>A ⊆ B 不代表「非 A ⊆ 非 B」</td></tr>
+      <tr><td>明確連結</td><td>显式关系</td><td>explicit connection</td><td>案例之間一致或近乎一致的共同點</td></tr>
+      <tr><td>前因條件</td><td>前因条件</td><td>causal condition</td><td>與結果解釋有關的案例面向</td></tr>
+      <tr><td>前因配方</td><td>前因配方</td><td>causal recipe</td><td>條件的特定組合（組態）</td></tr>
+      <tr><td>必要條件</td><td>必要条件</td><td>necessary condition</td><td>結果出現時它都在：結果 ⊆ 條件</td></tr>
+      <tr><td>充分條件</td><td>充分条件</td><td>sufficient condition</td><td>它在時結果都出現：條件 ⊆ 結果</td></tr>
+      <tr><td>真值表</td><td>真值表</td><td>truth table</td><td>列出所有邏輯上可能的條件組合及其結果</td></tr>
+      <tr><td>清晰集</td><td>清晰集</td><td>crisp set</td><td>隸屬只有 0 或 1</td></tr>
+      <tr><td>隱性布林主義者</td><td>隐式布尔</td><td>implicit Booleans</td><td>不用集合術語、卻在做集合分析的質性研究者</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>自我測驗</h3>
+<p class="quiz-score" data-quiz-score></p>
+
+<div class="quiz" data-answer="1">
+  <p class="q">「宗教基本教義派是政治保守的」這句話，最適合的集合表述是？</p>
+  <div class="opts">
+    <button class="opt">政治保守派 ⊆ 宗教基本教義派</button>
+    <button class="opt">宗教基本教義派 ⊆ 政治保守派</button>
+    <button class="opt">兩者有正相關</button>
+    <button class="opt">兩個集合完全相等</button>
+  </div>
+  <div class="explain">「A 是 B」表示 A 的成員都屬於 B，所以基本教義派是保守派的子集合。很多保守派不是基本教義派，並不影響這個主張。</div>
+</div>
+
+<div class="quiz" data-answer="2">
+  <p class="q">研究者發現「許多貧窮國家也是民主國家」。這對「已開發國家是民主國家」的主張有什麼影響？</p>
+  <div class="opts">
+    <button class="opt">直接推翻它</button>
+    <button class="opt">讓它的一致性下降</button>
+    <button class="opt">不影響集合論主張，但會拉低開發與民主之間的相關</button>
+    <button class="opt">證明開發是民主的必要條件</button>
+  </div>
+  <div class="explain">集合關係是非對稱的：主張只談已開發國家，沒說未開發國家就不民主。但這些案例會落在 2×2 表的「格 1」型位置，拉低相關係數。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">想檢驗「X 是 Y 的必要條件」，在 2×2 表中主要該看哪兩格？</p>
+  <div class="opts">
+    <button class="opt">格 1 與格 2（所有結果存在的案例）</button>
+    <button class="opt">格 2 與格 4（所有條件存在的案例）</button>
+    <button class="opt">格 2 與格 3</button>
+    <button class="opt">四格都要同等重視</button>
+  </div>
+  <div class="explain">必要性 = 結果 ⊆ 條件。所以要看「結果存在」的案例（格 1、格 2），希望格 1（有結果卻沒條件）越少越好。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">在相關分析中很重要，但對必要性與充分性評估都沒有直接幫助的是哪一格？</p>
+  <div class="opts">
+    <button class="opt">格 1：條件缺席、結果存在</button>
+    <button class="opt">格 2：條件存在、結果存在</button>
+    <button class="opt">格 4：條件存在、結果缺席</button>
+    <button class="opt">格 3：條件缺席、結果缺席</button>
+  </div>
+  <div class="explain">格 3 的案例「什麼都沒有」。它會提高相關係數，卻無法告訴你條件是否必要或充分。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">有 5 個前因條件的清晰集真值表，共有幾列？</p>
+  <div class="opts">
+    <button class="opt">10</button>
+    <button class="opt">32</button>
+    <button class="opt">25</button>
+    <button class="opt">120</button>
+  </div>
+  <div class="explain">每個條件有「存在／缺席」兩種狀態，組合數 = 2<sup>k</sup> = 2<sup>5</sup> = 32。</div>
+</div>
+
+<div class="quiz" data-answer="2">
+  <p class="q">真值表中某一列的案例結果互相矛盾（有的有結果、有的沒有）。Ragin 建議的第一步是？</p>
+  <div class="opts">
+    <button class="opt">把這列刪掉</button>
+    <button class="opt">用多數決決定這列的結果</button>
+    <button class="opt">回頭比較該列中有結果與沒結果的案例，找出可加入的新條件</button>
+    <button class="opt">改用迴歸分析</button>
+  </div>
+  <div class="explain">矛盾列是研究的線索。比較該列內正向與負向案例，常能找出被遺漏的條件（例如「沒有菁英分裂」），加入後重建真值表。</div>
+</div>
+
+<p><button class="btn ghost" data-quiz-reset type="button">重新作答</button></p>
+
+<div class="done-box" data-ch="1">
+  <span class="msg"></span>
+  <button class="btn" type="button">標記本章為已讀</button>
+</div>
+
+<nav class="chap-nav">
+  <a class="prev" href="ch0.html"><div class="dir">← 上一章</div><div class="ttl">導讀：兩種研究範式的七組對比</div></a>
+  <a class="next" href="ch2.html"><div class="dir">下一章 →</div><div class="ttl">第 2 章 模糊集與模糊集合關係</div></a>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Charles C. Ragin, <em>Redesigning Social Inquiry: Fuzzy Sets and Beyond</em> (University of Chicago Press, 2008)<br>
+  以學習為目的之概念整理與重新詮釋，非原書譯文 · <a href="index.html">回本書首頁</a></p>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="js/ragin.js"></script>
+<script>
+/* ---------- 練習：文字理論 → 集合關係 ---------- */
+(function () {
+  const root = document.getElementById('w-translate');
+  const st = root.querySelector('[data-st]'), ans = root.querySelector('[data-ans]'), out = root.querySelector('[data-out]');
+  const key = [
+    { a: 'a', why: '「小農戶」是條件、「風險規避」是結果：小農戶 ⊆ 風險規避者。' },
+    { a: 'a', why: '「雙方皆民主的國家配對」⊆「未發生戰爭的配對」：民主配對是和平的子集合（充分性的味道）。' },
+    { a: 'b', why: '「社會革命」⊆「國家崩潰」：每場革命都伴隨國家崩潰，所以結果是條件的子集合（必要性的味道）。' },
+    { a: 'b', why: '「已開發國家」⊆「擁有強大公民社會的國家」：強公民社會是成為已開發國家的必要條件。' },
+    { a: 'b', why: '「厭食症少女」⊆「有挑剔母親的少女」：結果（厭食）是條件的一致子集合——典型的質性研究「找共同點」。' },
+  ];
+  function run() {
+    const k = key[+st.value];
+    if (!ans.value) { out.innerHTML = '請先選擇答案。'; return; }
+    const ok = ans.value === k.a;
+    out.innerHTML = `<span class="hl">${ok ? '✔ 正確' : '✘ 不太對'}</span>\n${k.why}`;
+  }
+  st.addEventListener('input', () => { ans.value = ''; run(); });
+  ans.addEventListener('input', run);
+})();
+
+/* ---------- 兩張表：相關 vs 集合 ---------- */
+(function () {
+  const root = document.getElementById('w-two-tables');
+  const presets = { t1: [7, 11, 17, 5], t2: [15, 16, 9, 0] };
+  const ins = [...root.querySelectorAll('input[data-c]')];
+  const btns = root.querySelectorAll('[data-pick] button');
+  function set(v) { ins.forEach((el, i) => el.value = v[i]); calc(); }
+  function calc() {
+    const [c1, c2, c3, c4] = ins.map((el) => Math.max(0, +el.value || 0));
+    // 條件存在 = 議會制；結果存在 = 失敗
+    const a = c2, b = c1, c = c4, d = c3;
+    const den = Math.sqrt((a + b) * (c + d) * (a + c) * (b + d));
+    const phi = den ? (a * d - b * c) / den : NaN;
+    const suf = (c2 + c4) ? c2 / (c2 + c4) : NaN;
+    const nec = (c1 + c2) ? c2 / (c1 + c2) : NaN;
+    root.querySelector('[data-phi]').textContent = RG.fz.fmt(phi);
+    root.querySelector('[data-suf]').textContent = RG.fz.fmt(suf);
+    root.querySelector('[data-nec]').textContent = RG.fz.fmt(nec);
+    let msg = `φ = ${RG.fz.fmt(phi)}：`;
+    msg += Math.abs(phi) < .3 ? '相關偏弱。' : Math.abs(phi) < .6 ? '相關中等。' : '相關很強。';
+    msg += `\n議會制國家中有 ${c2} / ${c2 + c4} 失敗 → `;
+    msg += suf === 1 ? '「議會制 ⊆ 失敗」完美成立！格 4 沒有任何例外。' :
+           suf >= .8 ? '「議會制 ⊆ 失敗」近乎成立（幾乎所有議會制都失敗）。' :
+           '「議會制 ⊆ 失敗」不成立：議會制國家的結果不一致。';
+    if (c1 > 0 && suf >= .8) msg += `\n總統制也有 ${c1} 個失敗——只代表「通往失敗還有別條路」，不會推翻充分性主張。`;
+    root.querySelector('[data-note]').textContent = msg;
+  }
+  btns.forEach((b) => b.addEventListener('click', () => {
+    btns.forEach((x) => x.classList.toggle('on', x === b));
+    if (presets[b.dataset.v]) set(presets[b.dataset.v]);
+  }));
+  ins.forEach((el) => el.addEventListener('input', () => {
+    btns.forEach((x) => x.classList.toggle('on', x.dataset.v === 'custom'));
+    calc();
+  }));
+  set(presets.t1);
+})();
+
+/* ---------- 2x2 透鏡 ---------- */
+(function () {
+  const root = document.getElementById('w-cells');
+  const cells = root.querySelectorAll('[data-cell]');
+  const note = root.querySelector('[data-lensnote]');
+  const lens = {
+    corr: { on: [1, 2, 3, 4], txt: '相關係數同時使用四格：格 2、格 3 越多 → 相關越大；格 1、格 4 越多 → 相關越小。\n它把「必要性」與「充分性」兩種問題混成一個對稱的數字。' },
+    nec: { on: [1, 2], txt: '必要性（結果 ⊆ 條件）：只看「結果存在」的案例。\n目標：格 1（有結果卻沒有條件）越少越好，理想是 0。\n一致性 ≈ 格2 /（格1 + 格2）' },
+    suf: { on: [2, 4], txt: '充分性（條件 ⊆ 結果）：只看「條件存在」的案例。\n目標：格 4（有條件卻沒有結果）越少越好，理想是 0。\n一致性 ≈ 格2 /（格2 + 格4）' },
+  };
+  function paint(v) {
+    cells.forEach((c) => {
+      const on = lens[v].on.includes(+c.dataset.cell);
+      c.classList.toggle('hi', on); c.classList.toggle('lo', !on);
+    });
+    note.textContent = lens[v].txt;
+  }
+  const btns = root.querySelectorAll('[data-lens] button');
+  btns.forEach((b) => b.addEventListener('click', () => { btns.forEach((x) => x.classList.toggle('on', x === b)); paint(b.dataset.v); }));
+  paint('corr');
+})();
+
+/* ---------- 2^k ---------- */
+(function () {
+  const root = document.getElementById('w-2k');
+  const k = root.querySelector('[data-k]');
+  function run() {
+    const n = +k.value, rows = 2 ** n;
+    root.querySelector('[data-kout]').textContent = n;
+    root.querySelector('[data-kres]').innerHTML =
+      `2<sup>${n}</sup> = <span class="hl">${rows.toLocaleString()}</span> 種邏輯上可能的條件組合` +
+      (n >= 7 ? `\n如果你只有 50 個案例，至少有 ${(rows - 50).toLocaleString()} 列注定空著——這就是第 8 章的「有限多樣性」。` : '');
+  }
+  k.addEventListener('input', run); run();
+})();
+
+/* ---------- 真值表（表 1-4） ---------- */
+(function () {
+  const root = document.getElementById('w-tt');
+  const names = ['總統制', '強行政', '低分化', '非共產'];
+  // 原書表 1-4：P S L N → 結果（1 是 / 0 否 / null 無案例）
+  const rows = [
+    [0,0,0,0,null],[0,0,0,1,0],[0,0,1,0,0],[0,0,1,1,null],
+    [0,1,0,0,0],[0,1,0,1,0],[0,1,1,0,null],[0,1,1,1,1],
+    [1,0,0,0,0],[1,0,0,1,null],[1,0,1,0,null],[1,0,1,1,null],
+    [1,1,0,0,1],[1,1,0,1,1],[1,1,1,0,null],[1,1,1,1,1],
+  ];
+  const tb = root.querySelector('tbody'), out = root.querySelector('[data-ttout]');
+  const yn = (v) => v ? '是' : '否';
+  rows.forEach((r, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i + 1}</td>` + r.slice(0, 4).map((v) => `<td>${yn(v)}</td>`).join('') +
+      `<td>${r[4] === null ? '—' : `<strong style="color:${r[4] ? 'var(--accent2)' : 'var(--ink-faint)'}">${yn(r[4])}</strong>`}</td>`;
+    if (r[4] === 1) tr.style.cursor = 'pointer';
+    tr.addEventListener('click', () => pick(i));
+    tb.appendChild(tr);
+  });
+  const trs = [...tb.children];
+  const term = (r, skip) => r.slice(0, 4).map((v, j) => j === skip ? null : (v ? names[j] : `非${names[j]}`)).filter(Boolean).join(' × ');
+  function pick(i) {
+    const r = rows[i];
+    trs.forEach((t) => t.querySelectorAll('td').forEach((td) => td.classList.remove('hi', 'warnc')));
+    if (r[4] !== 1) { out.textContent = r[4] === null ? `第 ${i + 1} 列沒有經驗案例（—），暫時不能拿來推論。` : `第 ${i + 1} 列的結果是「否」，請點一列結果為「是」的列。`; return; }
+    trs[i].querySelectorAll('td').forEach((td) => td.classList.add('hi'));
+    const lines = [`第 ${i + 1} 列：${term(r, -1)} → 民主存續`];
+    let found = 0;
+    rows.forEach((s, j) => {
+      if (j === i || s[4] !== 1) return;
+      const diff = [0, 1, 2, 3].filter((k) => s[k] !== r[k]);
+      if (diff.length === 1) {
+        found++;
+        trs[j].querySelectorAll('td').forEach((td) => td.classList.add('warnc'));
+        lines.push(`\n＋ 第 ${j + 1} 列只差「${names[diff[0]]}」，結果同樣存續`,
+          `  → 「${names[diff[0]]}」與結果無關，可合併為：`,
+          `    <span class="hl">${term(r, diff[0])}</span>`);
+      }
+    });
+    if (!found) lines.push('\n沒有找到「只差一個條件、結果也存續」的列。');
+    out.innerHTML = lines.join('\n');
+  }
+})();
+</script>
+</body>
+</html>

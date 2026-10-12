@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 7 章 使用模糊集與真值表進行組態分析 · 重新設計社會科學研究</title>
+<meta name="description" content="Ragin《重新設計社會科學研究》第 7 章互動教材：向量空間的角與真值表列、案例分布與頻數門檻、模糊子集一致性、模糊集真值表分析、為什麼不該把模糊集二分化">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="css/ragin.css">
+<style>
+  table.tbl.compact th, table.tbl.compact td { padding: .32rem .42rem; font-size: .8rem; }
+  table.tbl.compact td { font-family: var(--mono); }
+  table.tbl td.colsel { outline: 2px solid var(--rose); outline-offset: -2px; }
+  table.tbl tr.rem td { color: var(--ink-faint); }
+  table.tbl tr.clickable { cursor: pointer; }
+  .vs-svg { width: 100%; max-width: 380px; height: auto; display: block; margin: 0 auto; }
+  .vs-svg .edge { stroke: var(--ink-faint); stroke-width: 1.4; fill: none; }
+  .vs-svg .edge.back { stroke-dasharray: 4 4; opacity: .6; }
+  .vs-svg .face { fill: var(--accent); fill-opacity: .05; }
+  .vs-svg .corner { fill: var(--bg-card); stroke: var(--ink-faint); stroke-width: 1.5; }
+  .vs-svg .corner.near { fill: var(--gold); stroke: var(--gold); }
+  .vs-svg .clab { fill: var(--ink-soft); font-size: 12px; font-family: var(--mono); }
+  .vs-svg .clab.near { fill: var(--gold); font-weight: 700; }
+  .vs-svg .case { fill: var(--rose); stroke: var(--bg-card); stroke-width: 1.5; }
+  .vs-svg .link { stroke: var(--gold); stroke-width: 2; stroke-dasharray: 5 3; }
+  .vs-svg .guide { stroke: var(--rose); stroke-width: 1; stroke-dasharray: 2 3; opacity: .7; }
+  .vs-svg .axl { fill: var(--accent); font-size: 12px; font-weight: 700; font-family: var(--sans); }
+  .mini-q { border-top: 1px dashed var(--border); padding-top: .8rem; margin-top: .8rem; }
+  .mini-q:first-child { border-top: 0; margin-top: 0; padding-top: 0; }
+  .mini-q .opts { display: flex; flex-wrap: wrap; gap: .4rem; margin: .5rem 0; }
+  .mini-q .opts button { font: inherit; font-size: .88rem; padding: .35rem .8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--ink); cursor: pointer; }
+  .mini-q .opts button.right { background: var(--ok-soft); border-color: var(--ok); }
+  .mini-q .opts button.wrong { background: var(--bad-soft); border-color: var(--bad); }
+  .code-row { font-family: var(--mono); background: var(--bg-soft); padding: .1rem .4rem; border-radius: 5px; }
+</style>
+</head>
+<body>
+<div id="readbar"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="logo rg">R</span><span>重新設計社會科學研究<small>Ragin (2008) 互動教材</small></span></a>
+    <nav class="topnav">
+      <a href="index.html">本書首頁</a>
+      <a href="ch0.html">導讀</a>
+      <a href="ch1.html">第一篇</a>
+      <a href="ch4.html">第二篇</a>
+      <a href="ch6.html">第三篇</a>
+      <a href="ch8.html">第四篇</a>
+      <a href="../index.html">QCA with R ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="chapter-head">
+  <div class="part">第三篇　條件組態與「自」變數</div>
+  <div class="eyebrow">CHAPTER 7</div>
+  <h1>使用模糊集與真值表進行組態分析</h1>
+  <div class="en">Configurational Analysis with Fuzzy Sets and Truth Tables</div>
+  <div class="src">對應原書第 7 章（中譯本頁 87–102）</div>
+</div>
+
+<p class="lead">想像你要整理全班同學的「讀書風格」：每個人在「早起」「愛喝咖啡」「喜歡小組討論」上都有程度差異，不是非黑即白。你想問：<strong>哪一種「風格組合」的人，期末考一律考得好？</strong>清晰集真值表要求你先把每個人硬分成「是／否」；本章則示範 Ragin 的作法——<strong>保留程度差異</strong>，同時仍然用真值表來整理組合、檢驗一致性、做布林簡化。這正是今天 fsQCA 軟體與 R 的 <code class="inline">truthTable()</code> 背後的核心邏輯。</p>
+
+<div class="objectives">
+  <div class="ct">🎯 讀完本章，你應該能夠……</div>
+  <ol>
+    <li>說明為什麼 k 個模糊集條件構成的向量空間有 2<sup>k</sup> 個<strong>角</strong>，且每個角正好對應真值表的一列。</li>
+    <li>計算一個案例在任何一個角（條件組合）的隸屬度，並解釋為什麼它<strong>最多只會在一個角</strong>上超過 0.5。</li>
+    <li>根據「隸屬度 &gt; 0.5 的案例數」設定<strong>頻數門檻</strong>，區分有經驗案例的列與邏輯餘項。</li>
+    <li>用 Σmin(X,Y)/ΣX 計算每一列的<strong>一致性</strong>，並依<strong>一致性門檻</strong>編碼結果欄、做布林最小化。</li>
+    <li>用原書資料說明：把模糊集在 0.5 二分化，會造成<strong>矛盾組態</strong>與<strong>過於寬鬆的一致性</strong>。</li>
+    <li>在 fsQCA 或 R（<code class="inline">truthTable()</code>、<code class="inline">minimize()</code>）中完成模糊集真值表分析。</li>
+  </ol>
+</div>
+
+<nav class="toc">
+  <strong>本章目錄</strong>
+  <ol>
+    <li><a href="#s1">從前因配方到真值表</a></li>
+    <li><a href="#s2">模糊集與真值表：資料與三根支柱</a></li>
+    <li><a href="#s3">向量空間的角 ＝ 真值表的列</a></li>
+    <li><a href="#s4">案例在條件組合上的分布與頻數門檻</a></li>
+    <li><a href="#s5">評估模糊子集關係的一致性</a></li>
+    <li><a href="#s6">真值表分析：門檻、編碼與最小化</a></li>
+    <li><a href="#s7">為什麼不乾脆把模糊集二分化？</a></li>
+    <li><a href="#s8">結論與實用附錄：模糊集真值表程序</a></li>
+    <li><a href="#s9">本章重點、名詞與自我測驗</a></li>
+  </ol>
+</nav>
+
+<!-- ================================================= -->
+<h2 id="s1">1. 從前因配方到真值表 <span class="en">· From recipes to truth tables</span></h2>
+
+<p>組態思維最有用的地方，是它正視<strong>因果複雜性（causal complexity）</strong>：同一個結果，可能由好幾種不同的條件組合——好幾份不同的「<strong>前因配方（causal recipes）</strong>」——產生。第 6 章的例子是：反對國際貨幣基金組織（IMF）緊縮政策的大規模抗議，可能有幾條不同的成因路徑。</p>
+
+<p>系統性分析因果複雜性的關鍵工具是<strong>真值表（truth table）</strong>。以第 6 章的四個條件為例——嚴厲的 IMF 緊縮、都市貧民高度集中、官員貪腐、強大的政治動員——清晰集真值表會列出這四個「有／無」條件的 2<sup>4</sup> = 16 種組合，並記錄每種組合的案例是否一致地出現抗議。</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>第 6 章：從「一份配方」出發</h4>
+    <ul>
+      <li>先有一個理論配方（例如四個條件同時存在）。</li>
+      <li>再看配方的各種「縮減版」（只取部分條件）是否也與結果有關。</li>
+      <li>條件只有「在配方裡」或「無關」兩種角色。</li>
+    </ul>
+  </div>
+  <div class="new">
+    <h4>本章：真值表檢查<strong>所有</strong>組合</h4>
+    <ul>
+      <li>條件可以來自不同理論、不同配方。</li>
+      <li>每個條件都分「存在」與「<strong>不存在</strong>」兩種狀態，而不只是「相關／無關」。</li>
+      <li>因此可以發現「某條件必須<em>不存在</em>」的配方，例如「官員<strong>不</strong>貪腐」才會引發抗議。</li>
+    </ul>
+  </div>
+</div>
+
+<p>檢視所有 2<sup>k</sup> 種組合，就像建立一組「類實驗」的對照：任何兩列只差一個條件時，就能看出那個條件的作用。通過充分性檢驗的組合，再以「由下而上」的方式做邏輯簡化——如果四條件齊備的案例都有抗議、只缺其中一個條件的案例也都有抗議，那麼那個「有沒有都一樣」的條件就可以拿掉。</p>
+
+<div class="callout tip">
+  <div class="ct">📌 真值表也會指引你回到案例</div>
+  <p>假設以秘魯為原型建立的那一列，裡面除了秘魯之外還有好幾個<strong>沒有</strong>發生抗議的國家——這一列不一致。研究者就該比較「有抗議」與「沒抗議」的案例。若發現沒抗議的國家都有強大的鎮壓能力與鎮壓歷史，就可以把「<strong>缺乏</strong>廣泛鎮壓能力」加入配方，改用五個條件（32 列）重建真值表。只研究秘魯一個正面案例，幾乎不可能發現這種「必須<em>缺席</em>」的成分——這正是比較分析的價值。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s2">2. 模糊集與真值表：資料與三根支柱 <span class="en">· Fuzzy sets and truth tables</span></h2>
+
+<p>本章要搭一座橋：<strong>用模糊集資料建構傳統的布爾真值表</strong>，再用它分析因果複雜性。重點是充分利用隸屬度的「程度差異」，而<strong>不是</strong>先把模糊分數切成 0／1。</p>
+
+<p>示範資料是第 2 章出現過的 Nieuwbeerta 階級投票資料：12 個先進工業民主國家，結果是「<strong>弱階級投票（W）</strong>」的隸屬度，四個前因條件為：</p>
+<ul>
+  <li><strong>A</strong>：高度富裕（affluent）國家的隸屬度</li>
+  <li><strong>I</strong>：收入嚴重不平等（inequality）的隸屬度</li>
+  <li><strong>M</strong>：製造業從業人口眾多（manufacturing）的隸屬度</li>
+  <li><strong>U</strong>：強大工會（unions）的隸屬度</li>
+</ul>
+
+<div class="table-wrap">
+  <table class="tbl center">
+    <caption style="caption-side:top;text-align:left;font-weight:700;padding-bottom:.4rem">原書表 7-1　先進工業社會階級投票的模糊集資料</caption>
+    <thead><tr><th>國家</th><th>弱階級投票 W</th><th>高度富裕 A</th><th>收入不平等 I</th><th>製造業從業多 M</th><th>強大工會 U</th></tr></thead>
+    <tbody id="t71"></tbody>
+  </table>
+</div>
+
+<p>Ragin 強調，這套「真值表版」的模糊集分析，比他在《模糊集社會科學》（2000）中的作法更好，而且<strong>更透明</strong>：研究者對每一步都看得到、控制得到，這正是案例導向研究的精神。要把模糊集分析接上真值表，需要三根支柱：</p>
+
+<div class="steps">
+  <div class="step"><div><h4>支柱一：對應關係</h4><p>真值表的每一列，對應到由模糊集條件構成的<strong>向量空間的一個角</strong>。（第 3 節）</p></div></div>
+  <div class="step"><div><h4>支柱二：案例分布</h4><p>評估案例如何分布在各個條件組合（向量空間的各個區塊）上，找出哪些角有足夠的案例。（第 4 節）</p></div></div>
+  <div class="step"><div><h4>支柱三：一致性</h4><p>評估每個條件組合是不是結果的<strong>一致子集</strong>，也就是「組合 ⊆ 結果」的證據有多強。（第 5 節）</p></div></div>
+</div>
+
+<p>三根支柱都到位後，就能做出一張<strong>彙總多次模糊集分析結果</strong>的真值表，再對它做最小化。換句話說，一張模糊集真值表，其實是把 2<sup>k</sup> 次「這個角 ⊆ 結果嗎？」的模糊集檢驗<strong>綜合</strong>在一起。</p>
+
+<!-- ================================================= -->
+<h2 id="s3">3. 向量空間的角 ＝ 真值表的列 <span class="en">· Vector-space corners and truth-table rows</span></h2>
+
+<p>先從最簡單的兩個條件 B、C 開始。清晰集真值表有 4 列：00、01、10、11。如果 B、C 是模糊集，每個案例就是單位正方形裡的一個點 (B, C)，而這個正方形有 4 個角：(0,0)、(0,1)、(1,0)、(1,1)。<strong>真值表的列和正方形的角一一對應</strong>。三個條件時是立方體的 8 個角；k 個條件時，就是 k 維「超立方體」的 2<sup>k</sup> 個角。</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>清晰集：每個案例只屬於一列</h4>
+    <p>案例依「有／無」被分進唯一的一列，各列是案例的互斥子集合。</p>
+  </div>
+  <div class="new">
+    <h4>模糊集：每個案例對每個角都有隸屬度</h4>
+    <p>案例在向量空間中的位置，決定它對各個角的<strong>部分隸屬</strong>。計算方法就是模糊交集：取各條件（或其否定）的<strong>最小值</strong>。</p>
+  </div>
+</div>
+
+<div class="formula">
+  <span class="flabel">案例在某個角的隸屬度（以 B=0.7、C=0.9 為例）</span>
+  B·C = min(0.7, 0.9) = <strong>0.7</strong><br>
+  ~B·~C = min(1−0.7, 1−0.9) = min(0.3, 0.1) = <strong>0.1</strong><br>
+  B·~C = min(0.7, 0.1) = 0.1　　~B·C = min(0.3, 0.9) = 0.3
+</div>
+
+<p>這裡「~」是模糊集的否定（1 − 隸屬度），對應清晰集的「不存在」；「·」是交集（邏輯「且」）。在原書表格中，<strong>小寫字母</strong>也表示否定，例如 a = ~A。</p>
+
+<div class="widget" id="w-vs">
+  <div class="widget-head"><span class="wtag">互動</span> 向量空間探索器：案例離哪個角最近？</div>
+  <div class="widget-body">
+    <p style="margin-top:0">調整案例在各條件的隸屬分數，觀察它在正方形／立方體中的位置，以及它對每個角（＝真值表每一列）的隸屬度。金色的角是隸屬度 &gt; 0.5 的那一個。</p>
+    <div class="controls">
+      <div class="seg" data-dim>
+        <button data-v="2" class="on">2 個條件（正方形）</button>
+        <button data-v="3">3 個條件（立方體）</button>
+      </div>
+      <button class="btn ghost" type="button" data-half>試試看：把 B 設成 0.5</button>
+    </div>
+    <div class="wgrid">
+      <div>
+        <div class="slider-row"><span class="sl-label">B</span><input type="range" min="0" max="1" step="0.05" value="0.7" data-s="0"><output data-o="0">0.70</output></div>
+        <div class="slider-row"><span class="sl-label">C</span><input type="range" min="0" max="1" step="0.05" value="0.9" data-s="1"><output data-o="1">0.90</output></div>
+        <div class="slider-row" data-drow style="display:none"><span class="sl-label">D</span><input type="range" min="0" max="1" step="0.05" value="0.3" data-s="2"><output data-o="2">0.30</output></div>
+        <svg class="vs-svg" viewBox="-45 0 455 330" data-svg aria-label="向量空間圖"></svg>
+      </div>
+      <div>
+        <div class="table-wrap" style="margin-top:0">
+          <table class="tbl center compact" data-ctab>
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<p>Ragin 的關鍵想法是：雖然模糊集案例會「散落」在每一列上，我們仍可以<strong>把真值表的列當作向量空間角的代表</strong>，在每一列上記錄關於那個角的評估結果。例如，計算每個國家在 <span class="code-row">~A·~I·M·U</span> 這個角的隸屬度（不富裕、不太不平等、製造業多、工會強），然後用<strong>所有 12 個案例</strong>（不只是隸屬度高的那幾個）檢驗「這個角 ⊆ W」是否成立，把結論寫回對應的列。對 16 個角都這麼做，整張真值表就彙總了 16 次模糊集分析。</p>
+
+<div class="callout key">
+  <div class="ct">🔑 每個角要記錄兩件事</div>
+  <p>① 這個角（條件組合）中，有<strong>多少案例具有高隸屬度</strong>（&gt; 0.5）？——決定這一列有沒有足夠的經驗基礎。<br>② 有多強的證據顯示這個角的隸屬度是結果隸屬度的<strong>子集合</strong>？——也就是一致性。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s4">4. 案例在條件組合上的分布與頻數門檻 <span class="en">· Distribution of cases across combinations</span></h2>
+
+<p>清晰集時，數一數每列有幾個案例就好。模糊集時，每個案例在每一列都有部分隸屬，該怎麼數？答案來自模糊交集的一個漂亮性質：</p>
+
+<div class="callout key">
+  <div class="ct">🔑 每個案例最多只在一個角的隸屬度 &gt; 0.5</div>
+  <p>對 k 個條件形成的 2<sup>k</sup> 個組合，一個案例<strong>至多只有一個</strong>組合的隸屬度大於 0.5。這個角就是案例「最靠近」的角，也就是它「偏屬於」的那個條件組合。找法很簡單：把每個條件以 0.5 為界看成 1 或 0（大寫或小寫），組起來就是那個角；它的隸屬度＝各條件「離 0.5 較遠那一側」分數的最小值。</p>
+</div>
+
+<details class="think">
+  <summary>想一想：為什麼不可能有兩個角都 &gt; 0.5？</summary>
+  <div class="ans">
+    <p>任兩個不同的角，至少在某一個條件上相反：一個用 X、另一個用 ~X。由於 X 與 1−X 不可能同時大於 0.5，兩個角的最小值中，至少有一個會被這個條件壓到 0.5 以下（或剛好 0.5）。所以 &gt; 0.5 的角最多一個。</p>
+    <p><strong>那剛好 0.5 呢？</strong>如果某條件的隸屬度正好是 0.5，那麼 X 與 ~X 都是 0.5，任何包含它的組合最多只有 0.5——案例落在兩個角「正中間的牆上」，<strong>不屬於任何一個角</strong>，也就不會被算進任何一列的案例數。因此 Ragin 建議：校準前因條件時，盡可能<strong>避免使用 0.5</strong>（最大模糊點）。你可以在上面的向量空間探索器按「把 B 設成 0.5」親自看看。</p>
+  </div>
+</details>
+
+<p>原書表 7-2 列出了 12 個國家在 16 個角的隸屬度。下面把它做成可互動的版本（為了在手機上好讀，我們把原書的「國家為列、組合為欄」轉置成「組合為列、國家為欄」）：</p>
+
+<div class="widget" id="w-dist">
+  <div class="widget-head"><span class="wtag">互動</span> 案例在 16 個條件組合上的分布（原書表 7-2）</div>
+  <div class="widget-body">
+    <div class="controls">
+      <div class="field"><label>挑一個國家，看它的計算</label>
+        <select data-country></select>
+      </div>
+      <div class="field"><label>頻數門檻（隸屬度 &gt; 0.5 的案例至少幾個）</label>
+        <div class="slider-row" style="margin:0"><input type="range" min="1" max="3" step="1" value="1" data-ncut><output data-ncutout>1</output></div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl center compact" data-dtab><thead></thead><tbody></tbody></table>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<p>最右欄「n」就是原書表 7-2 最後一列：每個角有幾個案例隸屬度 &gt; 0.5。12 個國家剛好分到 8 個角（n 總和 = 12），另外 8 個角<strong>一個高隸屬案例都沒有</strong>。</p>
+
+<h3>設定頻數門檻（frequency threshold）</h3>
+<p>這一階段的核心決策是：<strong>一個條件組合至少要有幾個高隸屬案例，才算「有經驗基礎」、值得評估它和結果的關係？</strong>沒達到門檻的組合就被當作<strong>邏輯餘項（logical remainders）</strong>——在經驗上缺乏案例的邏輯可能組合（可能是資料不足，也可能是現實中根本不存在）。</p>
+
+<ul>
+  <li>如何訂門檻，要考慮：總案例數、條件數、你對案例的熟悉程度、校準的精確度、測量與賦值誤差的程度，以及你想要的結果是粗略還是精細。</li>
+  <li>本例只有 12 個案例、16 種組合，合理的門檻是 <strong>1</strong>：8 個 n = 0 的組合成為邏輯餘項，其餘 8 個保留下來繼續分析。</li>
+  <li>案例很多時（例如數百個），有些角可能因為測量或編碼誤差而「意外」出現幾個案例。此時更明智的作法是把低頻組合也視為邏輯餘項；例如要求至少 10 個高隸屬案例。問題從「有沒有案例」變成「案例<strong>夠不夠多</strong>」。</li>
+</ul>
+
+<div class="callout info">
+  <div class="ct">ℹ️ 邏輯餘項怎麼處理？</div>
+  <p>邏輯餘項是 QCA 最重要的議題之一，第 8 章（有限多樣性）與第 9 章（反事實分析）會專門討論。本章先記住：它們是「我們不知道結果會如何」的列。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s5">5. 評估模糊子集關係的一致性 <span class="en">· Assessing the consistency of fuzzy subset relations</span></h2>
+
+<p>選出有經驗基礎的組合後，下一步是問：<strong>哪些條件組合是結果的子集合？</strong>也就是，哪些組合與「高的弱階級投票隸屬度」有一致的關聯？我們用第 3 章介紹過的集合論一致性：</p>
+
+<div class="formula">
+  <span class="flabel">充分性一致性（X 為組合的隸屬度、Y 為結果的隸屬度）</span>
+  一致性(X<sub>i</sub> ≤ Y<sub>i</sub>) =
+  <span class="frac"><span>Σ min(X<sub>i</sub>, Y<sub>i</sub>)</span><span>Σ X<sub>i</sub></span></span>
+</div>
+
+<ul>
+  <li>所有 X<sub>i</sub> 都 ≤ 對應的 Y<sub>i</sub>（點都在 XY 圖對角線上方）→ 一致性 = <strong>1.00</strong>。</li>
+  <li>只有少數 X<sub>i</sub> 稍微大於 Y<sub>i</sub> → 一致性略低於 1。</li>
+  <li>許多案例不一致，且有些 X<sub>i</sub> 遠大於 Y<sub>i</sub> → 一致性可能掉到 0.50 以下。</li>
+</ul>
+
+<p>注意：計算每個角的一致性時，用的是<strong>全部 12 個案例</strong>在那個角的隸屬度，而不只是隸屬度 &gt; 0.5 的那一兩個國家。隸屬度低的案例幾乎不會造成不一致（X 很小，通常 ≤ Y），但只要它的 X 超過 Y，一樣會扣分。</p>
+
+<div class="widget" id="w-cons">
+  <div class="widget-head"><span class="wtag">互動</span> 每一個角都是一次模糊子集檢驗</div>
+  <div class="widget-body">
+    <div class="controls">
+      <div class="field"><label>選擇一個角（條件組合）</label><select data-corner></select></div>
+    </div>
+    <div class="wgrid">
+      <svg class="plot" data-plot></svg>
+      <div>
+        <div class="stats">
+          <div class="stat"><div class="k">高隸屬案例數 n</div><div class="v" data-n>—</div></div>
+          <div class="stat"><div class="k">一致性 Σmin/ΣX</div><div class="v gold" data-inc>—</div></div>
+          <div class="stat"><div class="k">原始覆蓋度 Σmin/ΣY</div><div class="v" data-cov>—</div></div>
+        </div>
+        <div class="table-wrap" style="margin:.4rem 0"><table class="tbl center compact" data-ctab2><thead><tr><th>國家</th><th>X</th><th>W</th><th>min</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<p>把 8 個有經驗案例的組合，依一致性由高到低排列，就得到原書表 7-3（我們用 Python 與上面的元件重算，結果與原書一致）：</p>
+
+<div class="table-wrap">
+  <table class="tbl center">
+    <caption style="caption-side:top;text-align:left;font-weight:700;padding-bottom:.4rem">原書表 7-3　以模糊子集關係評估各組合的一致性（n ≥ 1 的 8 列）</caption>
+    <thead><tr><th>A</th><th>I</th><th>M</th><th>U</th><th>組合</th><th>n</th><th>一致性</th><th>結果（OUT）</th><th>高隸屬案例</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>0</td><td>0</td><td>0</td><td>A·i·m·u</td><td>1</td><td class="hi">1.00</td><td class="hi">1</td><td>荷蘭</td></tr>
+      <tr><td>1</td><td>1</td><td>0</td><td>0</td><td>A·I·m·u</td><td>3</td><td class="hi">1.00</td><td class="hi">1</td><td>法國、德國、美國</td></tr>
+      <tr><td>0</td><td>1</td><td>1</td><td>1</td><td>a·I·M·U</td><td>1</td><td>0.875<sup>*</sup></td><td>0</td><td>愛爾蘭</td></tr>
+      <tr><td>1</td><td>1</td><td>0</td><td>1</td><td>A·I·m·U</td><td>1</td><td>0.84</td><td>0</td><td>澳洲</td></tr>
+      <tr><td>0</td><td>1</td><td>0</td><td>1</td><td>a·I·m·U</td><td>1</td><td>0.82</td><td>0</td><td>義大利</td></tr>
+      <tr><td>1</td><td>0</td><td>0</td><td>1</td><td>A·i·m·U</td><td>2</td><td>0.79</td><td>0</td><td>比利時、丹麥</td></tr>
+      <tr><td>1</td><td>1</td><td>1</td><td>1</td><td>A·I·M·U</td><td>1</td><td>0.78</td><td>0</td><td>英國</td></tr>
+      <tr><td>1</td><td>0</td><td>1</td><td>1</td><td>A·i·M·U</td><td>2</td><td>0.72</td><td>0</td><td>挪威、瑞典</td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="sc">* 精確值為 7/8 = 0.875，原書印為 0.87（截位而非四捨五入）；R 的 <code class="inline">truthTable()</code> 會顯示 0.875。</p>
+
+<p>表 7-3 的每一列，回答的都是同一個問題：「<strong>在向量空間這個角的隸屬度，是不是弱階級投票隸屬度的一致子集？</strong>」所以分析這張表，就是對「向量空間各角的論斷」做邏輯綜合。</p>
+
+<!-- ================================================= -->
+<h2 id="s6">6. 真值表分析：門檻、編碼與最小化 <span class="en">· Truth table analysis</span></h2>
+
+<p>把表 7-3 變成真值表只差一小步：決定一個<strong>一致性門檻（consistency threshold）</strong>。一致性達到門檻的組合被視為結果的模糊子集，結果欄編碼為 <strong>1</strong>；未達門檻的編碼為 <strong>0</strong>。結果欄為 1 的組合，描述的是「結果一致出現」的那類案例（例如：一致呈現弱階級投票的那類國家）。</p>
+
+<h3>門檻怎麼選？</h3>
+<ul>
+  <li><strong>找落差（gap）</strong>：把一致性由高到低排列，看高分區有沒有明顯斷層。表 7-3 中，從第 2 列的 1.00 掉到第 3 列的 0.875，就是一個明顯落差，可以作為劃分依據。<span class="sc">（中譯本後文寫成「第 3 行和第 4 行之間的巨大差距」，但依表中數字與前文，落差實際在第 2、3 列之間。）</span></li>
+  <li><strong>一般不要低於 0.75</strong>；0 到 0.75 之間代表有實質的不一致。Ragin 建議 ≥ 0.85，尤其是總體（macro）資料。</li>
+  <li>完美的 1.0 在模糊集資料中很少見，大多數分析的門檻會設在 1.0 以下。</li>
+  <li>Ragin（2000）也示範過把機率準則（基準值如 0.75、顯著水準 α）納入一致性評估；但若排序後已有明顯落差（如本例），用機率準則反而會模糊焦點。</li>
+</ul>
+
+<div class="widget" id="w-tt">
+  <div class="widget-head"><span class="wtag">互動</span> 模糊集真值表實驗室（原書表 7-1 資料）</div>
+  <div class="widget-body">
+    <p style="margin-top:0">調整頻數門檻與一致性門檻，真值表的 OUT 欄與兩種解會即時更新。灰色列是邏輯餘項（未達頻數門檻）。點任一列可在下方看到它的案例。</p>
+    <div class="controls">
+      <div class="field"><label>結果</label>
+        <div class="seg" data-outc><button data-v="W" class="on">W 弱階級投票</button><button data-v="nW">~W 非弱階級投票</button></div>
+      </div>
+      <div class="field"><label>頻數門檻 n.cut</label>
+        <div class="slider-row" style="margin:0"><input type="range" min="0" max="3" step="1" value="1" data-n><output data-nout>1</output></div>
+      </div>
+      <div class="field"><label>一致性門檻 incl.cut</label>
+        <div class="slider-row" style="margin:0"><input type="range" min="0.70" max="1" step="0.01" value="0.90" data-c><output data-cout>0.90</output></div>
+      </div>
+      <button class="btn ghost" type="button" data-reset>回到原書設定</button>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl center compact" data-ttab>
+        <thead><tr><th>A</th><th>I</th><th>M</th><th>U</th><th>n</th><th>一致性</th><th>OUT</th><th>高隸屬案例</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<h3>原書的兩個解</h3>
+<p>在原書設定下（n ≥ 1；只有一致性 1.00 的兩列 OUT = 1；其餘 6 列 OUT = 0；8 個邏輯餘項）：</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>邏輯餘項設為「假」（不允許簡化假設）</h4>
+    <div class="formula" style="margin:.6rem 0">A·~M·~U ≤ W</div>
+    <p>一致性 1.00、覆蓋度 0.636。弱階級投票出現在<strong>富裕、製造業從業人口少、缺乏強大工會</strong>的國家；最佳實例是美國、法國、德國、荷蘭。這就是後來所謂的<strong>複雜解</strong>。</p>
+  </div>
+  <div class="new">
+    <h4>允許邏輯餘項作簡化假設</h4>
+    <div class="formula" style="margin:.6rem 0">~U ≤ W</div>
+    <p>一致性 1.00、覆蓋度 0.727。弱階級投票只有單一來源：<strong>沒有強大工會</strong>（工會隸屬度最低的是美國與法國）。這個解用了 <strong>6 個</strong>簡化假設（8 個邏輯餘項中的 6 個），是<strong>簡約解</strong>。</p>
+  </div>
+</div>
+
+<p>這兩個解分別把「複雜性」與「簡約性」推到極致。第 8、9 章會說明如何用理論與實質知識，在兩者之間找出「中間解」。</p>
+
+<div class="widget" id="w-min">
+  <div class="widget-head"><span class="wtag">練習</span> 布林最小化三小題</div>
+  <div class="widget-body">
+    <div data-qs></div>
+    <div class="result-box" data-out>請作答。</div>
+  </div>
+</div>
+
+<h3>模糊集特有的性質：結果與「非結果」可以同時成立</h3>
+<p>清晰集中，一個組合若是結果的子集，就不可能同時是「非結果」的子集。模糊集卻不同：</p>
+<ul>
+  <li>組合隸屬度 0.3、結果 0.6、非結果 0.4 → 0.3 同時 ≤ 0.6 與 ≤ 0.4，<strong>對結果與非結果都一致</strong>。</li>
+  <li>組合隸屬度 0.8、結果 0.7、非結果 0.3 → 0.8 同時 &gt; 0.7 與 &gt; 0.3，<strong>對兩者都不一致</strong>。</li>
+</ul>
+<p>所以在模糊集中，「對 ~Y 的充分性一致性」<strong>不能</strong>由「對 Y 的一致性」推算出來，兩者不是完全負相關。這給了我們分別分析結果與非結果的理由——在上面的實驗室切換到「~W」、把一致性門檻調到 0.80 就能看到：0111、1101、0101 這幾列對 W 和 ~W 的一致性<strong>都</strong>超過 0.8。</p>
+
+<div class="callout key">
+  <div class="ct">🔑 結果與非結果要分開分析：因果不對稱</div>
+  <p>簡約解告訴我們：沒有強大工會的國家，階級投票持續偏弱——它揭示了階級投票的<strong>主要障礙</strong>。但「什麼妨礙階級投票」與「什麼產生階級投票」是兩個不同的問題，答案可能很不一樣（參見 Lieberson, 1985）。集合論分析的不對稱性，正好吻合社會理論對<strong>因果不對稱</strong>的期待。分開分析結果存在與不存在，在清晰集 QCA 中也是標準作法。</p>
+</div>
+
+<details class="think">
+  <summary>想一想：如果一列對 W 和 ~W 的一致性都很高，代表什麼？</summary>
+  <div class="ans">
+    <p>通常代表這一列的案例在組合上的隸屬度<strong>普遍偏低</strong>（X 小到同時低於 Y 與 1−Y），所以「子集關係」幾乎是自動成立的，並沒有提供多少資訊。例如 a·I·M·U（愛爾蘭那一列）對 W 與 ~W 的一致性都是 0.875。本書之後的 fsQCA 版本與 R 的 <code class="inline">truthTable()</code> 會另外報告 <strong>PRI</strong>（proportional reduction in inconsistency）來偵測這種「兩邊都成立」的情形；在本例中，這一列的 PRI 只有 0.5，而兩列 1.00 的組合 PRI 都是 1.0。這是延伸知識，本章原書沒有討論。</p>
+  </div>
+</details>
+
+<!-- ================================================= -->
+<h2 id="s7">7. 為什麼不乾脆把模糊集二分化？ <span class="en">· Why not simply dichotomize fuzzy sets?</span></h2>
+
+<p>前面的程序有點繞：要評估案例分布、評估一致性，兩者還都要選門檻。很多人自然會問：<strong>既然 0.5 是「在／不在」的分界，何不直接以 0.5 把資料切成 0／1，做傳統清晰集分析？</strong></p>
+
+<p>Ragin 的回答是：直接拿同一份資料試試看。以 0.5 為交叉點二分化表 7-1，就得到原書表 7-4。資料確實變簡單了，但代價是：</p>
+
+<ol>
+  <li><strong>出現矛盾組態</strong>：比利時與丹麥在 A、I、M、U 上的清晰分數完全相同（1,0,0,1），結果卻一個 W = 1、一個 W = 0。傳統清晰集分析必須先處理這個矛盾。</li>
+  <li><strong>得到更寬鬆、更複雜的解</strong>：為了盡量接近模糊集的簡約解，Ragin 把矛盾列設為「假」，8 個邏輯餘項設為「無關（don't care）」，得到：
+    <div class="formula" style="margin:.6rem 0">~U + ~A + I·~M ≤ W</div>
+    比模糊集簡約解（~U）多出兩項：<strong>~A（不富裕）</strong>與 <strong>I·~M（收入不平等且製造業少）</strong>。</li>
+</ol>
+
+<div class="widget" id="w-dich">
+  <div class="widget-head"><span class="wtag">互動</span> 二分化 vs. 模糊：同一個條件，兩種一致性</div>
+  <div class="widget-body">
+    <div class="controls">
+      <div class="seg" data-term>
+        <button data-v="nU" class="on">~U</button>
+        <button data-v="nA">~A</button>
+        <button data-v="IM">I·~M</button>
+        <button data-v="AMU">A·~M·~U</button>
+        <button data-v="cs">~U + ~A + I·~M</button>
+      </div>
+    </div>
+    <div class="wgrid">
+      <svg class="plot" data-plot></svg>
+      <div class="table-wrap" style="margin-top:0">
+        <table class="tbl center compact" data-ctab>
+          <thead><tr><th>國家</th><th>X 模糊</th><th>W 模糊</th><th>X 清晰</th><th>W 清晰</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="k">清晰集一致性（X=1 的案例中 W=1 的比例）</div><div class="v" data-cc>—</div></div>
+      <div class="stat"><div class="k">模糊集一致性 Σmin/ΣX</div><div class="v gold" data-fc>—</div></div>
+      <div class="stat"><div class="k">模糊集覆蓋度</div><div class="v" data-fv>—</div></div>
+    </div>
+    <div class="result-box" data-out></div>
+  </div>
+</div>
+
+<h3>為什麼清晰集的一致性比較寬鬆？</h3>
+<p>在模糊集 XY 圖上，<strong>只要點都在對角線上方</strong>才算完美一致——不一致區是對角線下方的整個三角形。二分化之後，只有落在<strong>右下象限</strong>（X &gt; 0.5 且 Y &lt; 0.5）的點才算不一致；而這個象限只是對角線下方三角形的一部分，面積只有它的一半。標準降低了，更多組合「看起來」一致，解就多出額外的項。</p>
+
+<p>具體例子：挪威與丹麥在 ~A（不富裕）的隸屬度是 0.4，在 W 的隸屬度是 0.2。模糊集看：0.4 &gt; 0.2，這兩國削弱了「~A ⊆ W」。清晰集看：~A 編成 0、W 也編成 0，它們完全不構成反例。I·~M 也有同樣的情形。</p>
+
+<div class="callout warn">
+  <div class="ct">⚠️ Ragin 的結論：能用模糊集就別用清晰集</div>
+  <p>把模糊集二分化並不是好選擇。研究者應該用第 4、5 章的方法，把定距、定比尺度的變數校準成模糊集，再做模糊集分析。模糊集也優於<strong>多值集（multi-value sets；Cronqvist, 2004）</strong>，因為多值集往往會加劇有限多樣性的問題。<strong>清晰集應該只用於本質上就是類別的現象</strong>。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s8">8. 結論與實用附錄：模糊集真值表程序 <span class="en">· Conclusion &amp; practical appendix</span></h2>
+
+<p>fsQCA 的目標，是在與案例知識保持一致的前提下協助因果詮釋：探索描述性、組態性的證據，看看哪些不同的條件組合會產生同一個結果。本章的工具讓研究者能揭露並分析因果複雜性，同時<strong>不離開自己的案例與證據</strong>。</p>
+
+<p>以下是建構與分析模糊集真值表的完整步驟。前三步是準備工作，兩種軟體共通：</p>
+<ol>
+  <li><strong>建立模糊集資料</strong>（清晰集條件也可混用）。每個集合要仔細命名與定義（例如「持續弱階級投票國家的隸屬度」），認真校準三個錨點：完全隸屬、完全不隸屬、交叉點（第 4、5 章）。若前因條件的分數是 0.5 或非常接近 0.5，本章的程序要謹慎使用，甚至最好不用。</li>
+  <li><strong>匯入資料</strong>：Excel 存成逗號分隔（CSV），SPSS 存成 Tab 分隔；第一列是變數名稱，名稱不可有空格或標點。資料要包含結果與相關條件。</li>
+  <li><strong>挑選條件</strong>：數量要適中，大約 3–8 個。必要時可用第 11 章的方法建立「<strong>宏觀變數（macrovariables）</strong>」，例如以 fuzzy OR（取最大值）把三個可互相替代的條件合成一個，以降低向量空間的維度。</li>
+</ol>
+
+<div class="sw-tabs">
+  <div class="seg">
+    <button data-tab="fs" class="on">fsQCA 軟體</button>
+    <button data-tab="r">R（QCA 套件）</button>
+  </div>
+  <div class="sw-pane on" data-pane="fs">
+    <div class="steps">
+      <div class="step"><div><h4>（選用）建立宏觀變數</h4><p>在資料視窗點 <span class="menu-path">Variables → Compute</span>，用 <code class="inline">fuzzyor(x1, x2, x3)</code> 之類的函式把替代性條件合併。</p></div></div>
+      <div class="step"><div><h4>建立真值表</h4><p>點 <span class="menu-path">Analyze → Truth Table Algorithm</span>（原書的 2.0 版路徑為 Analyze → Fuzzy Sets → Truth Table Algorithm），指定結果與前因條件。得到的表有 2<sup>k</sup> 列，每列是向量空間的一個角；<strong>number</strong> 欄是隸屬度 &gt; 0.5 的案例數，其右側第二欄是 <strong>consistency</strong>。</p></div></div>
+      <div class="step"><div><h4>設定頻數門檻、刪除低頻列</h4><p>點 number 欄任一格 → <span class="menu-path">Sort → Descending</span>，觀察分布有沒有斷層。案例少時門檻設 1 或 2；N 大時要設實質性的門檻。點選低於門檻的第一列 → <span class="menu-path">Edit → Delete current row to last row</span>。剩下的就是達到頻數門檻的角。</p></div></div>
+      <div class="step"><div><h4>設定一致性門檻</h4><p>點 consistency 欄 → <span class="menu-path">Sort → Descending</span>，在高分區尋找落差。低於 0.75 代表嚴重不一致。建議做兩次分析並列呈現：一個較寬鬆（約 0.8）、一個較嚴格（約 0.9）。</p></div></div>
+      <div class="step"><div><h4>編碼結果欄</h4><p>在一致性欄左側、以結果命名的空白欄，手動輸入 1（一致性 ≥ 門檻）或 0。列數超過 20 時，可用 <span class="menu-path">Edit → Delete and code</span> 自動編碼。</p></div></div>
+      <div class="step"><div><h4>產生解</h4><p>按畫面下方的 <span class="menu-path">Standard Analyses</span>，得到<strong>複雜解、簡約解與中間解</strong>。中間解需要你根據實質知識輸入各條件的方向性預期（第 8、9 章）。</p></div></div>
+    </div>
+  </div>
+  <div class="sw-pane" data-pane="r">
+    <p>以下使用 Duşa 的 <code class="inline">QCA</code> 套件重現本章分析（資料取自原書表 7-1）：</p>
+<pre class="code"><span class="c-fn">library</span>(QCA)
+
+<span class="c-com"># 原書表 7-1：12 個先進工業民主國家</span>
+cv <span class="c-kw">&lt;-</span> <span class="c-fn">data.frame</span>(
+  W = <span class="c-fn">c</span>(<span class="c-num">0.6</span>,<span class="c-num">0.6</span>,<span class="c-num">0.2</span>,<span class="c-num">0.8</span>,<span class="c-num">0.6</span>,<span class="c-num">0.8</span>,<span class="c-num">0.6</span>,<span class="c-num">0.8</span>,<span class="c-num">0.2</span>,<span class="c-num">0.0</span>,<span class="c-num">0.4</span>,<span class="c-num">1.0</span>),  <span class="c-com"># 弱階級投票</span>
+  A = <span class="c-fn">c</span>(<span class="c-num">0.8</span>,<span class="c-num">0.6</span>,<span class="c-num">0.6</span>,<span class="c-num">0.6</span>,<span class="c-num">0.6</span>,<span class="c-num">0.2</span>,<span class="c-num">0.4</span>,<span class="c-num">0.6</span>,<span class="c-num">0.6</span>,<span class="c-num">0.8</span>,<span class="c-num">0.6</span>,<span class="c-num">1.0</span>),  <span class="c-com"># 高度富裕</span>
+  I = <span class="c-fn">c</span>(<span class="c-num">0.6</span>,<span class="c-num">0.2</span>,<span class="c-num">0.4</span>,<span class="c-num">0.8</span>,<span class="c-num">0.8</span>,<span class="c-num">0.6</span>,<span class="c-num">0.8</span>,<span class="c-num">0.4</span>,<span class="c-num">0.4</span>,<span class="c-num">0.4</span>,<span class="c-num">0.6</span>,<span class="c-num">0.8</span>),  <span class="c-com"># 收入不平等</span>
+  M = <span class="c-fn">c</span>(<span class="c-num">0.4</span>,<span class="c-num">0.2</span>,<span class="c-num">0.2</span>,<span class="c-num">0.2</span>,<span class="c-num">0.4</span>,<span class="c-num">0.8</span>,<span class="c-num">0.2</span>,<span class="c-num">0.2</span>,<span class="c-num">0.6</span>,<span class="c-num">0.8</span>,<span class="c-num">0.8</span>,<span class="c-num">0.4</span>),  <span class="c-com"># 製造業從業多</span>
+  U = <span class="c-fn">c</span>(<span class="c-num">0.6</span>,<span class="c-num">0.8</span>,<span class="c-num">0.8</span>,<span class="c-num">0.2</span>,<span class="c-num">0.4</span>,<span class="c-num">0.8</span>,<span class="c-num">0.6</span>,<span class="c-num">0.4</span>,<span class="c-num">0.8</span>,<span class="c-num">1.0</span>,<span class="c-num">0.6</span>,<span class="c-num">0.2</span>),  <span class="c-com"># 強大工會</span>
+  row.names = <span class="c-fn">c</span>(<span class="c-str">"AUS"</span>,<span class="c-str">"BEL"</span>,<span class="c-str">"DEN"</span>,<span class="c-str">"FRA"</span>,<span class="c-str">"GER"</span>,<span class="c-str">"IRE"</span>,
+                <span class="c-str">"ITA"</span>,<span class="c-str">"NET"</span>,<span class="c-str">"NOR"</span>,<span class="c-str">"SWE"</span>,<span class="c-str">"UK"</span>,<span class="c-str">"USA"</span>)
+)
+
+<span class="c-com"># 1) 模糊集真值表：n.cut = 頻數門檻，incl.cut = 一致性門檻</span>
+tt <span class="c-kw">&lt;-</span> <span class="c-fn">truthTable</span>(cv, outcome = <span class="c-str">"W"</span>, conditions = <span class="c-str">"A, I, M, U"</span>,
+                 n.cut = <span class="c-num">1</span>, incl.cut = <span class="c-num">0.9</span>,
+                 show.cases = <span class="c-kw">TRUE</span>, sort.by = <span class="c-str">"incl"</span>)
+tt    <span class="c-com"># 8 列有案例；只有 1000 與 1100 兩列 OUT = 1（incl = 1.000）</span>
+
+<span class="c-com"># 2) 複雜解（邏輯餘項設為假）</span>
+<span class="c-fn">minimize</span>(tt, details = <span class="c-kw">TRUE</span>)                  <span class="c-com"># A*~M*~U → W，incl 1.000，cov 0.636</span>
+
+<span class="c-com"># 3) 簡約解（允許邏輯餘項作簡化假設）</span>
+<span class="c-fn">minimize</span>(tt, include = <span class="c-str">"?"</span>, details = <span class="c-kw">TRUE</span>)  <span class="c-com"># ~U → W，incl 1.000，cov 0.727</span>
+
+<span class="c-com"># 4) 結果的否定要另外分析（因果不對稱）</span>
+ttn <span class="c-kw">&lt;-</span> <span class="c-fn">truthTable</span>(cv, outcome = <span class="c-str">"~W"</span>, conditions = <span class="c-str">"A, I, M, U"</span>,
+                  n.cut = <span class="c-num">1</span>, incl.cut = <span class="c-num">0.9</span>, show.cases = <span class="c-kw">TRUE</span>)
+
+<span class="c-com"># 5) 對照：在 0.5 二分化後做清晰集分析（原書表 7-4）</span>
+cs <span class="c-kw">&lt;-</span> <span class="c-fn">as.data.frame</span>(<span class="c-fn">lapply</span>(cv, <span class="c-kw">function</span>(x) <span class="c-fn">as.integer</span>(x <span class="c-kw">&gt;</span> <span class="c-num">0.5</span>)),
+                    row.names = <span class="c-fn">rownames</span>(cv))
+ttc <span class="c-kw">&lt;-</span> <span class="c-fn">truthTable</span>(cs, outcome = <span class="c-str">"W"</span>, conditions = <span class="c-str">"A, I, M, U"</span>,
+                  incl.cut = <span class="c-num">1</span>, show.cases = <span class="c-kw">TRUE</span>)  <span class="c-com"># 1001 列（比利時、丹麥）incl = 0.5，矛盾</span>
+<span class="c-fn">minimize</span>(ttc, include = <span class="c-str">"?"</span>)                 <span class="c-com"># ~A + ~U + I*~M（順序可能不同）</span>
+
+<span class="c-com"># 6) 用模糊資料檢查清晰集解的各項</span>
+<span class="c-fn">pof</span>(<span class="c-str">"~A + ~U + I*~M"</span>, outcome = <span class="c-str">"W"</span>, data = cv, relation = <span class="c-str">"sufficiency"</span>)</pre>
+    <p>第 6 步會看到：在模糊資料上，<code class="inline">~A</code> 的一致性只有約 0.87、<code class="inline">I*~M</code> 約 0.85，而 <code class="inline">~U</code> 是 1.00——正是第 7 節所說「清晰集一致性比較寬鬆」的證據。</p>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s9">9. 本章重點、名詞與自我測驗 <span class="en">· Review</span></h2>
+
+<ol class="takeaways">
+  <li>真值表列出前因條件「存在／不存在」的全部 2<sup>k</sup> 種組合，比第 6 章只看單一配方的縮減版更嚴謹，也能發現「某條件必須<strong>缺席</strong>」的配方。</li>
+  <li>k 個模糊集條件構成的向量空間有 2<sup>k</sup> 個<strong>角</strong>，與真值表的 2<sup>k</sup> 列<strong>一一對應</strong>；案例在某角的隸屬度＝相應各條件（或其否定）的最小值。</li>
+  <li>每個案例<strong>最多只在一個角</strong>的隸屬度 &gt; 0.5；若某條件剛好 0.5，案例不屬於任何角，所以校準時應避免 0.5。</li>
+  <li><strong>頻數門檻</strong>依「隸屬度 &gt; 0.5 的案例數」決定哪些列有經驗基礎，其餘為邏輯餘項；小樣本常用 1，大樣本要提高。</li>
+  <li>每列的<strong>一致性</strong>＝Σmin(X,Y)/ΣX，用全部案例計算；依<strong>一致性門檻</strong>（找落差，通常 ≥ 0.75，建議 ≥ 0.85）把結果欄編為 1／0，再做布林最小化。</li>
+  <li>原書結果：複雜解 A·~M·~U（一致性 1.00、覆蓋度 0.636）；簡約解 ~U（一致性 1.00、覆蓋度 0.727，用了 6 個簡化假設）。結果與非結果應<strong>分開分析</strong>。</li>
+  <li>在 0.5 二分化會產生<strong>矛盾組態</strong>（比利時 vs. 丹麥），且一致性標準變寬鬆，解多出 ~A 與 I·~M。能用模糊集就不要用清晰集。</li>
+</ol>
+
+<h3>名詞對照</h3>
+<div class="table-wrap">
+  <table class="tbl gloss">
+    <thead><tr><th>本教材用語</th><th>簡中譯本</th><th>英文</th><th>白話說明</th></tr></thead>
+    <tbody>
+      <tr><td>因果複雜性</td><td>因果复杂性</td><td>causal complexity</td><td>同一結果可由多種不同條件組合產生</td></tr>
+      <tr><td>向量空間</td><td>向量空间</td><td>vector space</td><td>以每個模糊集條件為一個座標軸所形成的空間（單位超立方體）</td></tr>
+      <tr><td>角</td><td>角</td><td>corner</td><td>向量空間中各座標皆為 0 或 1 的點，對應真值表一列</td></tr>
+      <tr><td>真值表列</td><td>真值表行</td><td>truth table row</td><td>一種邏輯上可能的條件組合</td></tr>
+      <tr><td>頻數門檻</td><td>频数阈值</td><td>frequency threshold</td><td>一列至少要有幾個隸屬度 &gt; 0.5 的案例才納入分析</td></tr>
+      <tr><td>一致性門檻</td><td>一致性阈值／临界值</td><td>consistency threshold</td><td>一致性達到多少才把結果欄編為 1</td></tr>
+      <tr><td>邏輯餘項</td><td>逻辑余项</td><td>logical remainder</td><td>缺乏（足夠）經驗案例的條件組合</td></tr>
+      <tr><td>簡化假設</td><td>简化假设</td><td>simplifying assumption</td><td>為了簡化解而對邏輯餘項結果所做的假定</td></tr>
+      <tr><td>矛盾組態</td><td>矛盾组态</td><td>contradictory configuration</td><td>條件組合相同、結果卻相反的案例</td></tr>
+      <tr><td>複雜解／簡約解／中間解</td><td>复杂解／简约解／中间解</td><td>complex / parsimonious / intermediate solution</td><td>不用、全用、選擇性使用邏輯餘項所得的解</td></tr>
+      <tr><td>交叉點</td><td>交叉点／交叉值</td><td>crossover point</td><td>隸屬度 0.5，「偏在」與「偏不在」的分界</td></tr>
+      <tr><td>宏觀變數</td><td>宏观变量</td><td>macrovariable</td><td>把幾個可替代的條件合併（如 fuzzy OR）成的一個條件</td></tr>
+      <tr><td>多值集</td><td>多值集</td><td>multi-value set</td><td>條件可取 0、1、2…多個類別值的集合（mvQCA）</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>自我測驗</h3>
+<p class="quiz-score" data-quiz-score></p>
+
+<div class="quiz" data-answer="2">
+  <p class="q">用 5 個模糊集前因條件所形成的向量空間，有幾個角？對應的真值表有幾列？</p>
+  <div class="opts">
+    <button class="opt">10 個角、10 列</button>
+    <button class="opt">25 個角、32 列</button>
+    <button class="opt">32 個角、32 列</button>
+    <button class="opt">32 個角，但真值表列數要看案例數</button>
+  </div>
+  <div class="explain">k 維向量空間有 2<sup>k</sup> 個角，與清晰集真值表的 2<sup>k</sup> 列一一對應：2<sup>5</sup> = 32。列數與案例數無關；案例少只會讓很多列成為邏輯餘項。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">某案例在 B 的隸屬度 0.7、在 C 的隸屬度 0.9。它在 ~B·~C 這個角的隸屬度是？</p>
+  <div class="opts">
+    <button class="opt">0.1</button>
+    <button class="opt">0.3</button>
+    <button class="opt">0.7</button>
+    <button class="opt">0.2</button>
+  </div>
+  <div class="explain">~B = 0.3、~C = 0.1，交集取最小值 → 0.1。它在 B·C 角的隸屬度則是 min(0.7, 0.9) = 0.7，是唯一 &gt; 0.5 的角。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">一個案例在條件 A 的隸屬度剛好是 0.5，其他條件都是 0.9。它在所有條件組合中的最大隸屬度是？</p>
+  <div class="opts">
+    <button class="opt">0.9，屬於全部大寫的那個角</button>
+    <button class="opt">0.9，同時屬於兩個角</button>
+    <button class="opt">0.1</button>
+    <button class="opt">0.5，不會被算進任何一列的案例數</button>
+  </div>
+  <div class="explain">A 與 ~A 都是 0.5，任何組合取最小值後最多 0.5，沒有任何角 &gt; 0.5。這就是 Ragin 建議校準時避免 0.5 的原因。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">原書的 12 國資料中，頻數門檻設為 1 的意思是？</p>
+  <div class="opts">
+    <button class="opt">每列至少要有 1 個案例的隸屬度 &gt; 0，否則刪除</button>
+    <button class="opt">至少有 1 個案例隸屬度 &gt; 0.5 的組合才保留；其餘 8 個組合當作邏輯餘項</button>
+    <button class="opt">一致性至少要 1.0 才編為 1</button>
+    <button class="opt">每個國家只能出現在 1 列中，其餘列的隸屬度歸零</button>
+  </div>
+  <div class="explain">頻數以「隸屬度 &gt; 0.5 的案例數」計算。每個國家都會在 16 列中有部分隸屬（多半 &gt; 0），所以「&gt; 0」不是有意義的標準。本例有 8 個角 n ≥ 1、8 個角 n = 0。</div>
+</div>
+
+<div class="quiz" data-answer="2">
+  <p class="q">表 7-3 中，Ragin 選擇只把一致性 1.00 的兩列編為 1，最主要的依據是？</p>
+  <div class="opts">
+    <button class="opt">模糊集分析一律要求一致性 1.0</button>
+    <button class="opt">這兩列的案例最多</button>
+    <button class="opt">排序後 1.00 與下一列 0.875 之間有明顯落差</button>
+    <button class="opt">機率檢定顯示其他列不顯著</button>
+  </div>
+  <div class="explain">Ragin 建議把一致性降序排列，在高分區找實質的落差。他也指出完美一致性在模糊集資料中很少見，多數分析的門檻會低於 1.0；本例只是剛好落差落在 1.00 與 0.875 之間。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">某組合在一個案例的隸屬度是 0.3，該案例在結果 Y 的隸屬度是 0.6。下列敘述何者正確？</p>
+  <div class="opts">
+    <button class="opt">此案例支持「組合 ⊆ Y」，但否定「組合 ⊆ ~Y」</button>
+    <button class="opt">此案例同時符合「組合 ⊆ Y」與「組合 ⊆ ~Y」</button>
+    <button class="opt">此案例同時否定兩者</button>
+    <button class="opt">模糊集中不可能出現這種情形</button>
+  </div>
+  <div class="explain">~Y = 0.4。0.3 ≤ 0.6 且 0.3 ≤ 0.4，所以對 Y 與 ~Y 都一致。模糊集中，對結果與非結果的一致性不是完全負相關，因此要分開分析。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">把表 7-1 在 0.5 二分化後做清晰集分析，解多出了 ~A 與 I·~M。主要原因是？</p>
+  <div class="opts">
+    <button class="opt">清晰集分析用了比較少的邏輯餘項</button>
+    <button class="opt">二分化讓案例數增加了</button>
+    <button class="opt">清晰集的一致性標準比較嚴格</button>
+    <button class="opt">清晰集只在右下象限算不一致，標準較寬鬆；例如挪威、丹麥在模糊集中違反 ~A ⊆ W，二分化後卻變成「一致」</button>
+  </div>
+  <div class="explain">模糊集要求所有點在對角線上方；清晰集只要求沒有點落在右下象限（面積只有對角線下三角形的一半）。挪威、丹麥 ~A = 0.4 &gt; W = 0.2，在模糊集中是不一致，二分化後兩者都變成 0，問題就消失了。</div>
+</div>
+
+<p><button class="btn ghost" data-quiz-reset type="button">重新作答</button></p>
+
+<div class="done-box" data-ch="7">
+  <span class="msg"></span>
+  <button class="btn" type="button">標記本章為已讀</button>
+</div>
+
+<nav class="chap-nav">
+  <a class="prev" href="ch6.html"><div class="dir">← 上一章</div><div class="ttl">第 6 章 組態思維</div></a>
+  <a class="next" href="ch8.html"><div class="dir">下一章 →</div><div class="ttl">第 8 章 有限多樣性與反事實案例</div></a>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Charles C. Ragin, <em>Redesigning Social Inquiry: Fuzzy Sets and Beyond</em> (University of Chicago Press, 2008)<br>
+  以學習為目的之概念整理與重新詮釋，非原書譯文 · <a href="index.html">回本書首頁</a></p>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="js/ragin.js"></script>
+<script>
+/* ============ 共用資料：原書表 7-1 ============ */
+const CH7 = (function () {
+  const names = ['澳洲', '比利時', '丹麥', '法國', '德國', '愛爾蘭', '義大利', '荷蘭', '挪威', '瑞典', '英國', '美國'];
+  // [W, A, I, M, U]
+  const data = [
+    [0.6, 0.8, 0.6, 0.4, 0.6], [0.6, 0.6, 0.2, 0.2, 0.8], [0.2, 0.6, 0.4, 0.2, 0.8], [0.8, 0.6, 0.8, 0.2, 0.2],
+    [0.6, 0.6, 0.8, 0.4, 0.4], [0.8, 0.2, 0.6, 0.8, 0.8], [0.6, 0.4, 0.8, 0.2, 0.6], [0.8, 0.6, 0.4, 0.2, 0.4],
+    [0.2, 0.6, 0.4, 0.6, 0.8], [0.0, 0.8, 0.4, 0.8, 1.0], [0.4, 0.6, 0.6, 0.8, 0.6], [1.0, 1.0, 0.8, 0.4, 0.2],
+  ];
+  const L = ['A', 'I', 'M', 'U'];
+  const r3 = (x) => Math.round(x * 1000) / 1000;
+  // 16 個角，A 為最高位（與原書表 7-2 順序相同）
+  const corners = [];
+  for (let i = 0; i < 16; i++) corners.push([3, 2, 1, 0].map((b) => (i >> b) & 1));
+  const lab = (row) => row.map((v, j) => (v ? L[j] : L[j].toLowerCase())).join('·');
+  const mem = (conds, row) => r3(Math.min(...row.map((v, j) => (v ? conds[j] : 1 - conds[j]))));
+  const W = data.map((d) => d[0]);
+  const memTab = corners.map((row) => data.map((d) => mem(d.slice(1), row)));
+  const nTab = memTab.map((ms) => ms.filter((m) => m > 0.5).length);
+  return { names, data, L, r3, corners, lab, mem, W, memTab, nTab };
+})();
+
+/* ============ 布林最小化（Quine–McCluskey 簡化版，k 個條件）============ */
+function qmc(pos, dc, k) {
+  // pos, dc: 以整數表示的列（A 為最高位）；回傳最小覆蓋的解（陣列，每項為 term 陣列：1 / 0 / -1 代表 -）
+  const allow = new Set([...pos, ...dc]);
+  const terms = [];
+  const total = 3 ** k;
+  for (let t = 0; t < total; t++) {
+    const term = []; let x = t;
+    for (let j = 0; j < k; j++) { term.push((x % 3) - 1); x = Math.floor(x / 3); }
+    term.reverse(); // 值：-1 表示「—」，0、1 為條件狀態
+    const cov = [];
+    for (let m = 0; m < 2 ** k; m++) {
+      let ok = true;
+      for (let j = 0; j < k; j++) { const bit = (m >> (k - 1 - j)) & 1; if (term[j] !== -1 && term[j] !== bit) { ok = false; break; } }
+      if (ok) cov.push(m);
+    }
+    if (cov.every((m) => allow.has(m))) terms.push({ term, cov });
+  }
+  const sub = (a, b) => a.term.every((v, j) => b.term[j] === -1 || b.term[j] === v); // a 被 b 涵蓋
+  const primes = terms.filter((a) => !terms.some((b) => b !== a && sub(a, b) && b.cov.length > a.cov.length))
+    .filter((p) => p.cov.some((m) => pos.includes(m)));
+  if (!pos.length) return [];
+  const lits = (s) => s.reduce((n, p) => n + p.term.filter((v) => v !== -1).length, 0);
+  for (let size = 1; size <= primes.length; size++) {
+    const found = [];
+    const pick = (start, chosen) => {
+      if (chosen.length === size) {
+        const c = new Set(chosen.flatMap((p) => p.cov));
+        if (pos.every((m) => c.has(m))) found.push(chosen.slice());
+        return;
+      }
+      for (let i = start; i < primes.length; i++) { chosen.push(primes[i]); pick(i + 1, chosen); chosen.pop(); }
+    };
+    pick(0, []);
+    if (found.length) {
+      const best = Math.min(...found.map(lits));
+      return found.filter((s) => lits(s) === best).slice(0, 3);
+    }
+  }
+  return [];
+}
+function termStr(term, L) {
+  const parts = term.map((v, j) => (v === -1 ? null : (v ? L[j] : '~' + L[j]))).filter(Boolean);
+  return parts.length ? parts.join('·') : '1（恆真）';
+}
+function termMem(term, conds) {
+  const vals = term.map((v, j) => (v === -1 ? 1 : (v ? conds[j] : 1 - conds[j])));
+  return Math.min(...vals);
+}
+
+/* ---------- 表 7-1 ---------- */
+(function () {
+  const tb = document.getElementById('t71');
+  tb.innerHTML = CH7.data.map((d, i) => `<tr><td>${CH7.names[i]}</td>${d.map((v) => `<td>${v.toFixed(1)}</td>`).join('')}</tr>`).join('');
+})();
+
+/* ---------- 向量空間探索器 ---------- */
+(function () {
+  const root = document.getElementById('w-vs');
+  const svg = root.querySelector('[data-svg]');
+  const sliders = [...root.querySelectorAll('[data-s]')];
+  const outs = [...root.querySelectorAll('[data-o]')];
+  const out = root.querySelector('[data-out]');
+  const thead = root.querySelector('[data-ctab] thead'), tbody = root.querySelector('[data-ctab] tbody');
+  const NM = ['B', 'C', 'D'];
+  let dim = 2;
+  const ns = 'http://www.w3.org/2000/svg';
+  const el = (tag, at, txt) => { const e = document.createElementNS(ns, tag); for (const k in at) e.setAttribute(k, at[k]); if (txt != null) e.textContent = txt; svg.appendChild(e); return e; };
+  function proj(p) {
+    if (dim === 2) return [70 + p[0] * 240, 285 - p[1] * 240];
+    // 斜投影：x 向右、y 向上、z 往右上後方
+    return [55 + p[0] * 190 + p[2] * 95, 300 - p[1] * 190 - p[2] * 75];
+  }
+  function cornerName(c) { return c.map((v, j) => (v ? NM[j] : '~' + NM[j])).join('·'); }
+  function draw(vals, corners, mems, near) {
+    svg.innerHTML = '';
+    svg.setAttribute('viewBox', dim === 2 ? '-45 0 455 330' : '-50 0 480 335');
+    if (dim === 2) {
+      const pts = [[0, 0], [1, 0], [1, 1], [0, 1]].map(proj);
+      el('polygon', { class: 'face', points: pts.map((p) => p.join(',')).join(' ') });
+      pts.forEach((p, i) => { const q = pts[(i + 1) % 4]; el('line', { class: 'edge', x1: p[0], y1: p[1], x2: q[0], y2: q[1] }); });
+      el('text', { class: 'axl', x: 190, y: 318, 'text-anchor': 'middle' }, 'B →');
+      el('text', { class: 'axl', x: 30, y: 165, 'text-anchor': 'middle' }, 'C ↑');
+      const [px, py] = proj(vals);
+      el('line', { class: 'guide', x1: px, y1: py, x2: px, y2: proj([vals[0], 0])[1] });
+      el('line', { class: 'guide', x1: px, y1: py, x2: proj([0, vals[1]])[0], y2: py });
+    } else {
+      const P = (a, b, c) => proj([a, b, c]);
+      const E = [[[0,0,0],[1,0,0]],[[0,0,0],[0,1,0]],[[0,0,0],[0,0,1]],[[1,0,0],[1,1,0]],[[1,0,0],[1,0,1]],[[0,1,0],[1,1,0]],[[0,1,0],[0,1,1]],[[0,0,1],[1,0,1]],[[0,0,1],[0,1,1]],[[1,1,0],[1,1,1]],[[1,0,1],[1,1,1]],[[0,1,1],[1,1,1]]];
+      E.forEach(([a, b]) => {
+        const back = (a[0] === 0 && a[1] === 0 && a[2] === 1) || (b[0] === 0 && b[1] === 0 && b[2] === 1 && a[0] === 0 && a[1] === 0);
+        const p = P(...a), q = P(...b);
+        el('line', { class: 'edge' + (back ? ' back' : ''), x1: p[0], y1: p[1], x2: q[0], y2: q[1] });
+      });
+      el('text', { class: 'axl', x: 150, y: 322, 'text-anchor': 'middle' }, 'B →');
+      el('text', { class: 'axl', x: 28, y: 205, 'text-anchor': 'middle' }, 'C ↑');
+      el('text', { class: 'axl', x: 330, y: 255, 'text-anchor': 'middle' }, 'D ↗');
+      const [px, py] = proj(vals), [fx, fy] = proj([vals[0], 0, vals[2]]);
+      el('line', { class: 'guide', x1: px, y1: py, x2: fx, y2: fy });
+    }
+    corners.forEach((c, i) => {
+      const [x, y] = proj(c);
+      if (i === near) { const [px, py] = proj(vals); el('line', { class: 'link', x1: px, y1: py, x2: x, y2: y }); }
+    });
+    corners.forEach((c, i) => {
+      const [x, y] = proj(c);
+      el('circle', { class: 'corner' + (i === near ? ' near' : ''), cx: x, cy: y, r: 6 });
+      const right = c[0] === 1, up = c[1] === 1;
+      if (dim === 2) {
+        el('text', { class: 'clab' + (i === near ? ' near' : ''), x: x + (right ? 9 : -9), y: y + (up ? -9 : 17), 'text-anchor': right ? 'start' : 'end' },
+          `${cornerName(c)} ${mems[i].toFixed(2)}`);
+      } else {
+        el('text', { class: 'clab' + (i === near ? ' near' : ''), x: x + (right ? 8 : -8), y: y + (up ? -8 : 15), 'text-anchor': right ? 'start' : 'end', style: 'font-size:10.5px' },
+          cornerName(c));
+      }
+    });
+    const [px, py] = proj(vals);
+    el('circle', { class: 'case', cx: px, cy: py, r: 7 });
+  }
+  function run() {
+    const vals = sliders.slice(0, dim).map((s) => +s.value);
+    sliders.forEach((s, i) => { outs[i].textContent = (+s.value).toFixed(2); });
+    const corners = [];
+    for (let i = 0; i < 2 ** dim; i++) corners.push([...Array(dim)].map((_, j) => (i >> (dim - 1 - j)) & 1));
+    const mems = corners.map((c) => CH7.r3(Math.min(...c.map((v, j) => (v ? vals[j] : 1 - vals[j])))));
+    const near = mems.findIndex((m) => m > 0.5);
+    draw(vals, corners, mems, near);
+    thead.innerHTML = `<tr><th>列</th>${NM.slice(0, dim).map((n) => `<th>${n}</th>`).join('')}<th>角</th><th>隸屬度</th></tr>`;
+    tbody.innerHTML = corners.map((c, i) => {
+      const cls = i === near ? 'hi' : (mems[i] === 0.5 ? 'warnc' : '');
+      return `<tr><td>${i + 1}</td>${c.map((v) => `<td>${v}</td>`).join('')}<td class="${cls}">${cornerName(c)}</td><td class="${cls}">${mems[i].toFixed(2)}</td></tr>`;
+    }).join('');
+    const calc = vals.map((v, j) => `${NM[j]}=${v.toFixed(2)}`).join('，');
+    let msg = `案例位置：(${vals.map((v) => v.toFixed(2)).join(', ')})　→ ${2 ** dim} 個角、對應真值表 ${2 ** dim} 列\n`;
+    if (near >= 0) {
+      const c = corners[near];
+      const parts = c.map((v, j) => (v ? `${NM[j]}=${vals[j].toFixed(2)}` : `~${NM[j]}=${(1 - vals[j]).toFixed(2)}`));
+      msg += `最接近的角：<span class="hl">${cornerName(c)}</span>，隸屬度 = min(${parts.join(', ')}) = ${mems[near].toFixed(2)}\n`;
+      msg += `其餘 ${2 ** dim - 1} 個角的隸屬度都 ≤ 0.5——一個案例最多只會「偏屬於」一個角。\n`;
+      msg += `決定這個角的捷徑：把每個分數以 0.5 為界看成 1 或 0（${calc}）。`;
+      const mx = Math.min(...vals.map((v) => Math.abs(v - 0.5)));
+      if (mx < 0.15) msg += `\n⚠ 有條件很接近 0.5：案例雖然仍偏屬於這個角，但隸屬度只有 ${mems[near].toFixed(2)}，離牆壁很近。`;
+    } else {
+      msg += `<span class="hl">沒有任何角的隸屬度 &gt; 0.5！</span>\n有條件剛好是 0.5（最大模糊點），X 與 ~X 都是 0.5，任何包含它的組合最多只有 0.5。\n案例落在兩個角正中間的「牆」上，不會被算進任何一列的案例數——這就是校準時要避免 0.5 的原因。`;
+    }
+    out.innerHTML = msg;
+  }
+  sliders.forEach((s) => s.addEventListener('input', run));
+  const btns = root.querySelectorAll('[data-dim] button');
+  btns.forEach((b) => b.addEventListener('click', () => {
+    btns.forEach((x) => x.classList.toggle('on', x === b));
+    dim = +b.dataset.v;
+    root.querySelector('[data-drow]').style.display = dim === 3 ? '' : 'none';
+    run();
+  }));
+  root.querySelector('[data-half]').addEventListener('click', () => { sliders[0].value = 0.5; run(); });
+  run();
+})();
+
+/* ---------- 表 7-2：案例分布 ---------- */
+(function () {
+  const root = document.getElementById('w-dist');
+  const sel = root.querySelector('[data-country]'), ncut = root.querySelector('[data-ncut]');
+  const thead = root.querySelector('[data-dtab] thead'), tbody = root.querySelector('[data-dtab] tbody');
+  const out = root.querySelector('[data-out]');
+  sel.innerHTML = '<option value="-1">— 全部 —</option>' + CH7.names.map((n, i) => `<option value="${i}">${n}</option>`).join('');
+  sel.value = '3';
+  thead.innerHTML = `<tr><th>#</th><th>組合（角）</th>${CH7.names.map((n, i) => `<th data-col="${i}">${n}</th>`).join('')}<th>n</th></tr>`;
+  function run() {
+    const c = +sel.value, nc = +ncut.value;
+    root.querySelector('[data-ncutout]').textContent = nc;
+    tbody.innerHTML = CH7.corners.map((row, r) => {
+      const n = CH7.nTab[r];
+      const cells = CH7.memTab[r].map((m, i) => `<td class="${m > 0.5 ? 'hi' : ''}${i === c ? ' colsel' : ''}">${m.toFixed(1)}</td>`).join('');
+      return `<tr class="${n < nc ? 'rem' : ''}"><td>${r + 1}</td><td>${CH7.lab(row)}</td>${cells}<td class="${n >= nc ? 'hi' : 'lo'}">${n}</td></tr>`;
+    }).join('');
+    const kept = CH7.nTab.filter((n) => n >= nc).length;
+    const covered = CH7.nTab.reduce((s, n) => s + (n >= nc ? n : 0), 0);
+    let msg = '';
+    if (c >= 0) {
+      const d = CH7.data[c].slice(1);
+      const row = d.map((v) => (v > 0.5 ? 1 : 0));
+      const r = row.reduce((s, v) => s * 2 + v, 0);
+      const parts = row.map((v, j) => (v ? `${CH7.L[j]}=${d[j].toFixed(1)}` : `~${CH7.L[j]}=${(1 - d[j]).toFixed(1)}`));
+      msg += `${CH7.names[c]}：A=${d[0]}, I=${d[1]}, M=${d[2]}, U=${d[3]}\n`;
+      msg += `以 0.5 為界 → ${CH7.lab(row)}（第 ${r + 1} 列）\n`;
+      msg += `隸屬度 = min(${parts.join(', ')}) = <span class="hl">${CH7.memTab[r][c].toFixed(1)}</span>；其餘 15 列都 ≤ 0.5（粉紅框那一欄）。\n\n`;
+    }
+    msg += `頻數門檻 = ${nc}：保留 <span class="hl">${kept}</span> 個組合（涵蓋 ${covered} / 12 個國家的「最近角」），其餘 ${16 - kept} 個組合（灰字）視為邏輯餘項。`;
+    if (nc > 1) msg += `\n提高門檻後，連一些確實有國家「住著」的角也被當成邏輯餘項——小樣本時這樣做通常太嚴格；大樣本時則能過濾測量誤差。`;
+    out.innerHTML = msg;
+  }
+  sel.addEventListener('input', run); ncut.addEventListener('input', run);
+  run();
+})();
+
+/* ---------- 單一角的一致性 XY 圖 ---------- */
+(function () {
+  const root = document.getElementById('w-cons');
+  const sel = root.querySelector('[data-corner]'), svg = root.querySelector('[data-plot]');
+  const tb = root.querySelector('[data-ctab2] tbody'), out = root.querySelector('[data-out]');
+  sel.innerHTML = CH7.corners.map((row, r) => `<option value="${r}">${CH7.lab(row)}（${row.join('')}，n=${CH7.nTab[r]}）</option>`).join('');
+  sel.value = '12';
+  function run() {
+    const r = +sel.value, X = CH7.memTab[r], Y = CH7.W;
+    const inc = RG.fz.consSuf(X, Y), cov = RG.fz.covSuf(X, Y);
+    const pts = X.map((x, i) => ({ x, y: Y[i], label: CH7.names[i], cls: x > Y[i] + 1e-9 ? 'off' : (x > 0.5 ? 'sel' : ''), tag: (x > Y[i] + 1e-9 || x > 0.5) ? CH7.names[i] : null }));
+    RG.xy(svg, pts, { xlab: `${CH7.lab(CH7.corners[r])} 的隸屬度（X）`, ylab: '弱階級投票 W（Y）', shade: 'suf' });
+    root.querySelector('[data-n]').textContent = CH7.nTab[r];
+    root.querySelector('[data-inc]').textContent = RG.fz.fmt(inc, 3);
+    root.querySelector('[data-cov]').textContent = RG.fz.fmt(cov, 3);
+    tb.innerHTML = X.map((x, i) => `<tr><td>${CH7.names[i]}</td><td class="${x > 0.5 ? 'hi' : ''}">${x.toFixed(1)}</td><td>${Y[i].toFixed(1)}</td><td class="${x > Y[i] + 1e-9 ? 'warnc' : ''}">${Math.min(x, Y[i]).toFixed(1)}</td></tr>`).join('');
+    const sx = RG.fz.sum(X), sm = RG.fz.sum(X.map((x, i) => Math.min(x, Y[i])));
+    const bad = X.map((x, i) => ({ i, x, y: Y[i] })).filter((o) => o.x > o.y + 1e-9);
+    let msg = `一致性 = Σmin(X,Y) / ΣX = ${sm.toFixed(1)} / ${sx.toFixed(1)} = <span class="hl">${inc.toFixed(3)}</span>\n`;
+    if (!bad.length) msg += '所有 12 個點都在對角線上（或上方）：這個角是 W 的完美子集合。';
+    else msg += `落在對角線下方（X > Y，紅點）的國家：${bad.map((o) => `${CH7.names[o.i]}（${o.x.toFixed(1)} > ${o.y.toFixed(1)}）`).join('、')}\n每個紅點都讓分子少了 X − Y，拉低一致性。`;
+    if (CH7.nTab[r] === 0) msg += '\n⚠ 這個角沒有任何隸屬度 > 0.5 的案例（n = 0）：一致性看起來可能很高，但只是因為大家的 X 都很小——經驗基礎太弱，依頻數門檻它是邏輯餘項。';
+    else msg += inc >= 0.9 ? '\n→ 高度一致：可視為 W 的子集合。' : inc >= 0.75 ? '\n→ 中等一致：要看你設定的一致性門檻。' : '\n→ 不一致：0.75 以下代表有實質的不一致。';
+    out.innerHTML = msg;
+  }
+  sel.addEventListener('input', run);
+  run();
+})();
+
+/* ---------- 模糊集真值表實驗室 ---------- */
+(function () {
+  const root = document.getElementById('w-tt');
+  const nIn = root.querySelector('[data-n]'), cIn = root.querySelector('[data-c]');
+  const tb = root.querySelector('[data-ttab] tbody'), out = root.querySelector('[data-out]');
+  let outcome = 'W', picked = -1;
+  const conds = CH7.data.map((d) => d.slice(1));
+  function run() {
+    const nc = +nIn.value, ic = +cIn.value;
+    root.querySelector('[data-nout]').textContent = nc;
+    root.querySelector('[data-cout]').textContent = ic.toFixed(2);
+    const Y = outcome === 'W' ? CH7.W : CH7.W.map((w) => CH7.r3(1 - w));
+    const rows = CH7.corners.map((row, r) => {
+      const X = CH7.memTab[r];
+      const inc = RG.fz.consSuf(X, Y);
+      const n = CH7.nTab[r];
+      const cases = X.map((x, i) => (x > 0.5 ? CH7.names[i] : null)).filter(Boolean);
+      const rem = n < nc;
+      const OUT = rem ? null : (inc >= ic - 1e-9 ? 1 : 0);
+      return { r, row, n, inc, cases, rem, OUT };
+    });
+    const shown = rows.slice().sort((a, b) => (a.rem - b.rem) || (b.inc - a.inc) || (b.n - a.n));
+    tb.innerHTML = shown.map((o) => `<tr class="clickable ${o.rem ? 'rem' : ''}" data-r="${o.r}">${o.row.map((v) => `<td>${v}</td>`).join('')}<td>${o.n}</td><td class="${o.OUT === 1 ? 'hi' : ''}">${o.inc.toFixed(3)}</td><td class="${o.OUT === 1 ? 'hi' : ''}">${o.rem ? '?' : o.OUT}</td><td style="text-align:left">${o.cases.join('、') || '—'}</td></tr>`).join('');
+    tb.querySelectorAll('tr').forEach((tr) => tr.addEventListener('click', () => { picked = +tr.dataset.r; run(); }));
+    const pos = rows.filter((o) => o.OUT === 1).map((o) => o.r);
+    const neg = rows.filter((o) => o.OUT === 0).map((o) => o.r);
+    const rem = rows.filter((o) => o.rem).map((o) => o.r);
+    const yName = outcome === 'W' ? 'W' : '~W';
+    let msg = `OUT=1：${pos.length} 列　OUT=0：${neg.length} 列　邏輯餘項（?）：${rem.length} 列\n`;
+    if (!pos.length) {
+      msg += '\n沒有任何列達到一致性門檻，無法得到解。試著調低一致性門檻。';
+    } else {
+      const fmtSol = (sol) => {
+        const s = sol.map((p) => termStr(p.term, CH7.L)).join(' + ');
+        const Xs = conds.map((c) => Math.max(...sol.map((p) => termMem(p.term, c))));
+        return `${s} → ${yName}　（一致性 ${RG.fz.consSuf(Xs, Y).toFixed(3)}，覆蓋度 ${RG.fz.covSuf(Xs, Y).toFixed(3)}）`;
+      };
+      const comp = qmc(pos, [], 4);
+      const pars = qmc(pos, rem, 4);
+      msg += `\n複雜解（邏輯餘項設為假）：\n  <span class="hl">${comp.map(fmtSol).join('\n  或 ')}</span>`;
+      if (rem.length) {
+        const used = new Set();
+        pars[0].forEach((p) => p.cov.forEach((m) => { if (rem.includes(m)) used.add(m); }));
+        msg += `\n簡約解（允許簡化假設）：\n  <span class="hl">${pars.map(fmtSol).join('\n  或 ')}</span>\n  用到 ${used.size} 個邏輯餘項作為簡化假設：${[...used].map((m) => CH7.lab(CH7.corners[m])).join('、') || '—'}`;
+      } else {
+        msg += '\n（頻數門檻為 0：沒有邏輯餘項，簡約解與複雜解相同。）';
+      }
+      if (outcome === 'W' && nc === 1 && pos.length === 2 && pos.includes(8) && pos.includes(12)) msg += '\n✔ 這正是原書的設定與結果。';
+    }
+    if (outcome === 'nW') {
+      const both = rows.filter((o) => !o.rem && o.OUT === 1 && RG.fz.consSuf(CH7.memTab[o.r], CH7.W) >= ic - 1e-9);
+      if (both.length) msg += `\n\n注意：${both.map((o) => o.row.join('')).join('、')} 這幾列對 W 與 ~W 的一致性都達到門檻——模糊集中結果與非結果的一致性不是互補的。`;
+    }
+    if (picked >= 0) {
+      const o = rows[picked];
+      msg += `\n\n【第 ${o.row.join('')} 列 ${CH7.lab(o.row)}】n = ${o.n}，對 ${yName} 的一致性 ${o.inc.toFixed(3)}。` +
+        (o.rem ? '未達頻數門檻 → 邏輯餘項。' : (o.OUT ? '達到門檻 → OUT = 1。' : '未達一致性門檻 → OUT = 0。'));
+    }
+    out.innerHTML = msg;
+  }
+  nIn.addEventListener('input', run); cIn.addEventListener('input', run);
+  const btns = root.querySelectorAll('[data-outc] button');
+  btns.forEach((b) => b.addEventListener('click', () => { btns.forEach((x) => x.classList.toggle('on', x === b)); outcome = b.dataset.v; run(); }));
+  root.querySelector('[data-reset]').addEventListener('click', () => {
+    nIn.value = 1; cIn.value = 0.9; outcome = 'W'; picked = -1;
+    btns.forEach((x) => x.classList.toggle('on', x.dataset.v === 'W'));
+    run();
+  });
+  run();
+})();
+
+/* ---------- 布林最小化練習 ---------- */
+(function () {
+  const root = document.getElementById('w-min');
+  const box = root.querySelector('[data-qs]'), out = root.querySelector('[data-out]');
+  const qs = [
+    { q: '① 模糊集真值表中，<span class="code-row">1000（A·i·m·u，荷蘭）</span>與 <span class="code-row">1100（A·I·m·u，法、德、美）</span>兩列 OUT 都是 1。合併時哪個條件可以拿掉？',
+      opts: ['A', 'I', 'M', 'U'], a: 1,
+      why: '兩列只在 I 上不同（0 vs 1），結果都一樣，所以 I 與結果無關：A·~I·~M·~U + A·I·~M·~U = A·~M·~U。這就是原書的複雜解。' },
+    { q: '② 簡約解 ~U 涵蓋所有 U = 0 的 8 個角。這 8 個角中，有幾個是邏輯餘項（也就是用了幾個簡化假設）？',
+      opts: ['2 個', '4 個', '6 個', '8 個'], a: 2,
+      why: 'U = 0 的 8 個角中，只有 1000 與 1100 有案例（且 OUT = 1）；其餘 0000、0010、0100、0110、1010、1110 共 6 個是邏輯餘項，被假定為 1。這就是原書說的「6 個簡化假設」。' },
+    { q: '③ 二分化後的清晰集資料中，<span class="code-row">愛爾蘭 0111（a·I·M·U）</span>與<span class="code-row">義大利 0101（a·I·m·U）</span>都是 W = 1。這兩列可合併成什麼？',
+      opts: ['~A·I·U', '~A·M·U', 'I·M·U', '~A·I·M'], a: 0,
+      why: '兩列只差 M，所以 M 可以拿掉，得到 ~A·I·U。若再允許邏輯餘項（0100、0110 都沒有案例），就能進一步簡化成清晰集解中的 ~A。' },
+  ];
+  box.innerHTML = qs.map((o, i) => `<div class="mini-q" data-i="${i}"><div>${o.q}</div><div class="opts">${o.opts.map((t, j) => `<button type="button" data-j="${j}">${t}</button>`).join('')}</div></div>`).join('');
+  box.querySelectorAll('.mini-q').forEach((div) => {
+    const o = qs[+div.dataset.i];
+    div.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+      div.querySelectorAll('button').forEach((x) => x.classList.remove('right', 'wrong'));
+      const ok = +b.dataset.j === o.a;
+      b.classList.add(ok ? 'right' : 'wrong');
+      if (!ok) div.querySelectorAll('button')[o.a].classList.add('right');
+      out.innerHTML = `<span class="hl">${ok ? '✔ 正確' : '✘ 不太對'}</span>（第 ${+div.dataset.i + 1} 題）\n${o.why}`;
+    }));
+  });
+})();
+
+/* ---------- 二分化 vs 模糊 ---------- */
+(function () {
+  const root = document.getElementById('w-dich');
+  const svg = root.querySelector('[data-plot]'), tb = root.querySelector('[data-ctab] tbody'), out = root.querySelector('[data-out]');
+  const f = {
+    nU: { name: '~U', fn: (c) => 1 - c[3] },
+    nA: { name: '~A', fn: (c) => 1 - c[0] },
+    IM: { name: 'I·~M', fn: (c) => Math.min(c[1], 1 - c[2]) },
+    AMU: { name: 'A·~M·~U', fn: (c) => Math.min(c[0], 1 - c[2], 1 - c[3]) },
+    cs: { name: '~U + ~A + I·~M', fn: (c) => Math.max(1 - c[3], 1 - c[0], Math.min(c[1], 1 - c[2])) },
+  };
+  const crisp = (v) => (v > 0.5 ? 1 : 0);
+  let cur = 'nU';
+  function run() {
+    const t = f[cur];
+    const X = CH7.data.map((d) => CH7.r3(t.fn(d.slice(1)))), Y = CH7.W;
+    const cX = CH7.data.map((d) => crisp(t.fn(d.slice(1).map(crisp)))), cY = Y.map(crisp);
+    const inX = cX.map((v, i) => i).filter((i) => cX[i] === 1);
+    const cc = inX.length ? inX.filter((i) => cY[i] === 1).length / inX.length : NaN;
+    const fc = RG.fz.consSuf(X, Y), fv = RG.fz.covSuf(X, Y);
+    const pts = X.map((x, i) => ({ x, y: Y[i], label: CH7.names[i], cls: x > Y[i] + 1e-9 ? 'off' : '', tag: x > Y[i] + 1e-9 ? CH7.names[i] : null }));
+    const g = RG.xy(svg, pts, { xlab: `${t.name} 的隸屬度（X）`, ylab: '弱階級投票 W（Y）', shade: 'suf', cross: true });
+    const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    poly.setAttribute('class', 'area-bad');
+    poly.setAttribute('points', `${g.sx(0.5)},${g.sy(0.5)} ${g.sx(1)},${g.sy(0.5)} ${g.sx(1)},${g.sy(0)} ${g.sx(0.5)},${g.sy(0)}`);
+    svg.insertBefore(poly, svg.querySelector('circle'));
+    tb.innerHTML = X.map((x, i) => `<tr><td>${CH7.names[i]}</td><td class="${x > Y[i] + 1e-9 ? 'warnc' : ''}">${x.toFixed(1)}</td><td>${Y[i].toFixed(1)}</td><td class="${cX[i] ? 'hi' : ''}">${cX[i]}</td><td>${cY[i]}</td></tr>`).join('');
+    root.querySelector('[data-cc]').textContent = RG.fz.fmt(cc, 2);
+    root.querySelector('[data-fc]').textContent = RG.fz.fmt(fc, 3);
+    root.querySelector('[data-fv]').textContent = RG.fz.fmt(fv, 3);
+    const bad = X.map((x, i) => i).filter((i) => X[i] > Y[i] + 1e-9);
+    let msg = `清晰集眼光：${t.name} = 1 的國家有 ${inX.length} 個（${inX.map((i) => CH7.names[i]).join('、')}），其中 W = 1 的有 ${inX.filter((i) => cY[i]).length} 個 → 一致性 ${RG.fz.fmt(cc, 2)}\n`;
+    msg += `模糊集眼光：一致性 = <span class="hl">${fc.toFixed(3)}</span>`;
+    if (bad.length) msg += `，在對角線下方的國家：${bad.map((i) => `${CH7.names[i]}（${X[i].toFixed(1)} > ${Y[i].toFixed(1)}）`).join('、')}`;
+    else msg += '，所有點都在對角線上方。';
+    if (bad.length && cc === 1 && (cur === 'nA' || cur === 'IM')) msg += `\n→ 這些點都不在右下的紅色象限（X > 0.5 且 Y < 0.5），所以二分化後「看不見」它們的不一致。清晰集的標準比較寬鬆，${t.name} 因此混進了清晰集解。`;
+    if (cur === 'nU') msg += '\n→ 兩種眼光都完全一致：這是模糊集簡約解，也是唯一經得起嚴格檢驗的項。';
+    if (cur === 'AMU') msg += '\n→ 模糊集複雜解：一致性 1.00、覆蓋度 0.636。';
+    if (cur === 'cs') msg += '\n→ 清晰集解整體：用模糊資料檢查，一致性降到 0.88；覆蓋度雖高（0.91），但是以放寬一致性為代價換來的。';
+    msg += '\n\n另外別忘了：二分化後比利時與丹麥都是 1001，但 W 一個 1、一個 0——矛盾組態。';
+    out.innerHTML = msg;
+  }
+  const btns = root.querySelectorAll('[data-term] button');
+  btns.forEach((b) => b.addEventListener('click', () => { btns.forEach((x) => x.classList.toggle('on', x === b)); cur = b.dataset.v; run(); }));
+  run();
+})();
+</script>
+</body>
+</html>

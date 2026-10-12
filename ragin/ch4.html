@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 4 章 為什麼要校準 · 重新設計社會科學研究</title>
+<meta name="description" content="Ragin《重新設計社會科學研究》第 4 章互動教材：校準的意義、定量與定性研究的測量實務、模糊集作為橋樑、相關與不相關的變異">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="css/ragin.css">
+<style>
+  .slider-row .sl-label.wide { width: auto; min-width: 5.6rem; font-size: .85rem; }
+  .slider-row { flex-wrap: wrap; }
+  .slider-row input[type=range] { flex: 1 1 140px; min-width: 120px; max-width: 260px; }
+  .cplot { width: 100%; max-width: 520px; height: auto; display: block; margin: .4rem auto; }
+  .cplot .anc { stroke: var(--gold); stroke-width: 1.4; stroke-dasharray: 4 3; }
+  .cplot .anc-t { fill: var(--gold); font-size: 10px; font-weight: 700; }
+  .cplot .band { fill: var(--accent2); opacity: .10; }
+  .cplot .ptA { fill: var(--accent); stroke: var(--bg-card); stroke-width: 1.5; }
+  .cplot .ptB { fill: var(--rose); stroke: var(--bg-card); stroke-width: 1.5; }
+  .chk-list { display: flex; flex-wrap: wrap; gap: .35rem .9rem; margin: .4rem 0 .8rem; font-size: .88rem; }
+  .chk-list label { display: inline-flex; align-items: center; gap: .3rem; cursor: pointer; }
+  .bar { display: inline-block; height: .7rem; border-radius: 3px; vertical-align: middle; background: var(--accent); }
+  .bar.neg { background: var(--rose); }
+  .bar.mem { background: var(--accent2); }
+  .zcell { white-space: nowrap; font-family: var(--mono); font-size: .85rem; }
+  .cls-item { border: 1px solid var(--border); border-radius: 10px; padding: .7rem .9rem; margin: .55rem 0; background: var(--bg); }
+  .cls-item .stmt { margin: 0 0 .5rem; }
+  .cls-item .fb { font-size: .86rem; margin-top: .45rem; color: var(--ink-soft); display: none; }
+  .cls-item.done .fb { display: block; }
+  .cls-item .seg button.right { background: var(--ok); color: #fff; border-color: var(--ok); }
+  .cls-item .seg button.wrong { background: var(--bad); color: #fff; border-color: var(--bad); }
+  .phase { display: inline-block; padding: .1rem .55rem; border-radius: 999px; font-size: .82rem; font-weight: 700; background: var(--bg-soft); border: 1px solid var(--border); }
+  .bridge { display: grid; grid-template-columns: 1fr auto 1fr; gap: .6rem; align-items: stretch; margin: 1.2rem 0; }
+  .bridge > div { border: 1px solid var(--border); border-radius: 10px; padding: .8rem 1rem; background: var(--bg-card); font-size: .92rem; }
+  .bridge .mid { border-color: var(--accent2); background: var(--accent2-soft, var(--bg-soft)); text-align: center; display: flex; flex-direction: column; justify-content: center; }
+  .bridge h4 { margin: 0 0 .35rem; font-size: .95rem; }
+  .bridge ul { margin: 0; padding-left: 1.1rem; }
+  @media (max-width: 680px) { .bridge { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div id="readbar"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="logo rg">R</span><span>重新設計社會科學研究<small>Ragin (2008) 互動教材</small></span></a>
+    <nav class="topnav">
+      <a href="index.html">本書首頁</a>
+      <a href="ch0.html">導讀</a>
+      <a href="ch1.html">第一篇</a>
+      <a href="ch4.html">第二篇</a>
+      <a href="ch6.html">第三篇</a>
+      <a href="ch8.html">第四篇</a>
+      <a href="../index.html">QCA with R ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="chapter-head">
+  <div class="part">第二篇　校準與測量</div>
+  <div class="eyebrow">CHAPTER 4</div>
+  <h1>為什麼要校準</h1>
+  <div class="en">Why Calibrate? Measurement, Meaning, and Fuzzy Sets</div>
+  <div class="src">對應原書第 4 章（中譯本頁 47–56）</div>
+</div>
+
+<p class="lead">體溫計顯示 38.5°C，你立刻知道「發燒了」；但如果有人只告訴你「你的體溫比全班平均高 1.3 個標準差」，你還是不知道該不該請假。前者有<strong>外部標準</strong>可以對照，後者只告訴你<strong>相對位置</strong>。本章要談的就是這個差別：社會科學的大多數測量屬於後者，而模糊集要求我們做到前者——這就是<strong>校準（calibration）</strong>。</p>
+
+<div class="objectives">
+  <div class="ct">🎯 讀完本章，你應該能夠……</div>
+  <ol>
+    <li>用溫度計的例子說明「校準」是什麼，以及它和單純「測量」差在哪裡。</li>
+    <li>解釋為什麼平均數、標準差、z 分數只是一種<strong>依樣本而變的被動校準</strong>。</li>
+    <li>說明定性研究如何依靠<strong>外部知識與語境</strong>來詮釋測量（例如國家形成的「早」與「晚」）。</li>
+    <li>說出模糊集為何同時是「定性的」與「定量的」，因而能成為兩種方法之間的橋樑。</li>
+    <li>區分「常規變數」與「模糊集」：模糊集必須先指定<strong>目標集合</strong>，並把<strong>不相關的變異</strong>截斷。</li>
+  </ol>
+</div>
+
+<nav class="toc">
+  <strong>本章目錄</strong>
+  <ol>
+    <li><a href="#s1">什麼是校準</a></li>
+    <li><a href="#s2">定量研究中常見的測量實務</a></li>
+    <li><a href="#s3">定性研究中常見的測量實務</a></li>
+    <li><a href="#s4">模糊集：兩種方法之間的橋樑</a></li>
+    <li><a href="#s5">模糊集與常規變數的差異</a></li>
+    <li><a href="#s6">R 對照：z 分數 vs. 校準（觀念預覽）</a></li>
+    <li><a href="#s7">本章重點、名詞與自我測驗</a></li>
+  </ol>
+</nav>
+
+<p>模糊集進入社會科學的時間並不長：Smithson 在 1987 年首先有系統地引介它，但真正被廣泛應用，要等到 QCA 把集合論（而不是相關）當作分析基礎之後。兩者結合就是 <strong>fsQCA</strong>。Ragin 在這一章提出一個關鍵主張：</p>
+
+<div class="callout key">
+  <div class="ct">🔑 本章主張</div>
+  <p>好的模糊集分析，取決於<strong>建構良好的模糊集</strong>；而建構模糊集的核心問題是<strong>校準</strong>。「完全隸屬」長什麼樣子？「完全不隸屬」呢？隸屬度 0.75 的人和 0.90 的人差在哪？正因為模糊集<strong>必須</strong>校準，它在很多方面反而優於定量與定性研究的慣用測量。模糊集提供的是一條「中間路徑」——但不是兩者各讓一步的折衷，而是<strong>同時補上兩者的缺點</strong>。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s1">1. 什麼是校準 <span class="en">· What is calibration?</span></h2>
+
+<p>在化學、天文、物理等自然科學中，校準是再平常不過的例行工作：研究者調整儀器與讀數，讓它們<strong>對齊公認、可靠的已知標準</strong>。有了這些標準，讀數就能被<strong>直接解讀</strong>。</p>
+
+<p>例如 20°C 為什麼「有意義」？因為攝氏溫標有兩個外部錨點：0°C 是水結冰、100°C 是水沸騰，20°C 落在兩者之間、偏冷的一側。相對地，如果你手上的溫度計<strong>沒有校準</strong>，你頂多知道「A 比 B 熱」或「A 比這批物體的平均溫度高」，卻<strong>無法判斷 A 到底是熱的還是冷的</strong>。</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>未校準的測量：只知道相對位置</h4>
+    <ul>
+      <li>「這杯水比那杯熱」</li>
+      <li>「這杯水比全部樣本的平均溫度高」</li>
+      <li>「A 國比 B 國更民主」「A 國比大多數國家更民主」</li>
+    </ul>
+    <p>知道排序，但<strong>不知道「是不是」</strong>：是熱還是冷？是民主還是威權？</p>
+  </div>
+  <div class="new">
+    <h4>校準後的測量：可以對照外部標準</h4>
+    <ul>
+      <li>「這杯水 100°C，正在沸騰」</li>
+      <li>「這杯水 45°C，算是熱水」</li>
+      <li>「A 國完全屬於民主國家集合」</li>
+    </ul>
+    <p>讀數本身就帶有<strong>意義</strong>，因為它被錨定在大家公認的標準上。</p>
+  </div>
+</div>
+
+<p>社會科學中，依照公認標準來校準的做法相當少見。Ragin 在註腳中舉了兩個例外：<strong>貧窮線</strong>（「誰算窮人」本身就是一個政策意義重大的外部標準）與聯合國《人類發展報告》中的<strong>人類發展指數</strong>。</p>
+
+<div class="callout warn">
+  <div class="ct">⚠️ 別混淆：經濟學裡的「校準」</div>
+  <p>經濟學家也說「校準（calibrate）」，但意思完全不同：他們是把模型中的某個<strong>參數固定在特定值</strong>，再觀察其他參數的表現。本章談的「校準」是<strong>測量</strong>的校準——讓分數可以對照外部標準來解讀，兩者不要搞混。</p>
+</div>
+
+<h3>相移：質變發生的地方</h3>
+<p>校準在<strong>某個條件替其他條件「設定情境」</strong>時特別重要。以水（H<sub>2</sub>O）為例：溫度與體積的關係在 0°C 與 100°C 會發生<strong>質的改變</strong>——在 0°C 結冰、在 100°C 沸騰成蒸氣，體積都會出現跳躍式的改變，不再是溫度的平滑函數。攝氏溫標的錨點恰好就標記了這兩個「<strong>相移（phase shift）</strong>」。研究水的人如果不考慮這兩個斷點，就無法正確理解溫度與其他性質之間的關係。換句話說：<strong>知道外部的相移在哪裡，正是校準的基礎</strong>。</p>
+
+<div class="widget" id="w-temp">
+  <div class="widget-head"><span class="wtag">互動</span> 溫度計 → 「熱水」集合：自己設定錨點</div>
+  <div class="widget-body">
+    <p style="margin-top:0">溫度（°C）是一個<strong>已經校準過</strong>的量尺（錨定在冰點與沸點）。但「熱水」是一個<strong>集合</strong>，它需要另外三個錨點：<strong>完全不隸屬</strong>（一點也不熱）、<strong>交叉點</strong>（熱與不熱最模糊的地方，0.5）、<strong>完全隸屬</strong>（確定是熱水）。拖曳滑桿看看隸屬度怎麼變。</p>
+    <div class="slider-row"><span class="sl-label wide">水溫</span><input type="range" min="-10" max="110" step="1" value="45" data-t><output data-tout>45</output><span>°C</span></div>
+    <div class="slider-row"><span class="sl-label wide">完全不隸屬</span><input type="range" min="0" max="60" step="1" value="25" data-non><output data-nonout>25</output><span>°C</span></div>
+    <div class="slider-row"><span class="sl-label wide">交叉點 0.5</span><input type="range" min="5" max="80" step="1" value="40" data-cross><output data-crossout>40</output><span>°C</span></div>
+    <div class="slider-row"><span class="sl-label wide">完全隸屬</span><input type="range" min="10" max="100" step="1" value="55" data-full><output data-fullout>55</output><span>°C</span></div>
+    <svg class="cplot plot" data-tplot aria-label="溫度與熱水隸屬度曲線"></svg>
+    <div class="stats">
+      <div class="stat"><div class="k">物理狀態（相）</div><div class="v" data-phase>—</div></div>
+      <div class="stat"><div class="k">「熱水」隸屬度</div><div class="v gold" data-tm>—</div></div>
+    </div>
+    <div class="result-box" data-tnote></div>
+  </div>
+</div>
+
+<p>注意這個示範裡有<strong>兩層</strong>外部標準：攝氏溫標的錨點（冰點、沸點）讓「45°C」有意義；而「熱水」集合的錨點，則反映我們對「熱」的<strong>共同理解</strong>（洗澡水、燙手）。錨點不是從資料算出來的，而是由實質知識決定的——這正是下一章「直接校準法」要正式操作的東西（滑桿的對應方式就是第 5 章的公式：完全隸屬 ↔ 約 0.95、交叉點 ↔ 0.5、完全不隸屬 ↔ 約 0.05）。</p>
+
+<h3>社會科學中的「情境設定條件」</h3>
+<p>社會現象裡充滿類似「相移」的<strong>情境設定條件（context-setting conditions）</strong>——它們會「開啟」或「關閉」某種性質或關係。Ragin 舉出三種：</p>
+
+<div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th>類型</th><th>例子</th><th>形式</th></tr></thead>
+    <tbody>
+      <tr><td><strong>範圍條件</strong>（scope condition）</td><td>「這個關係只在民主國家成立」</td><td>二分：在範圍內／外</td></tr>
+      <tr><td><strong>經驗上的族群</strong>（empirical population）</td><td>「這個關係只在拉丁美洲國家成立」</td><td>二分：屬於該族群與否</td></tr>
+      <tr><td><strong>統計交互作用</strong>中的調節變數 Z</td><td>Z 越高，X 對 Y 的效果從 0 變成很強</td><td>連續：Z 有程度之分</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>這三者的邏輯其實相同：都是「讓某種關係得以出現」的條件。前兩者甚至可以看成交互作用的特例（Z 只取 0 或 1）。但當 Z 是連續的，<strong>校準問題就自動冒出來了</strong>：</p>
+<ul>
+  <li>Z 要到<strong>什麼水準</strong>，X 與 Y 之間才開始有關係？</li>
+  <li>Z 要到<strong>什麼水準</strong>，這個關係才變得很強？</li>
+</ul>
+<p>要回答這些問題，就必須替 Z 指定有意義的數值範圍——這其實就是在<strong>校準 Z</strong>，而且必須引入外部的實質知識。Ragin 批評：使用交互作用模型的研究者大多忽略這件事，只檢定交互項是否顯著、增加了多少解釋變異，卻沒有追問「在哪個範圍內，關係才成立」。</p>
+
+<details class="think">
+  <summary>想一想：「教育對所得的報酬，只在勞動市場開放的國家才明顯」——這裡的 Z 是什麼？要怎麼校準？</summary>
+  <div class="ans">
+    <p>Z 是「勞動市場開放程度」。如果用一個連續指數來衡量，迴歸只會告訴你交互項係數是否顯著。但校準的問法是：<strong>指數多高才算「開放的勞動市場」？</strong>多低算「完全封閉」？交叉點在哪？這需要你了解各國勞動制度的實質知識（例如是否有就業保障、職業執照門檻），而不是用樣本平均數一切兩半。一旦你校準了 Z，「開放勞動市場」就成為一個<strong>集合</strong>，可以直接進入第 1–3 章的集合分析。</p>
+  </div>
+</details>
+
+<p>為了替模糊集鋪路，Ragin 接著比較定量與定性兩種研究傳統的測量習慣，並指出兩者的目標不同：</p>
+<div class="callout info">
+  <div class="ct">ℹ️ 兩種測量目標</div>
+  <p><strong>定量測量</strong>的目標：精確地定出案例<strong>彼此之間的相對位置</strong>。<br>
+  <strong>定性測量</strong>的目標：區分<strong>相關與不相關的變異</strong>，也就是<strong>詮釋</strong>變異的意義。<br>
+  模糊集同時呼應這兩種關懷。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s2">2. 定量研究中常見的測量實務 <span class="en">· Common measurement practices in quantitative research</span></h2>
+
+<p>儘管 Duncan、Pawson 等學者花了很大力氣，社會科學的測量實務仍相當鬆散。主流做法是<strong>指標法（indicator approach）</strong>：替理論概念找一個最好的經驗指標。例如用「人均國民生產毛額（GNP，經購買力平價調整）」作為「國家發展程度」的指標。</p>
+
+<h3>指標法的三個層次</h3>
+<div class="steps">
+  <div class="step"><div><h4>單一指標</h4><p>唯一的要求：指標要在案例之間<strong>有變異</strong>，而且排序方式要符合概念（例如 GNP 要能把較不發達與較發達的國家分開）。越細的分級、<strong>等距</strong>的尺度越受青睞：5,500 美元比 5,600 美元剛好少 100 美元；1,000→2,000 與 21,000→22,000 都被視為「同樣」差 1,000 美元。這類等距、等比尺度正好適合迴歸與相關分析。</p></div></div>
+  <div class="step"><div><h4>多重指標（心理計量）</h4><p>依據心理計量理論（Nunnally &amp; Bernstein），由多個相關指標組成的<strong>指數</strong>比單一指標更準確、可靠。例如 GNP 會高估石油輸出國的發展程度；加入識字率、預期壽命、能源消耗、勞動力結構等指標後，這些國家的分數就會被拉回來。理想上，各指標應該彼此高度相關；只有在<em>所有</em>指標上都高分的案例，才拿得到指數的最高分。</p></div></div>
+  <div class="step"><div><h4>結構方程模型（SEM）</h4><p>把多重指標的邏輯擴展到<strong>多個概念及其相互關係</strong>（Bollen）。指數的建構是在整個模型的脈絡中進行的，會朝著「讓假設關係最佳化」的方向調整，研究者可以同時評估各指數與整個模型的一致性。</p></div></div>
+</div>
+
+<h3>問題在哪？一切都是「相對」的</h3>
+<p>這整個指標家族都深深依賴<strong>可觀察的變異</strong>，而這些變異幾乎都是<strong>特定樣本</strong>的產物。案例的「高」與「低」，是在分數分布中<strong>彼此相對</strong>定義的：</p>
+<ul>
+  <li>美國的人均 GNP 比義大利高 1,000 美元 → 美國「相對更發達」。</li>
+  <li>高於樣本集中趨勢（通常是<strong>平均數</strong>）的案例得高分，差距越大分數越高；低於平均數的則得低分。</li>
+</ul>
+
+<div class="formula">
+  <span class="flabel">z 分數：以樣本平均數與標準差為「標準」</span>
+  z<sub>i</sub> = <span class="frac"><span>x<sub>i</sub> − x̄<sub>樣本</sub></span><span>s<sub>樣本</sub></span></span>
+</div>
+
+<p>Ragin 指出：用「偏離樣本平均數」來界定高低，其實是一種<strong>非常原始、被動的校準</strong>。原始在於：它的標準（平均數、標準差）是從資料<strong>歸納</strong>出來的，而且<strong>換一個樣本就跟著變</strong>。物理學的校準則依靠外部、公認的標準（例如水的沸點），不會因為你這次量了哪幾杯水而改變。</p>
+
+<div class="widget" id="w-z">
+  <div class="widget-head"><span class="wtag">互動</span> 相對位置 vs. 外部標準：換個樣本試試看</div>
+  <div class="widget-body">
+    <p style="margin-top:0">下表是 14 個國家的人均 GNP（<strong>教學用示意數值</strong>，約略接近 2000 年代初的購買力平價水準，非原書資料）。選擇不同的樣本組成，觀察<strong>z 分數</strong>如何隨樣本改變，而以外部錨點校準的「已開發國家」<strong>隸屬度</strong>卻固定不動。（校準錨點採第 5 章 Ragin 的設定：20,000 美元 = 完全隸屬、5,000 = 交叉點、2,500 = 完全不隸屬。）</p>
+    <div class="controls">
+      <div class="seg" data-zpick>
+        <button data-v="all" class="on">全部 14 國</button>
+        <button data-v="rich">富國俱樂部</button>
+        <button data-v="poor">開發中國家為主</button>
+      </div>
+    </div>
+    <div class="chk-list" data-zchk></div>
+    <div class="stats">
+      <div class="stat"><div class="k">樣本平均數 x̄</div><div class="v" data-zmean>—</div></div>
+      <div class="stat"><div class="k">樣本標準差 s</div><div class="v" data-zsd>—</div></div>
+      <div class="stat"><div class="k">樣本數 n</div><div class="v" data-zn>—</div></div>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl" data-ztable>
+        <thead><tr><th>國家</th><th>人均 GNP（美元）</th><th>z 分數（隨樣本變）</th><th>「已開發國家」隸屬度（固定）</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="result-box" data-znote></div>
+  </div>
+</div>
+
+<p>試著比較兩個極端：在「富國俱樂部」樣本中，墨西哥的 z = −1.33，看起來「很不發達」，連西班牙都略低於平均（z = −0.09）；在「開發中國家為主」的樣本中，墨西哥的 z = +0.93，突然變成「相當發達」。但墨西哥的經濟並沒有改變——<strong>改變的只是比較的對象</strong>。相對地，它在「已開發國家」集合中的隸屬度始終是 0.65：偏屬於、但不完全屬於該集合。</p>
+
+<h3>所有變異都被視為「同等相關」</h3>
+<p>指標法還有一個隱藏的預設：<strong>指標在整個範圍內的任何變化，都同樣反映了背後的概念</strong>。收入分布最頂端的兩個國家都已是「高度發達國家」，但指標法仍會說「其中一個比另一個更發達」，而且通常照單全收，<strong>不會回頭看案例，追問這個差距對概念而言是否有意義</strong>。</p>
+
+<div class="callout tip">
+  <div class="ct">📌 Ragin 的註腳：同樣 1,000 美元，意義大不同</div>
+  <p>生活在人均 GNP 2,000 美元的國家，和 1,000 美元的國家，日子可能天差地遠；但 22,000 美元與 21,000 美元的國家，生活幾乎沒有差別。使用常規指標的研究者很少正面處理這個問題；使用校準測量（如模糊集）的研究者則<strong>不得不</strong>面對它。（研究者有時會做對數轉換來調整變異的權重，但這並不常見，而且通常只被當成讓模型更穩健的機械操作，而不是對「哪些差異有意義」的實質判斷。）</p>
+</div>
+
+<details class="think">
+  <summary>想一想：等比尺度有「有意義的零點」，被稱為最高的測量尺度。模糊集呢？</summary>
+  <div class="ans">
+    <p>Ragin 在註腳中半開玩笑地說：等比尺度之所以被認為最高級，是因為它被<strong>一個</strong>有意義的零點錨定。而模糊集有<strong>三個</strong>數值錨點：1.0（完全隸屬）、0.0（完全不隸屬）、0.5（交叉點）。如果「錨定越多 = 測量水準越高」，那麼模糊集的測量水準反而<strong>高於</strong>等比尺度。</p>
+  </div>
+</details>
+
+<!-- ================================================= -->
+<h2 id="s3">3. 定性研究中常見的測量實務 <span class="en">· Common measurement practices in qualitative research</span></h2>
+
+<p>定量研究的測量是<strong>以理論為中心</strong>：指標是模型的零件，由理論推導而來。定性研究則更<strong>以知識與案例為中心</strong>，比較貼近經驗證據，也更具「<strong>反覆迭代</strong>」的性格：研究者先帶著想法與概念進場，用案例來精煉概念，在概念與證據之間<strong>來回往返</strong>（Becker；Glaser &amp; Strauss；Katz），經驗指標與測量就在這個過程中被一步步界定出來。</p>
+
+<h3>例子：國家形成的「早」與「晚」</h3>
+<p>宏觀比較研究常區分國家形成較「早」與較「晚」的國家（Rokkan）。早期形成的國家有某些優勢——例如 Laitin 指出，今天的國家領導人已經無法像早期君主那樣強制推行統一語言，因為會招致國際譴責。</p>
+<p>那麼，什麼叫「早」？國家形成的時間可以追溯，所以研究者大可做一個精確的等比尺度：國家「年齡」。但問題是：</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>只看「年齡」這個指標</h4>
+    <p>A 國 500 歲、B 國 250 歲 → A 的年齡是 B 的<strong>兩倍</strong>，兩者差距很大。</p>
+  </div>
+  <div class="new">
+    <h4>用國家形成理論來詮釋</h4>
+    <p>A 與 B 都<strong>完全屬於「早期形成」</strong>。這 250 年的差距，對「早 vs. 晚」這個概念<strong>毫無關係</strong>。</p>
+  </div>
+</div>
+
+<p>所以「年齡」必須依據累積的實質知識加以調整，才能以符合理論的方式詮釋「早」與「晚」。這種校準在定性研究中天天在做，只是<strong>很少被明確寫出來或模型化</strong>。從定量研究者的眼光看，定性研究者好像是「為了配合預設而扭曲測量」；但事實上，他們是在依據案例知識與研究關懷，<strong>詮釋「單純的指標」</strong>。</p>
+
+<h3>案例導向：在乎「是不是某一類」</h3>
+<p>定性測量的第二個特徵是更<strong>案例導向</strong>。差別雖細微卻很重要：</p>
+<div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th></th><th>變數導向（variable-oriented）</th><th>案例導向（case-oriented）</th></tr></thead>
+    <tbody>
+      <tr><td><strong>焦點</strong></td><td>一個樣本或母體在某個<strong>維度</strong>上的變異（例如各國發展程度的差異）</td><td>某<strong>一類</strong>案例（例如「已開發國家」）</td></tr>
+      <tr><td><strong>案例的角色</strong></td><td>只是「進行測量的地點」、單純的觀察值，用來提供跨案例模式的原料</td><td>本身有身分，可以被個別辨認與研究</td></tr>
+      <tr><td><strong>案例如何變化</strong></td><td>在維度上有高低程度</td><td>在「<strong>滿足某集合隸屬要求</strong>」的程度上有差異：有的完全符合、有的部分符合、有的完全不符合</td></tr>
+      <tr><td><strong>標準從哪來</strong></td><td>通常不需要指定隸屬標準；高低由樣本分布（如平均數）決定</td><td>由<strong>外部</strong>決定的公認標準（例如：一個國家憑什麼算「已開發」）；標準若不合公認理解，類別本身就會被質疑</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>因此，案例導向的觀點天生更適合「<strong>測量應該被校準</strong>」的主張。定性與定量測量的根本差別在於：<strong>定性研究會替測量賦予意義</strong>——什麼樣的條件構成「早期國家形成」、要具備什麼才算「已開發國家」。一言以蔽之：<strong>定性研究的測量是詮釋性的</strong>。</p>
+
+<div class="callout info">
+  <div class="ct">ℹ️ Cicourel 的提醒</div>
+  <p>定性社會學家 Aaron Cicourel 在《社會學的方法與測量》（1964）中指出，社會學家是透過<strong>語言、文化意義、測量系統本身的性質</strong>這三種「媒介」來建立類別，並把類別連結到可觀察的事物上。像「民主國家」「已開發國家」這種等價類別，不能和語言與文化意義的問題切割開來。他的大意是：把變數當成定量的、因為資料是數字或因為那樣「比較科學」，並沒有解決測量問題，只是藉由「依規定計量」<strong>避開</strong>了它。手上有一個等比指標，並不表示「社會現實」本身就具有那種數學性質。</p>
+</div>
+
+<p>所以，「用外部標準來評估與詮釋測量」這個想法，在定性研究中遠比在常規定量研究中普遍。不過定性研究也有明顯弱點：測量通常<strong>不夠精確</strong>，情境敏感、案例導向的做法常顯得雜亂、不夠「科學」，而且所用的標準往往是<strong>隱而不宣</strong>的。</p>
+
+<div class="widget" id="w-cls">
+  <div class="widget-head"><span class="wtag">互動</span> 分類練習：這是「相對位置」還是「校準」？</div>
+  <div class="widget-body">
+    <p style="margin-top:0">判斷每一句描述是依據<strong>樣本內的相對位置</strong>（未校準），還是依據<strong>外部標準</strong>（已校準）來詮釋分數。</p>
+    <div data-clslist></div>
+    <div class="result-box" data-clsscore>尚未作答。</div>
+    <p style="margin-bottom:0"><button class="btn ghost" type="button" data-clsreset>重新練習</button></p>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s4">4. 模糊集：兩種方法之間的橋樑 <span class="en">· Fuzzy sets: a bridge between the two approaches</span></h2>
+
+<p>有了模糊集，就有機會「兩全其美」：既保有定量研究者珍視的<strong>精確度</strong>，又能用定性研究不可或缺的<strong>實質知識</strong>來校準測量。</p>
+<ul>
+  <li><strong>精確度</strong>：以集合隸屬度的量化形式呈現，範圍從 0.0（完全排除）到 1.0（完全包含）。</li>
+  <li><strong>實質知識</strong>：提供校準所需的外部標準——指出什麼是完全隸屬、什麼是完全不隸屬，以及「偏屬於」與「偏不屬於」的分界點（交叉點）。</li>
+</ul>
+
+<p>外部標準可以來自三種知識來源：</p>
+<div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th>知識來源</th><th>例子</th></tr></thead>
+    <tbody>
+      <tr><td>社會共有的知識</td><td>受教育 12 年（高中畢業）是一道重要的教育門檻</td></tr>
+      <tr><td>社會科學界的集體知識</td><td>經濟發展如何演變、一個國家要具備什麼才算「已開發」</td></tr>
+      <tr><td>研究者自己的案例知識</td><td>從具體案例研究中累積的判斷</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="callout warn">
+  <div class="ct">⚠️ 與一般定性研究的分野：標準必須明說</div>
+  <p>這些外部標準必須<strong>明確寫出來</strong>，並且<strong>系統而透明地</strong>套用到所有案例。這正是模糊集與一般定性研究的不同之處——後者用的標準往往是隱含的。寫論文時，你必須交代每個集合的三個錨點是什麼、根據是什麼。</p>
+</div>
+
+<p>模糊集之所以能當橋樑，是因為它<strong>同時具有定性與定量的性格</strong>：</p>
+
+<div class="bridge">
+  <div>
+    <h4>定性的一面</h4>
+    <ul>
+      <li>「完全隸屬」與「完全不隸屬」是<strong>質的狀態</strong></li>
+      <li>案例導向：關心集合與集合隸屬</li>
+      <li>案例的<strong>身分</strong>很重要（它屬於「民主國家」嗎？）</li>
+    </ul>
+  </div>
+  <div class="mid"><strong>模糊集</strong><span style="font-size:.85rem;color:var(--ink-soft)">0 ← 0.5 → 1</span></div>
+  <div>
+    <h4>定量的一面</h4>
+    <ul>
+      <li>兩個質的狀態之間有<strong>程度</strong>之分</li>
+      <li>變數導向：案例之間有細緻的差異</li>
+      <li>提供<strong>精確測量</strong>的基礎</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s5">5. 模糊集與常規變數的差異 <span class="en">· How fuzzy sets differ from conventional variables</span></h2>
+
+<p>關鍵差異在於兩者如何被<strong>概念化與命名</strong>。你可以建構一個通用變數「受教育年數」，但<strong>不先指定目標集合</strong>，就無法把它直接轉成模糊集。你想研究的是「至少高中畢業的人」？還是「受過大學教育的人」？<strong>目標集合不同，校準方式就不同</strong>：一個念過一年大學的人，在「至少高中畢業」集合中是完全隸屬（1.0），但顯然不是「受過大學教育」集合的完全成員。</p>
+
+<div class="widget" id="w-edu">
+  <div class="widget-head"><span class="wtag">互動</span> 同一個變數，兩個目標集合</div>
+  <div class="widget-body">
+    <p style="margin-top:0">拖曳「受教育年數」（台灣學制：12 年 = 高中畢業、16 年 = 大學畢業）。錨點為<strong>教學示意</strong>：「至少高中畢業」以 9 / 11 / 12 年為完全不隸屬／交叉點／完全隸屬；「受過大學教育」以 12 / 14 / 16 年。</p>
+    <div class="slider-row"><span class="sl-label wide">受教育年數</span><input type="range" min="6" max="20" step="1" value="13" data-ey><output data-eyout>13</output><span>年</span></div>
+    <div class="stats">
+      <div class="stat"><div class="k">「至少高中畢業」隸屬度</div><div class="v" data-e1>—</div></div>
+      <div class="stat"><div class="k">「受過大學教育」隸屬度</div><div class="v gold" data-e2>—</div></div>
+    </div>
+    <div class="result-box" data-enote></div>
+  </div>
+</div>
+
+<p>同樣地，「經濟發展程度」作為通用變數當然有意義；但要把它校準成模糊集，就必須指定一個目標集合，例如「<strong>已開發國家</strong>」。這個要求帶來兩個好處：</p>
+<ol>
+  <li>它<strong>構成</strong>了校準本身（目標集合決定錨點）。</li>
+  <li>它在<strong>理論論述與實證分析之間建立直接連結</strong>——畢竟，理論多半是圍繞「已開發國家」這類目標集合來討論的，而不是圍繞「經濟發展程度」這種通用變數。</li>
+</ol>
+
+<h3>核心特徵：區分相關與不相關的變異</h3>
+<p>上面的例子點出模糊集校準最關鍵的特徵：研究者必須<strong>區分相關與不相關的差異</strong>。念了一年大學與念了兩年大學的人，對「至少高中畢業」這個集合來說沒有差別——兩人都是完全隸屬（1.0）。他們之間那一年的差異，與這個被概念化、被命名的目標集合<strong>毫不相干</strong>。校準時，<strong>與集合無關的變異必須被截斷</strong>，讓隸屬分數忠實反映集合的名稱。</p>
+
+<div class="widget" id="w-irr">
+  <div class="widget-head"><span class="wtag">互動</span> 不相關的變異：同樣差 1,000 美元，算不算數？</div>
+  <div class="widget-body">
+    <p style="margin-top:0">選一組國家配對與目標集合，比較<strong>原始差距</strong>與<strong>隸屬度差距</strong>。陰影區是「完全隸屬」或「完全不隸屬」的平台區——落在這裡的差異幾乎被截斷。也可以拖曳滑桿自訂兩國的人均 GNP。</p>
+    <div class="controls">
+      <div class="field"><label>目標集合</label>
+        <div class="seg" data-iset>
+          <button data-v="dev" class="on">已開發國家</button>
+          <button data-v="poor">貧窮國家</button>
+        </div>
+      </div>
+      <div class="field"><label>國家配對</label>
+        <div class="seg" data-ipair>
+          <button data-v="hi" class="on">21,000 vs 22,000</button>
+          <button data-v="lo">1,000 vs 2,000</button>
+          <button data-v="mid">4,500 vs 5,500</button>
+        </div>
+      </div>
+    </div>
+    <div class="slider-row"><span class="sl-label wide" style="color:var(--accent)">A 國</span><input type="range" min="0" max="40000" step="100" value="21000" data-ia><output data-iaout style="min-width:4.2rem">21000</output></div>
+    <div class="slider-row"><span class="sl-label wide" style="color:var(--rose)">B 國</span><input type="range" min="0" max="40000" step="100" value="22000" data-ib><output data-ibout style="min-width:4.2rem">22000</output></div>
+    <svg class="cplot plot" data-iplot aria-label="人均 GNP 與集合隸屬度曲線"></svg>
+    <div class="stats">
+      <div class="stat"><div class="k">原始差距（美元）</div><div class="v" data-iraw>—</div></div>
+      <div class="stat"><div class="k">A 國隸屬度</div><div class="v" data-ima>—</div></div>
+      <div class="stat"><div class="k">B 國隸屬度</div><div class="v" data-imb>—</div></div>
+      <div class="stat"><div class="k">隸屬度差距</div><div class="v gold" data-imd>—</div></div>
+    </div>
+    <div class="result-box" data-inote></div>
+  </div>
+</div>
+
+<p>這個示範揭露一個有趣的事實：對「<strong>已開發國家</strong>」集合而言，<em>不只</em> 21,000 與 22,000 的差距不相干，1,000 與 2,000 的差距也幾乎不相干——兩國都完全不屬於已開發國家。真正「算數」的變異集中在 2,500 到 20,000 美元之間。反過來，如果目標集合是「<strong>貧窮國家</strong>」，1,000 與 2,000 的差距就變得非常重要。<strong>哪些變異相關，取決於你指定的目標集合</strong>——這就是 Ragin 說「目標集合構成校準」的意思。</p>
+
+<div class="callout warn">
+  <div class="ct">⚠️ 初學者常見誤解</div>
+  <p><strong>誤解一：「截斷變異會丟失資訊，所以不好。」</strong>Ragin 承認定量研究者通常對此存疑——因為截斷分布兩端的變異往往會<strong>削弱相關係數</strong>。但如果那些變異與概念無關，保留它們反而是在用雜訊「稀釋」概念。<br>
+  <strong>誤解二：「模糊集就是把變數縮放到 0–1。」</strong>不是。把 GNP 除以最大值也會得到 0–1 的數字，但那仍然是<strong>相對於樣本</strong>的分數，沒有外部錨點、也沒有交叉點的意義。模糊隸屬度必須有<strong>完全隸屬、完全不隸屬、交叉點</strong>這三個由實質知識決定的錨點。</p>
+</div>
+
+<h3>為什麼一定要校準？因為集合運算需要它</h3>
+<p>使用精確校準的模糊集，最大的好處是可以在社會科學中運用<strong>集合論的原則</strong>：</p>
+<div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th>集合論工具</th><th>用途</th><th>本書章節</th></tr></thead>
+    <tbody>
+      <tr><td>子集合關係</td><td>分析<strong>必要性與充分性</strong>的核心</td><td>第 1–3 章</td></tr>
+      <tr><td>集合交集（AND）</td><td>把案例當成<strong>組態</strong>來研究</td><td>第 2、6 章</td></tr>
+      <tr><td>集合聯集（OR）</td><td>檢視通往同一結果的<strong>不同路徑</strong></td><td>第 2、7 章</td></tr>
+      <tr><td>真值表</td><td>揭示<strong>因果複雜性</strong></td><td>第 1、7–9 章</td></tr>
+    </tbody>
+  </table>
+</div>
+<p>這些運算都<strong>無法</strong>用在未校準的測量上（例如一般的等距、等比變數）：對一個 z 分數取「最小值」做交集，數學上做得到，但結果沒有任何意義。</p>
+
+<h3>展望</h3>
+<p>第 5 章將具體介紹如何把等距、等比變數校準成模糊集，有兩種通用方法：</p>
+<ul>
+  <li><strong>直接法（direct method）</strong>：研究者指定完全隸屬、完全不隸屬與交叉點三個錨點（本章的溫度與 GNP 示範就是這種做法的預覽）。</li>
+  <li><strong>間接法（indirect method）</strong>：研究者先把案例粗分成六個等級，再用迴歸估計把原始分數轉換成模糊隸屬分數。</li>
+</ul>
+
+<!-- ================================================= -->
+<h2 id="s6">6. R 對照：z 分數 vs. 校準（觀念預覽） <span class="en">· A quick look in R</span></h2>
+
+<p>原書第 4 章沒有實用附錄。以下只是用 R 把本章的核心對比「跑一次」：<code class="inline">scale()</code> 產生的 z 分數依樣本而變，<code class="inline">calibrate()</code> 產生的隸屬度則只依外部錨點而定。<code class="inline">calibrate()</code> 的完整用法留到第 5 章。</p>
+
+<pre class="code"><span class="c-fn">library</span>(QCA)
+
+<span class="c-com"># 教學用示意資料：人均 GNP（美元）</span>
+gnp <span class="c-kw">&lt;-</span> <span class="c-fn">c</span>(Norway = <span class="c-num">38000</span>, USA = <span class="c-num">36000</span>, Japan = <span class="c-num">28000</span>, Italy = <span class="c-num">26000</span>,
+         Spain = <span class="c-num">22000</span>, Korea = <span class="c-num">17000</span>, Chile = <span class="c-num">9000</span>, Mexico = <span class="c-num">8000</span>,
+         Brazil = <span class="c-num">7500</span>, Thailand = <span class="c-num">6500</span>, China = <span class="c-num">4500</span>, India = <span class="c-num">2600</span>,
+         Nigeria = <span class="c-num">1000</span>, Ethiopia = <span class="c-num">700</span>)
+
+rich <span class="c-kw">&lt;-</span> gnp[<span class="c-num">1</span>:<span class="c-num">8</span>]      <span class="c-com"># 富國俱樂部樣本</span>
+poor <span class="c-kw">&lt;-</span> gnp[<span class="c-num">7</span>:<span class="c-num">14</span>]     <span class="c-com"># 開發中國家為主的樣本</span>
+
+<span class="c-com"># (1) z 分數：標準來自樣本本身 → 墨西哥的位置隨樣本翻轉</span>
+<span class="c-fn">round</span>(<span class="c-fn">scale</span>(rich)[<span class="c-str">"Mexico"</span>, ], <span class="c-num">2</span>)   <span class="c-com"># -1.33</span>
+<span class="c-fn">round</span>(<span class="c-fn">scale</span>(poor)[<span class="c-str">"Mexico"</span>, ], <span class="c-num">2</span>)   <span class="c-com">#  0.93</span>
+
+<span class="c-com"># (2) 直接校準：標準來自外部知識（完全不隸屬、交叉點、完全隸屬）</span>
+dev <span class="c-kw">&lt;-</span> <span class="c-fn">calibrate</span>(gnp, type = <span class="c-str">"fuzzy"</span>,
+                 thresholds = <span class="c-fn">c</span>(<span class="c-num">2500</span>, <span class="c-num">5000</span>, <span class="c-num">20000</span>))
+<span class="c-fn">round</span>(<span class="c-fn">setNames</span>(dev, <span class="c-fn">names</span>(gnp)), <span class="c-num">2</span>)   <span class="c-com"># 墨西哥約 0.65，不論樣本為何</span></pre>
+
+<div class="callout info">
+  <div class="ct">ℹ️ 小提醒</div>
+  <p><code class="inline">calibrate()</code> 預設把完全隸屬門檻對應到 0.95（<code class="inline">idm = 0.95</code>），Ragin 原本的做法是對應到 log odds = 3（約 0.953），所以 R 算出的數值與本頁示範可能在小數第二、三位有些微差異。第 5 章會詳細說明。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s7">7. 本章重點、名詞與自我測驗 <span class="en">· Review</span></h2>
+
+<ol class="takeaways">
+  <li><strong>校準</strong>是讓測量對齊公認的<strong>外部標準</strong>，使讀數可以被直接解讀（例如 0°C 冰點、100°C 沸點）；未校準的測量只告訴你案例之間的相對位置。</li>
+  <li>外部標準常常標記「<strong>相移</strong>」——質變發生之處。社會科學中的範圍條件、族群、交互作用的調節變數都是<strong>情境設定條件</strong>，連續的情境條件自動帶出校準問題。</li>
+  <li>定量研究的<strong>指標法</strong>（單一指標、多重指標、SEM）依賴樣本內變異；以平均數、標準差為基準的 z 分數只是<strong>被動、依樣本而變</strong>的原始校準，而且把所有變異都視為同等相關。</li>
+  <li>定性研究以案例知識<strong>詮釋</strong>測量（國家「年齡」→「早／晚形成」），關心案例是否滿足某集合的隸屬要求；但標準常是隱含的，精確度不足。</li>
+  <li><strong>模糊集</strong>同時是定性的（完全隸屬／完全不隸屬是質的狀態）與定量的（中間有程度），兼具精確度與實質意義，而且外部標準必須<strong>明確、系統、透明</strong>。</li>
+  <li>模糊集與常規變數的關鍵差別：必須先指定<strong>目標集合</strong>；目標集合決定校準，並讓與集合<strong>無關的變異被截斷</strong>。</li>
+  <li>只有經過校準的集合，才能合理地使用子集合、交集、聯集、真值表等<strong>集合論運算</strong>。</li>
+</ol>
+
+<h3>名詞對照</h3>
+<div class="table-wrap">
+  <table class="tbl gloss">
+    <thead><tr><th>本教材用語</th><th>簡中譯本</th><th>英文</th><th>白話說明</th></tr></thead>
+    <tbody>
+      <tr><td>校準</td><td>校准</td><td>calibration</td><td>讓測量對齊外部公認標準，使分數本身有意義</td></tr>
+      <tr><td>相移</td><td>相移</td><td>phase shift</td><td>關係發生質變的臨界點（如冰點、沸點）</td></tr>
+      <tr><td>情境設定條件</td><td>情境设置条件</td><td>context-setting condition</td><td>開啟或關閉某種性質或關係的條件</td></tr>
+      <tr><td>範圍條件</td><td>范围条件</td><td>scope condition</td><td>界定理論適用範圍的條件（如「只限民主國家」）</td></tr>
+      <tr><td>指標法</td><td>指标方法</td><td>indicator approach</td><td>替理論概念找經驗指標，並依指標排序案例</td></tr>
+      <tr><td>心理計量理論</td><td>心理测量理论</td><td>psychometric theory</td><td>用多個相關指標組成指數以提高信效度</td></tr>
+      <tr><td>結構方程模型</td><td>结构方程模型</td><td>structural equation modeling (SEM)</td><td>在概念間關係的模型中同時建構多重指標</td></tr>
+      <tr><td>集中趨勢</td><td>中心趋势</td><td>central tendency</td><td>平均數等代表樣本「中間」的量數</td></tr>
+      <tr><td>外部標準</td><td>外部标准</td><td>external standard</td><td>不依樣本而變、由實質知識決定的判準</td></tr>
+      <tr><td>目標集合</td><td>目标集合</td><td>target set</td><td>研究者要校準的、被命名的集合（如「已開發國家」）</td></tr>
+      <tr><td>交叉點</td><td>交叉点</td><td>crossover point</td><td>隸屬度 0.5，偏屬於與偏不屬於的分界</td></tr>
+      <tr><td>不相關的變異</td><td>不相关的差异</td><td>irrelevant variation</td><td>對目標集合沒有意義、校準時應被截斷的差異</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>自我測驗</h3>
+<p class="quiz-score" data-quiz-score></p>
+
+<div class="quiz" data-answer="2">
+  <p class="q">為什麼 20°C 這個讀數「有意義」？</p>
+  <div class="opts">
+    <button class="opt">因為它是一個等比尺度上的精確數字</button>
+    <button class="opt">因為它高於這批測量物體的平均溫度</button>
+    <button class="opt">因為攝氏溫標錨定在冰點（0°C）與沸點（100°C）這兩個外部標準上</button>
+    <button class="opt">因為大多數人覺得 20°C 很舒適</button>
+  </div>
+  <div class="explain">校準的本質是對齊外部、公認的已知標準。攝氏溫標的兩個錨點讓我們知道 20°C 落在什麼位置；「高於平均」只是相對位置。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">Ragin 為什麼說以樣本平均數、標準差為基準的 z 分數是一種「原始、被動的校準」？</p>
+  <div class="opts">
+    <button class="opt">因為它的標準從資料歸納而來，換一個樣本就跟著改變</button>
+    <button class="opt">因為它的計算太複雜，容易出錯</button>
+    <button class="opt">因為 z 分數無法處理負數</button>
+    <button class="opt">因為它把所有案例都轉成 0 或 1</button>
+  </div>
+  <div class="explain">平均數與標準差是樣本特定的，同一國家在不同樣本中的 z 分數可能從負轉正（如本章示範中的墨西哥）。外部標準則不會因樣本改變。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">A 國建國 500 年、B 國 250 年。從國家形成理論的角度，下列敘述何者最恰當？</p>
+  <div class="opts">
+    <button class="opt">A 國的「早期形成」程度是 B 國的兩倍</button>
+    <button class="opt">應把年齡取對數，再比較兩國</button>
+    <button class="opt">應以樣本平均年齡為界，區分早與晚</button>
+    <button class="opt">兩國都完全屬於「早期形成」，250 年的差距對這個概念不相關</button>
+  </div>
+  <div class="explain">「年齡」是等比指標，但它捕捉到的很多變異與「早 vs. 晚」無關。依據實質知識詮釋後，兩國都是早期形成國家的完全成員。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">下列何者<strong>不是</strong>模糊集能成為定量與定性方法之間橋樑的理由？</p>
+  <div class="opts">
+    <button class="opt">完全隸屬與完全不隸屬是質的狀態</button>
+    <button class="opt">它以樣本平均數作為交叉點，因此最客觀</button>
+    <button class="opt">兩個質的狀態之間有程度之分，提供精確測量的基礎</button>
+    <button class="opt">它關心集合隸屬與案例身分，同時也呈現案例間的細緻差異</button>
+  </div>
+  <div class="explain">交叉點必須由實質知識決定，而不是由樣本平均數推導——用平均數正是本章批評的「被動校準」。</div>
+</div>
+
+<div class="quiz" data-answer="2">
+  <p class="q">一個念過一年大學的人，在「至少高中畢業」集合與「受過大學教育」集合中的隸屬度，最合理的描述是？</p>
+  <div class="opts">
+    <button class="opt">兩個集合都是完全隸屬</button>
+    <button class="opt">兩個集合的隸屬度應該相同，因為受教育年數相同</button>
+    <button class="opt">前者完全隸屬（1.0），後者不是完全隸屬</button>
+    <button class="opt">前者部分隸屬，後者完全隸屬</button>
+  </div>
+  <div class="explain">同一個變數（受教育年數）依目標集合不同，會有不同的校準方式。這說明模糊集必須先指定目標集合。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">以「已開發國家」為目標集合時，下列哪一組人均 GNP 差距最可能是<strong>相關</strong>的變異？</p>
+  <div class="opts">
+    <button class="opt">21,000 vs 22,000 美元</button>
+    <button class="opt">4,500 vs 5,500 美元</button>
+    <button class="opt">1,000 vs 2,000 美元</button>
+    <button class="opt">36,000 vs 38,000 美元</button>
+  </div>
+  <div class="explain">4,500 與 5,500 跨越交叉點（5,000），一國偏不屬於、一國偏屬於已開發國家，隸屬度差距最大（約 0.35 vs 0.53，差 0.17）。其他三組都落在完全隸屬或完全不隸屬的平台區。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">定量研究者通常對「截斷分布兩端的變異」心存疑慮，主要原因是？</p>
+  <div class="opts">
+    <button class="opt">截斷變異往往會削弱相關係數</button>
+    <button class="opt">截斷後無法計算平均數</button>
+    <button class="opt">截斷違反了機率抽樣的原則</button>
+    <button class="opt">截斷會讓所有案例都變成交叉點</button>
+  </div>
+  <div class="explain">Ragin 在註腳中指出這一點：相關分析依賴全範圍的變異，截斷會降低相關。但若那些變異與概念無關，截斷才能讓分數忠實反映目標集合。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">模糊集校準與一般定性研究的「隱性校準」最大的不同是什麼？</p>
+  <div class="opts">
+    <button class="opt">模糊集完全不使用研究者的案例知識</button>
+    <button class="opt">模糊集只能用在大樣本研究</button>
+    <button class="opt">模糊集的錨點必須從樣本分布計算</button>
+    <button class="opt">模糊集要求外部標準明確寫出，並系統、透明地套用到所有案例</button>
+  </div>
+  <div class="explain">兩者都依靠實質知識，但模糊集要求把標準明確化、系統化，這正是它與常規定性研究（標準常隱而不宣）的分野。</div>
+</div>
+
+<p><button class="btn ghost" data-quiz-reset type="button">重新作答</button></p>
+
+<div class="done-box" data-ch="4">
+  <span class="msg"></span>
+  <button class="btn" type="button">標記本章為已讀</button>
+</div>
+
+<nav class="chap-nav">
+  <a class="prev" href="ch3.html"><div class="dir">← 上一章</div><div class="ttl">第 3 章 評估集合關係：一致性與覆蓋度</div></a>
+  <a class="next" href="ch5.html"><div class="dir">下一章 →</div><div class="ttl">第 5 章 校準模糊集</div></a>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Charles C. Ragin, <em>Redesigning Social Inquiry: Fuzzy Sets and Beyond</em> (University of Chicago Press, 2008)<br>
+  以學習為目的之概念整理與重新詮釋，非原書譯文 · <a href="index.html">回本書首頁</a></p>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="js/ragin.js"></script>
+<script>
+/* ---------- 共用：橫軸為原始分數、縱軸為隸屬度的曲線圖 ---------- */
+window.CH4 = (function () {
+  const ns = 'http://www.w3.org/2000/svg';
+  function plot(svg, o) {
+    const W = 420, H = 250, m = { l: 44, r: 14, t: 14, b: 42 };
+    const pw = W - m.l - m.r, ph = H - m.t - m.b;
+    const sx = (v) => m.l + (v - o.xmin) / (o.xmax - o.xmin) * pw;
+    const sy = (v) => m.t + (1 - v) * ph;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.innerHTML = '';
+    const el = (tag, a, t) => { const e = document.createElementNS(ns, tag); for (const k in a) e.setAttribute(k, a[k]); if (t != null) e.textContent = t; svg.appendChild(e); return e; };
+    (o.bands || []).forEach((b) => {
+      const x1 = sx(Math.max(o.xmin, b[0])), x2 = sx(Math.min(o.xmax, b[1]));
+      if (x2 > x1) el('rect', { class: 'band', x: x1, y: sy(1), width: x2 - x1, height: ph });
+    });
+    [0, .25, .5, .75, 1].forEach((v) => {
+      el('line', { class: 'grid', x1: sx(o.xmin), y1: sy(v), x2: sx(o.xmax), y2: sy(v) });
+      el('text', { class: 'lbl', x: m.l - 6, y: sy(v) + 4, 'text-anchor': 'end' }, v.toFixed(v === .25 || v === .75 ? 2 : 1));
+    });
+    o.ticks.forEach((t) => {
+      el('line', { class: 'grid', x1: sx(t), y1: sy(0), x2: sx(t), y2: sy(1) });
+      el('text', { class: 'lbl', x: sx(t), y: sy(0) + 15, 'text-anchor': 'middle' }, o.tickFmt ? o.tickFmt(t) : t);
+    });
+    el('line', { class: 'axis', x1: sx(o.xmin), y1: sy(0), x2: sx(o.xmax), y2: sy(0) });
+    el('line', { class: 'axis', x1: sx(o.xmin), y1: sy(0), x2: sx(o.xmin), y2: sy(1) });
+    (o.marks || []).forEach((mk) => {
+      if (mk.x < o.xmin || mk.x > o.xmax) return;
+      el('line', { class: mk.cls || 'anc', x1: sx(mk.x), y1: sy(0), x2: sx(mk.x), y2: sy(1) });
+      el('text', { class: 'anc-t', x: sx(mk.x) + 3, y: sy(1) + 10 + (mk.dy || 0) }, mk.t);
+    });
+    const N = 160, pts = [];
+    for (let i = 0; i <= N; i++) { const x = o.xmin + (o.xmax - o.xmin) * i / N; pts.push([sx(x), sy(o.fn(x))]); }
+    el('path', { class: 'curve', d: pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ') });
+    (o.pts || []).forEach((p) => {
+      el('circle', { class: p.cls, cx: sx(p.x), cy: sy(o.fn(p.x)), r: 6 });
+      if (p.t) el('text', { class: 'lbl', x: sx(p.x) + 8, y: sy(o.fn(p.x)) - 8 + (p.dy || 0) }, p.t);
+    });
+    el('text', { class: 'ttl', x: m.l + pw / 2, y: H - 6, 'text-anchor': 'middle' }, o.xlab);
+    el('text', { class: 'ttl', x: 12, y: m.t + ph / 2, 'text-anchor': 'middle', transform: `rotate(-90 12 ${m.t + ph / 2})` }, '隸屬度');
+  }
+  // 樣本平均數與樣本標準差（n − 1）
+  function meanSd(xs) {
+    const n = xs.length, m = xs.reduce((s, v) => s + v, 0) / n;
+    const sd = n > 1 ? Math.sqrt(xs.reduce((s, v) => s + (v - m) ** 2, 0) / (n - 1)) : NaN;
+    return { m, sd, n };
+  }
+  return { plot, meanSd };
+})();
+
+/* ---------- 溫度 → 熱水 ---------- */
+(function () {
+  const root = document.getElementById('w-temp');
+  const q = (s) => root.querySelector(s);
+  const T = q('[data-t]'), NON = q('[data-non]'), CR = q('[data-cross]'), FU = q('[data-full]');
+  function run(src) {
+    let non = +NON.value, cr = +CR.value, fu = +FU.value;
+    // 維持 完全不隸屬 < 交叉點 < 完全隸屬
+    if (src === CR) { if (cr <= non) non = cr - 1; if (cr >= fu) fu = cr + 1; }
+    else if (src === NON) { if (non >= cr) cr = non + 1; if (cr >= fu) fu = cr + 1; }
+    else if (src === FU) { if (fu <= cr) cr = fu - 1; if (cr <= non) non = cr - 1; }
+    NON.value = non; CR.value = cr; FU.value = fu;
+    non = +NON.value; cr = +CR.value; fu = +FU.value;
+    const t = +T.value;
+    q('[data-tout]').textContent = t; q('[data-nonout]').textContent = non;
+    q('[data-crossout]').textContent = cr; q('[data-fullout]').textContent = fu;
+    const f = (x) => RG.fz.calibrate(x, fu, cr, non);
+    const mu = f(t);
+    const phase = t < 0 ? '🧊 冰（固態）' : t >= 100 ? '♨️ 蒸氣（氣態）' : '💧 水（液態）';
+    q('[data-phase]').textContent = phase;
+    q('[data-tm]').textContent = mu.toFixed(2);
+    CH4.plot(q('[data-tplot]'), {
+      xmin: -10, xmax: 110, ticks: [0, 20, 40, 60, 80, 100], xlab: '水溫（°C）', fn: f,
+      marks: [{ x: 0, t: '冰點', cls: 'grid' }, { x: 100, t: '沸點', cls: 'grid' },
+              { x: non, t: '0.05', dy: 12 }, { x: cr, t: '0.5' }, { x: fu, t: '0.95', dy: 12 }],
+      pts: [{ x: t, cls: 'ptA', t: `${t}°C` }],
+    });
+    let msg = `水溫 ${t}°C → 「熱水」隸屬度 = <span class="hl">${mu.toFixed(2)}</span>\n`;
+    if (t < 0 || t >= 100) msg += `注意：這已經不是「水」了（${t < 0 ? '結冰' : '沸騰成蒸氣'}）。冰點與沸點是攝氏溫標的「相移」錨點——溫度與體積的關係在這裡發生質變。\n`;
+    if (mu >= .95) msg += '完全（或幾乎完全）屬於「熱水」：再升高幾度，對「是不是熱水」已經沒有差別——這就是被截斷的不相關變異。';
+    else if (mu > .5) msg += '偏屬於「熱水」：比較熱而不是比較不熱，但還不到「確定是熱水」。';
+    else if (mu === .5) msg += '剛好在交叉點：熱與不熱最難判斷的地方。';
+    else if (mu > .05) msg += '偏不屬於「熱水」：有點溫，但比較接近「不熱」。';
+    else msg += '完全（或幾乎完全）不屬於「熱水」：再冷幾度，對「是不是熱水」也沒有差別。';
+    msg += `\n\n試試看：把交叉點從 ${cr}°C 移到別處，同一杯 ${t}°C 的水，隸屬度就會改變——錨點代表你對「熱」的實質判斷，而不是從資料算出來的。`;
+    q('[data-tnote]').innerHTML = msg;
+  }
+  [T, NON, CR, FU].forEach((el) => el.addEventListener('input', () => run(el)));
+  run();
+})();
+
+/* ---------- 相對位置 vs 外部標準 ---------- */
+(function () {
+  const root = document.getElementById('w-z');
+  const data = [
+    ['挪威', 38000], ['美國', 36000], ['日本', 28000], ['義大利', 26000], ['西班牙', 22000],
+    ['南韓', 17000], ['智利', 9000], ['墨西哥', 8000], ['巴西', 7500], ['泰國', 6500],
+    ['中國', 4500], ['印度', 2600], ['奈及利亞', 1000], ['衣索比亞', 700],
+  ];
+  const presets = {
+    all: data.map((d) => d[0]),
+    rich: ['挪威', '美國', '日本', '義大利', '西班牙', '南韓', '智利', '墨西哥'],
+    poor: ['智利', '墨西哥', '巴西', '泰國', '中國', '印度', '奈及利亞', '衣索比亞'],
+  };
+  const chkBox = root.querySelector('[data-zchk]');
+  chkBox.innerHTML = data.map((d, i) => `<label><input type="checkbox" data-i="${i}"> ${d[0]}</label>`).join('');
+  const chks = [...chkBox.querySelectorAll('input')];
+  const btns = root.querySelectorAll('[data-zpick] button');
+  const tb = root.querySelector('[data-ztable] tbody');
+  const fmt$ = (v) => Math.round(v).toLocaleString('en-US');
+  function setPreset(k) { chks.forEach((c) => c.checked = presets[k].includes(data[+c.dataset.i][0])); run(); }
+  function run() {
+    const sel = data.filter((d, i) => chks[i].checked);
+    const { m, sd, n } = CH4.meanSd(sel.map((d) => d[1]));
+    root.querySelector('[data-zmean]').textContent = n ? fmt$(m) : '—';
+    root.querySelector('[data-zsd]').textContent = isFinite(sd) ? fmt$(sd) : '—';
+    root.querySelector('[data-zn]').textContent = n;
+    tb.innerHTML = sel.map((d) => {
+      const z = isFinite(sd) && sd > 0 ? (d[1] - m) / sd : NaN;
+      const mu = RG.fz.calibrate(d[1], 20000, 5000, 2500);
+      const zw = isFinite(z) ? Math.min(60, Math.abs(z) * 28) : 0;
+      const hl = d[0] === '墨西哥' ? ' style="font-weight:700;color:var(--accent)"' : '';
+      return `<tr><td${hl}>${d[0]}</td><td class="zcell">${fmt$(d[1])}</td>` +
+        `<td class="zcell">${isFinite(z) ? (z >= 0 ? '+' : '') + z.toFixed(2) : '—'} <span class="bar${z < 0 ? ' neg' : ''}" style="width:${zw}px"></span></td>` +
+        `<td class="zcell">${mu.toFixed(2)} <span class="bar mem" style="width:${Math.round(mu * 60)}px"></span></td></tr>`;
+    }).join('');
+    const note = root.querySelector('[data-znote]');
+    if (n < 2) { note.textContent = '至少要選 2 個國家，才能計算標準差與 z 分數。'; return; }
+    const mex = sel.find((d) => d[0] === '墨西哥');
+    let msg = `這個樣本的「標準」：平均數 ${fmt$(m)}、標準差 ${fmt$(sd)} 美元。\n`;
+    if (mex) {
+      const z = (mex[1] - m) / sd;
+      msg += `墨西哥（8,000 美元）的 z = <span class="hl">${(z >= 0 ? '+' : '') + z.toFixed(2)}</span> → 在這個樣本裡它看起來「${z >= .5 ? '相當發達' : z > 0 ? '略高於平均' : z > -.5 ? '略低於平均' : '相當不發達'}」。\n`;
+    } else msg += '（墨西哥不在樣本中，勾選它來追蹤它的 z 分數。）\n';
+    msg += `「已開發國家」隸屬度只依外部錨點（20,000 / 5,000 / 2,500）而定，墨西哥永遠是 <span class="hl">0.65</span>：偏屬於，但不完全屬於。\n`;
+    const above = sel.filter((d) => d[1] > m && d[1] < 5000), below = sel.filter((d) => d[1] < m && d[1] >= 20000);
+    if (below.length) msg += `\n注意：${below.map((d) => d[0]).join('、')} 已完全屬於已開發國家，卻因為低於樣本平均而得到負的 z 分數。`;
+    if (above.length) msg += `\n注意：${above.map((d) => d[0]).join('、')} 高於樣本平均（z 為正），卻偏不屬於已開發國家。`;
+    note.innerHTML = msg;
+  }
+  btns.forEach((b) => b.addEventListener('click', () => { btns.forEach((x) => x.classList.toggle('on', x === b)); setPreset(b.dataset.v); }));
+  chks.forEach((c) => c.addEventListener('change', () => { btns.forEach((x) => x.classList.remove('on')); run(); }));
+  setPreset('all');
+})();
+
+/* ---------- 分類練習：相對位置 or 校準 ---------- */
+(function () {
+  const root = document.getElementById('w-cls');
+  const items = [
+    ['某國人均 GNP 比樣本平均數高 1.2 個標準差。', 'rel', '以樣本平均數與標準差為基準，換一個樣本就會改變——相對位置。'],
+    ['水溫達到 100°C，正在沸騰。', 'cal', '沸點是公認的外部標準，讀數可以直接解讀。'],
+    ['某家戶的所得低於官方公布的貧窮線。', 'cal', 'Ragin 在註腳中特別提到：扶貧領域「定義誰是窮人」是社會科學中少見的外部校準。'],
+    ['李同學的成績排在班上前 10%。', 'rel', '排名只說明他和同班同學的相對位置；換一個班，結果可能完全不同。'],
+    ['這個國家已建國 500 年，依國家形成理論屬於「早期形成」國家。', 'cal', '用累積的實質知識詮釋「年齡」，把它對應到「早／晚」的概念——這是定性研究的典型校準。'],
+    ['A 國的民主分數比 B 國高 3 分。', 'rel', '只知道 A 比 B「更民主」，不知道 A 是不是民主國家。'],
+    ['某國人類發展指數達到「極高人類發展」的門檻。', 'cal', '依聯合國預先公布的固定門檻分類，不隨樣本改變——Ragin 也以人類發展指數為校準測量的例子。'],
+    ['受訪者的受教育年數 z 分數為 −0.4。', 'rel', 'z 分數是相對於樣本平均數的偏離，是被動、依樣本而變的「原始校準」。'],
+  ];
+  const list = root.querySelector('[data-clslist]'), score = root.querySelector('[data-clsscore]');
+  const state = [];
+  function build() {
+    state.length = 0;
+    list.innerHTML = items.map((it, i) =>
+      `<div class="cls-item" data-k="${i}"><p class="stmt"><strong>${i + 1}.</strong> ${it[0]}</p>` +
+      `<div class="seg"><button type="button" data-v="rel">相對位置（未校準）</button><button type="button" data-v="cal">外部標準（已校準）</button></div>` +
+      `<div class="fb"></div></div>`).join('');
+    list.querySelectorAll('.cls-item').forEach((box) => {
+      const k = +box.dataset.k;
+      box.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+        if (box.classList.contains('done')) return;
+        box.classList.add('done');
+        const ok = b.dataset.v === items[k][1];
+        state[k] = ok;
+        b.classList.add(ok ? 'right' : 'wrong');
+        if (!ok) box.querySelector(`button[data-v="${items[k][1]}"]`).classList.add('right');
+        box.querySelector('.fb').innerHTML = `${ok ? '✔ 正確。' : '✘ 不太對。'}${items[k][2]}`;
+        update();
+      }));
+    });
+    update();
+  }
+  function update() {
+    const done = state.filter((v) => v !== undefined).length, right = state.filter(Boolean).length;
+    if (!done) { score.textContent = '尚未作答。'; return; }
+    let msg = `已作答 ${done} / ${items.length} 題，答對 <span class="hl">${right}</span> 題。`;
+    if (done === items.length) msg += right === items.length
+      ? '\n全對！判斷關鍵：分數的意義是來自「和誰比」（相對位置），還是來自「對照什麼標準」（外部標準）？'
+      : '\n提示：只要標準是從這批資料本身算出來的（平均數、排名、彼此比較），就是相對位置。';
+    score.innerHTML = msg;
+  }
+  root.querySelector('[data-clsreset]').addEventListener('click', build);
+  build();
+})();
+
+/* ---------- 同一變數、兩個目標集合（教育） ---------- */
+(function () {
+  const root = document.getElementById('w-edu');
+  const y = root.querySelector('[data-ey]');
+  function run() {
+    const v = +y.value;
+    root.querySelector('[data-eyout]').textContent = v;
+    const a = RG.fz.calibrate(v, 12, 11, 9), b = RG.fz.calibrate(v, 16, 14, 12);
+    root.querySelector('[data-e1]').textContent = a.toFixed(2);
+    root.querySelector('[data-e2]').textContent = b.toFixed(2);
+    const desc = (m) => m >= .95 ? '完全隸屬' : m > .5 ? '偏屬於' : m === .5 ? '交叉點' : m > .05 ? '偏不屬於' : '完全不隸屬';
+    let msg = `受教育 ${v} 年：\n「至少高中畢業」= <span class="hl">${a.toFixed(2)}</span>（${desc(a)}）\n「受過大學教育」= <span class="hl">${b.toFixed(2)}</span>（${desc(b)}）\n\n`;
+    if (v === 13) msg += '這就是 Ragin 的例子：念過一年大學的人，在「至少高中畢業」中是完全成員，但在「受過大學教育」中還差得遠。';
+    else if (v >= 13 && v <= 14) msg += `把年數從 13 調到 14：對「至少高中畢業」幾乎沒差（都是完全隸屬）——這一年是<strong>不相關的變異</strong>；對「受過大學教育」卻是重要的進展。`;
+    else if (v >= 16) msg += '兩個集合都完全隸屬。再多念幾年（碩、博士）對這兩個集合都已是不相關的變異。';
+    else if (v <= 9) msg += '兩個集合都完全（或幾乎完全）不隸屬。';
+    else msg += '同一個人、同一個數字，換一個目標集合，隸屬度就不同——目標集合決定校準。';
+    root.querySelector('[data-enote]').innerHTML = msg;
+  }
+  y.addEventListener('input', run); run();
+})();
+
+/* ---------- 不相關的變異 ---------- */
+(function () {
+  const root = document.getElementById('w-irr');
+  const q = (s) => root.querySelector(s);
+  const A = q('[data-ia]'), B = q('[data-ib]');
+  const sets = {
+    dev: { name: '已開發國家', full: 20000, cross: 5000, non: 2500, bands: [[0, 2500], [20000, 40000]] },
+    poor: { name: '貧窮國家', full: 1000, cross: 2500, non: 6000, bands: [[0, 1000], [6000, 40000]] },
+  };
+  const pairs = { hi: [21000, 22000], lo: [1000, 2000], mid: [4500, 5500] };
+  let cur = 'dev';
+  const fmt$ = (v) => Math.round(v).toLocaleString('en-US');
+  function run() {
+    const s = sets[cur], a = +A.value, b = +B.value;
+    q('[data-iaout]').textContent = fmt$(a); q('[data-ibout]').textContent = fmt$(b);
+    const f = (x) => RG.fz.calibrate(x, s.full, s.cross, s.non);
+    const ma = f(a), mb = f(b), d = Math.abs(ma - mb), raw = Math.abs(a - b);
+    q('[data-iraw]').textContent = fmt$(raw);
+    q('[data-ima]').textContent = ma.toFixed(3);
+    q('[data-imb]').textContent = mb.toFixed(3);
+    q('[data-imd]').textContent = d.toFixed(3);
+    CH4.plot(q('[data-iplot]'), {
+      xmin: 0, xmax: 40000, ticks: [0, 10000, 20000, 30000, 40000], tickFmt: (t) => (t / 1000) + 'k',
+      xlab: `人均 GNP（美元）→「${s.name}」`, fn: f, bands: s.bands,
+      marks: [{ x: s.non, t: s.full > s.non ? '0.05' : '0.05', dy: 12 }, { x: s.cross, t: '0.5' }, { x: s.full, t: '0.95', dy: 24 }],
+      pts: [{ x: a, cls: 'ptA', t: 'A' }, { x: b, cls: 'ptB', t: 'B', dy: 16 }],
+    });
+    let msg = `目標集合：「${s.name}」（完全隸屬 ${fmt$(s.full)}、交叉點 ${fmt$(s.cross)}、完全不隸屬 ${fmt$(s.non)}）\n`;
+    msg += `原始差距 ${fmt$(raw)} 美元 → 隸屬度差距 <span class="hl">${d.toFixed(3)}</span>\n\n`;
+    if (raw === 0) msg += '兩國數值相同。';
+    else if (d < .05) msg += `幾乎沒有差別！兩國都落在${(ma + mb) / 2 > .5 ? '「完全隸屬」' : '「完全不隸屬」'}的平台區。對「${s.name}」這個概念而言，這 ${fmt$(raw)} 美元是<strong>不相關的變異</strong>，校準時被（近乎）截斷。\n但在指標法裡，這個差距會被照單全收，和其他同樣大小的差距一視同仁。`;
+    else if ((ma - .5) * (mb - .5) < 0) msg += `兩國分處交叉點兩側：一國偏屬於、一國偏不屬於「${s.name}」。這是<strong>質的差異</strong>，是最相關的變異。`;
+    else msg += `這段差距對「${s.name}」有意義：兩國都在曲線的斜坡上，隸屬度隨 GNP 明顯變化。`;
+    q('[data-inote]').innerHTML = msg;
+  }
+  function seg(sel, cb) {
+    const bs = root.querySelectorAll(sel + ' button');
+    bs.forEach((b) => b.addEventListener('click', () => { bs.forEach((x) => x.classList.toggle('on', x === b)); cb(b.dataset.v); }));
+    return bs;
+  }
+  seg('[data-iset]', (v) => { cur = v; run(); });
+  const pb = seg('[data-ipair]', (v) => { A.value = pairs[v][0]; B.value = pairs[v][1]; run(); });
+  [A, B].forEach((el) => el.addEventListener('input', () => { pb.forEach((x) => x.classList.remove('on')); run(); }));
+  run();
+})();
+</script>
+</body>
+</html>

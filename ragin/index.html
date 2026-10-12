@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>重新設計社會科學研究 · 互動教材</title>
+<meta name="description" content="Charles C. Ragin《重新設計社會科學研究：模糊集及其超越》繁體中文互動式教材">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="css/ragin.css">
+</head>
+<body>
+<div id="readbar"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="logo rg">R</span><span>重新設計社會科學研究<small>Ragin (2008) 互動教材</small></span></a>
+    <nav class="topnav">
+      <a href="index.html">本書首頁</a>
+      <a href="ch0.html">導讀</a>
+      <a href="ch1.html">第一篇</a>
+      <a href="ch4.html">第二篇</a>
+      <a href="ch6.html">第三篇</a>
+      <a href="ch8.html">第四篇</a>
+      <a href="../index.html">QCA with R ↗</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <span class="tag" style="color:var(--gold);background:var(--gold-soft)">Ragin (2008) · University of Chicago Press</span>
+  <h1>重新設計社會科學研究</h1>
+  <p class="sub"><em>Redesigning Social Inquiry: Fuzzy Sets and Beyond</em>——QCA 開創者 Charles C. Ragin 說明：為什麼社會科學應該從「變數之間的相關」轉向「集合之間的關係」。本教材用繁體中文、互動圖示與自我測驗，帶你從零開始讀懂這本書。</p>
+</section>
+
+<main class="wrap">
+
+  <div class="callout key">
+    <div class="ct">這本書在講什麼？</div>
+    <p>大多數社會科學訓練教我們：找一個依變數、放進一堆自變數、算出每個變數的「淨效應」。Ragin 提出另一套做法：把理論當成<strong>集合陳述</strong>來檢驗、用外部標準<strong>校準</strong>概念、把案例看成條件的<strong>組態</strong>、承認同一個結果可以有<strong>多條路徑</strong>。這套思維就是 QCA（質性比較分析）與 fsQCA 的理論核心。</p>
+  </div>
+
+  <div class="callout tip">
+    <div class="ct">建議閱讀順序</div>
+    <p>① 先讀〈<a href="ch0.html">導讀</a>〉掌握兩種研究範式的差別 → ② 依序讀第 1–11 章，每章都有學習目標、互動練習與自我測驗 → ③ 想動手做分析時，搭配本站另一套教材〈<a href="../index.html">QCA with R</a>〉的 R 操作。</p>
+  </div>
+
+  <div class="card-grid" style="grid-template-columns:1fr">
+    <a class="chapter-card" href="ch0.html" data-ch="0">
+      <span class="badge ready">開始這裡</span>
+      <span class="num">INTRODUCTION</span>
+      <h3>導讀：兩種研究範式的七組對比</h3>
+      <div class="en">Preface — The conventional template vs. the set-theoretic alternative</div>
+      <p>變數 vs. 集合、測量 vs. 校準、淨效應 vs. 前因配方……先看懂這七組對比，再讀全書就有地圖。</p>
+      <span class="done-mark">✔ 已讀</span>
+    </a>
+  </div>
+
+  <div class="part-banner">
+    <span class="pno">PART I</span><h2>第一篇　集合關係與相關關係</h2>
+    <p class="pdesc">相關是對稱的，集合關係是非對稱的。學會用必要性、充分性、一致性與覆蓋度來檢驗理論。</p>
+  </div>
+  <div class="card-grid">
+    <a class="chapter-card" href="ch1.html" data-ch="1">
+      <span class="num">CHAPTER 1</span>
+      <h3>社會科學研究中的集合關係：基本概念</h3>
+      <div class="en">Set relations in social research</div>
+      <p>文字理論就是集合陳述；非對稱性；必要與充分；2×2 表的四個格子；真值表入門。</p>
+      <span class="done-mark">✔ 已讀</span>
+    </a>
+    <a class="chapter-card" href="ch2.html" data-ch="2">
+      <span class="num">CHAPTER 2</span>
+      <h3>模糊集與模糊集合關係</h3>
+      <div class="en">Fuzzy sets and fuzzy set relations</div>
+      <p>0 到 1 之間的部分隸屬；交集、聯集與否定；模糊子集關係與 XY 圖。</p>
+      <span class="done-mark">✔ 已讀</span>
+    </a>
+    <a class="chapter-card" href="ch3.html" data-ch="3">
+      <span class="num">CHAPTER 3</span>
+      <h3>評估集合關係：一致性與覆蓋度</h3>
+      <div class="en">Consistency and coverage</div>
+      <p>如何量化「幾乎都是」？一致性、覆蓋度、原始與唯一覆蓋度。</p>
+      <span class="done-mark">✔ 已讀</span>
+    </a>
+  </div>
+
+  <div class="part-banner">
+    <span class="pno">PART II</span><h2>第二篇　校準與測量</h2>
+    <p class="pdesc">變數只告訴你案例彼此的相對位置；集合需要依外部標準來校準，才知道一個案例「算不算」屬於某個集合。</p>
+  </div>
+  <div class="card-grid">
+    <a class="chapter-card" href="ch4.html" data-ch="4">
+      <span class="num">CHAPTER 4</span>
+      <h3>為什麼要校準</h3>
+      <div class="en">Why calibrate?</div>
+      <p>物理科學的校準、量化與質性研究的測量習慣，以及模糊集如何成為兩者的橋樑。</p>
+      <span class="done-mark">✔ 已讀</span>
+    </a>
+    <a class="chapter-card" href="ch5.html" data-ch="5">
+      <span class="num">CHAPTER 5</span>
+      <h3>校準模糊集</h3>
+      <div class="en">Calibrating fuzzy sets</div>
+      <p>三個錨點與 log odds：直接校準法與間接校準法的逐步算例。</p>
+      <span class="done-mark">✔ 已讀</span>
+    </a>
+  </div>
+
+  <div class="part-banner">
+    <span class="pno">PART III</span><h2>第三篇　條件組態與「自」變數</h2>
+    <p class="pdesc">把案例看成條件的組合（配方），而不是一堆彼此獨立的自變數。</p>
+  </div>
+  <div class="card-grid">
+    <a class="chapter-card" href="ch6.html" data-ch="6">
+      <span class="num">CHAPTER 6</span>
+      <h3>組態思維</h3>
+      <div class="en">Configurational thinking</div>
+      <p>前因配方、交集隸屬度、交互作用項的困境，以及如何比較不同配方。</p>
+      <span class="done-mark">✔ 已讀</span>
+    </a>
+    <a class="chapter-card" href="ch7.html" data-ch="7">
+      <span class="num">CHAPTER 7</span>
+      <h3>使用模糊集與真值表進行組態分析</h3>
+      <div class="en">Fuzzy sets and truth tables</div>
+      <p>向量空間的角、模糊真值表、頻數與一致性門檻，以及為什麼不要把模糊集二分化。</p>
+      <span class="done-mark">✔ 已讀</span>
+    </a>
+  </div>
+
+  <div class="part-banner">
+    <span class="pno">PART IV</span><h2>第四篇　因果複雜性分析與淨效應分析</h2>
+    <p class="pdesc">社會資料的組合永遠不齊全。反事實怎麼處理？淨效應思維少看見了什麼？最後用大樣本資料實際比較兩種分析。</p>
+  </div>
+  <div class="card-grid">
+    <a class="chapter-card" href="ch8.html" data-ch="8">
+      <span class="num">CHAPTER 8</span>
+      <h3>有限多樣性與反事實案例</h3>
+      <div class="en">Limited diversity and counterfactuals</div>
+      <p>空白的真值表列、複雜解與簡約解，以及迴歸如何默默替你做了反事實假設。</p>
+      <span class="done-mark">✔ 已讀</span>
+    </a>
+    <a class="chapter-card" href="ch9.html" data-ch="9">
+      <span class="num">CHAPTER 9</span>
+      <h3>容易反事實與困難反事實</h3>
+      <div class="en">Easy versus difficult counterfactuals</div>
+      <p>用理論知識區分反事實，推導中間解；複雜解、中間解、簡約解的巢套關係。</p>
+      <span class="done-mark">✔ 已讀</span>
+    </a>
+    <a class="chapter-card" href="ch10.html" data-ch="10">
+      <span class="num">CHAPTER 10</span>
+      <h3>「淨效應」思維的局限</h3>
+      <div class="en">The limitations of net-effects thinking</div>
+      <p>淨效應方法的問題，以及把焦點轉向案例類別與組態比較。</p>
+      <span class="done-mark">✔ 已讀</span>
+    </a>
+    <a class="chapter-card" href="ch11.html" data-ch="11">
+      <span class="num">CHAPTER 11</span>
+      <h3>淨效應與組態：實證示範</h3>
+      <div class="en">Net effects versus configurations: an empirical demonstration</div>
+      <p>用《貝爾曲線》資料，並排比較 logistic 迴歸與 fsQCA 對「貧窮」的解釋。</p>
+      <span class="done-mark">✔ 已讀</span>
+    </a>
+  </div>
+
+  <h2>每一章都有 <span class="en">· In every chapter</span></h2>
+  <div class="steps">
+    <div class="step"><div><h4>學習目標與本章地圖</h4><p>先知道要學什麼，再開始讀。</p></div></div>
+    <div class="step"><div><h4>白話講解＋互動元件</h4><p>拖曳滑桿、修改數值、點選真值表，馬上看到一致性、覆蓋度、校準結果如何變化。</p></div></div>
+    <div class="step"><div><h4>軟體實作（fsQCA／R）</h4><p>原書的「實用附錄」改寫成 fsQCA 步驟與 R <code class="inline">QCA</code> 套件程式碼兩種版本。</p></div></div>
+    <div class="step"><div><h4>本章重點、名詞對照、自我測驗</h4><p>名詞附上簡體譯本用語與英文，方便對照原書與文獻；測驗作答後立即看到解析。讀完可在頁尾標記「已讀」，首頁卡片會顯示 ✔（只存在你自己的瀏覽器）。</p></div></div>
+  </div>
+
+  <div class="callout info">
+    <div class="ct">關於著作權</div>
+    <p>本網站是學習用途的<strong>概念整理與重新詮釋</strong>，文字說明、例題與互動元件為重新撰寫，並非原書或中譯本的翻譯；引用原書資料表時均註明出處。請購買原書閱讀完整內容：Ragin, C. C. (2008). <em>Redesigning Social Inquiry: Fuzzy Sets and Beyond</em>. University of Chicago Press；中譯本：杜運周等譯（2019），《重新設計社會科學研究》，機械工業出版社。</p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Charles C. Ragin, <em>Redesigning Social Inquiry: Fuzzy Sets and Beyond</em> (University of Chicago Press, 2008)<br>
+  以學習為目的之概念整理與重新詮釋，非原書譯文 · <a href="../index.html">回 QCA with R 主教材</a></p>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="js/ragin.js"></script>
+</body>
+</html>

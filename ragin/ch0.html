@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>導讀：兩種研究範式的七組對比 · 重新設計社會科學研究</title>
+<meta name="description" content="Ragin《重新設計社會科學研究》導讀互動教材：傳統範式 vs. 集合論範式的七組對比、與 KKV 的對話、全書地圖">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="css/ragin.css">
+<style>
+  /* 七組對比切換器 */
+  .ctabs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .45rem; margin-bottom: .9rem; }
+  .ctabs button {
+    font: inherit; font-size: .86rem; text-align: left; cursor: pointer; color: var(--ink-soft);
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: .5rem .65rem; line-height: 1.35;
+  }
+  .ctabs button b { display: block; font-family: var(--mono); font-size: .72rem; color: var(--ink-faint); }
+  .ctabs button:hover { border-color: var(--accent); }
+  .ctabs button.on { border-color: var(--gold); background: var(--gold-soft); color: var(--ink); }
+  .ctabs button.on b { color: var(--gold); }
+  .cpanel .compare { margin: .4rem 0 .8rem; }
+  .cpanel .eg { font-size: .88rem; background: var(--bg-soft); border-radius: 7px; padding: .5rem .7rem; margin-top: .5rem; }
+  .chlinks { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .4rem; }
+  .chlinks a { font-size: .82rem; text-decoration: none; padding: .25rem .65rem; border-radius: 999px; border: 1px solid var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .chlinks a:hover { filter: brightness(1.05); }
+  /* 思維判斷練習 */
+  .think-item { border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); padding: .75rem .9rem; margin: .6rem 0; }
+  .think-item .stmt { margin: 0 0 .5rem; font-size: .95rem; }
+  .think-item .stmt::before { content: attr(data-n) "．"; font-family: var(--mono); font-weight: 700; color: var(--accent); }
+  .think-item .row { display: flex; flex-wrap: wrap; gap: .45rem; }
+  .think-item .row button { font: inherit; font-size: .84rem; cursor: pointer; padding: .35rem .7rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card); color: var(--ink); }
+  .think-item .row button:hover { border-color: var(--accent); }
+  .think-item .row button.right { background: var(--ok-soft); border-color: var(--ok); }
+  .think-item .row button.wrong { background: var(--bad-soft); border-color: var(--bad); }
+  .think-item .fb { display: none; margin-top: .55rem; font-size: .88rem; color: var(--ink-soft); border-top: 1px dashed var(--border); padding-top: .5rem; }
+  .think-item.done .fb { display: block; }
+  .think-item .fb strong.ok { color: var(--ok); }
+  .think-item .fb strong.bad { color: var(--bad); }
+  /* 全書地圖 */
+  .bookmap { display: grid; gap: .6rem; }
+  .bm-part { border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); overflow: hidden; }
+  .bm-part > button {
+    width: 100%; font: inherit; text-align: left; cursor: pointer; background: transparent; color: var(--ink); border: 0;
+    padding: .75rem .9rem; display: flex; gap: .7rem; align-items: baseline; flex-wrap: wrap;
+  }
+  .bm-part > button .pno { font-family: var(--mono); font-size: .72rem; font-weight: 700; color: #fff; background: var(--gold); padding: .12rem .5rem; border-radius: 5px; }
+  .bm-part > button .pt { font-weight: 700; }
+  .bm-part > button .pc { font-size: .8rem; color: var(--ink-faint); margin-left: auto; }
+  .bm-part > button::after { content: "＋"; color: var(--accent); font-weight: 700; }
+  .bm-part.open > button::after { content: "－"; }
+  .bm-part.open { border-color: var(--gold); }
+  .bm-body { display: none; padding: 0 .9rem .8rem; }
+  .bm-part.open .bm-body { display: block; }
+  .bm-body .pq { font-size: .88rem; color: var(--ink-soft); margin: 0 0 .5rem; }
+  .bm-ch { display: grid; grid-template-columns: auto 1fr; gap: .2rem .7rem; padding: .55rem 0; border-top: 1px dashed var(--border); }
+  .bm-ch .no { font-family: var(--mono); font-size: .78rem; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 5px; padding: .1rem .45rem; height: fit-content; }
+  .bm-ch a { font-weight: 700; text-decoration: none; color: var(--ink); }
+  .bm-ch a:hover { color: var(--accent); }
+  .bm-ch p { margin: .15rem 0 0; font-size: .86rem; color: var(--ink-soft); }
+  /* 配方開關 */
+  .tgl { display: flex; flex-wrap: wrap; gap: .5rem; margin: .4rem 0 .6rem; }
+  .tgl button { font: inherit; font-size: .88rem; cursor: pointer; padding: .45rem .8rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--ink-soft); }
+  .tgl button.on { background: var(--accent2-soft); border-color: var(--accent2); color: var(--ink); font-weight: 700; }
+  .slider-row .sl-label.wide { width: auto; min-width: 5.5rem; font-family: var(--sans); font-size: .85rem; }
+  .slider-row input[type=range] { flex: 1; min-width: 0; }
+</style>
+</head>
+<body>
+<div id="readbar"></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="logo rg">R</span><span>重新設計社會科學研究<small>Ragin (2008) 互動教材</small></span></a>
+    <nav class="topnav">
+      <a href="index.html">本書首頁</a>
+      <a href="ch0.html">導讀</a>
+      <a href="ch1.html">第一篇</a>
+      <a href="ch4.html">第二篇</a>
+      <a href="ch6.html">第三篇</a>
+      <a href="ch8.html">第四篇</a>
+      <a href="../index.html">QCA with R ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+<div class="chapter-head">
+  <div class="part">導讀</div>
+  <div class="eyebrow">INTRODUCTION</div>
+  <h1>導讀：兩種研究範式的七組對比</h1>
+  <div class="en">Introduction: Two Templates for Social Inquiry</div>
+  <div class="src">對應原書中文版序、譯者序與作者前言（PDF 第 5–21 頁，中譯本前置頁）</div>
+</div>
+
+<p class="lead">想像你想研究「為什麼有些國家在八〇年代以後大砍福利」。受過統計訓練的你，第一個念頭大概是：找一個因變數（例如社會支出佔 GDP 比例），放進一堆自變數，跑迴歸，看哪個係數顯著。這是社會科學最熟悉的「標準流程」。Ragin 這本書想告訴你：<strong>這不是唯一的做法</strong>，而且對很多研究問題來說，它甚至不是最貼切的做法。本頁是全書的入口——讀完它，你會知道兩種思考方式差在哪裡、為什麼值得學，以及接下來該怎麼讀。</p>
+
+<div class="objectives">
+  <div class="ct">🎯 讀完導讀，你應該能夠……</div>
+  <ol>
+    <li>用自己的話描述「傳統範式」（變數、淨效應、迴歸）的研究流程。</li>
+    <li>說出傳統範式與集合論範式的<strong>七組對比</strong>，並各舉一個例子。</li>
+    <li>判斷一個研究問題比較接近「變數／淨效應思維」還是「集合／組態思維」。</li>
+    <li>說明 Ragin 為什麼不同意 King、Keohane 與 Verba 對「中間路徑」的看法，以及他為「選擇因變數」所做的辯護。</li>
+    <li>掌握全書四篇 11 章的架構，知道每一章在回答哪一組對比。</li>
+  </ol>
+</div>
+
+<nav class="toc">
+  <strong>導讀目錄</strong>
+  <ol>
+    <li><a href="#s1">為什麼要「重新設計」社會科學研究？</a></li>
+    <li><a href="#s2">七組對比：傳統範式 vs. 集合論範式</a></li>
+    <li><a href="#s3">示範：從「因變數」到「定性結果」</a></li>
+    <li><a href="#s4">淨效應 vs. 前因配方：一道菜的味道從哪來？</a></li>
+    <li><a href="#s5">與 KKV 的對話：什麼才是真正的中間路徑</a></li>
+    <li><a href="#s6">全書地圖與閱讀建議</a></li>
+    <li><a href="#s7">導讀重點、名詞與自我測驗</a></li>
+  </ol>
+</nav>
+
+<!-- ================================================= -->
+<h2 id="s1">1. 為什麼要「重新設計」社會科學研究？ <span class="en">· Why redesign?</span></h2>
+
+<p>先來看看 Ragin 所說的<strong>傳統範式（conventional template）</strong>。它在北美與歐洲偏好量化的社會科學界幾乎是預設值，流程大致如下：</p>
+
+<div class="steps">
+  <div class="step"><div><h4>設定一個因變數</h4><p>例如「各國的福利支出水準」「個人收入」「企業績效」。</p></div></div>
+  <div class="step"><div><h4>列出一組可能解釋它的自變數</h4><p>理想情況下，每個自變數各自代表一個相互競爭的理論。</p></div></div>
+  <div class="step"><div><h4>從「給定的」總體蒐集資料</h4><p>案例不多就用整個總體（例如所有 OECD 國家），案例很多就抽樣（例如全國隨機抽樣的家戶）。</p></div></div>
+  <div class="step"><div><h4>建立並檢驗模型</h4><p>焦點是：在控制其他變數之後，每個自變數的<strong>淨效應（net effect）</strong>有多大、是否顯著？因變數的變異被「切分」給各個自變數。</p></div></div>
+</div>
+
+<p>Ragin 強調，這<strong>不是一個糟糕的範式</strong>——它清楚、明確、發展成熟。問題在於它常被包裝成「最好的」甚至「唯一的」研究方式（他點名的代表作是 King、Keohane 與 Verba 1994 年的《社會科學研究設計》，學界常簡稱 <strong>KKV</strong>）。事實上，還有其他強而有力的研究路徑，本書提出的就是其中一條：<strong>以集合關係分析為核心的替代範式</strong>。</p>
+
+<div class="callout key">
+  <div class="ct">🔑 全書的統一主題</div>
+  <p><strong>分析集合關係，是社會科學研究的核心工作。</strong>理由有二：① 質性研究者天天在做集合分析，只是不用這套術語；② 社會科學理論大多是用文字寫成的，而文字陳述本質上就是集合陳述。</p>
+</div>
+
+<p>第一點，Ragin 舉了一個很直白的例子：如果訪談的厭食症少女<em>全部</em>（或幾乎全部）都有一位非常挑剔的母親，那麼「厭食症少女」就構成「有挑剔母親的少女」這個集合的一個<strong>一致的子集合</strong>，研究者自然會把這個連結納入解釋。這種對「一致共同點」的關注，正是質性研究中<strong>分析歸納（analytic induction）</strong>的基石。</p>
+
+<p>第二點，「發展與民主密切相關」這句理論，說穿了就是「已開發國家 ⊆ 民主國家」。很多貧窮國家也是民主國家（代表通往民主還有別條路），但這<strong>完全不會推翻</strong>原主張——它本來就只談已開發國家。可是一旦把它改寫成「開發程度與民主程度正相關」，那些貧窮的民主國家就會拉低相關係數，讓一個其實很穩固的集合關係看起來「證據薄弱」。</p>
+
+<div class="callout warn">
+  <div class="ct">⚠️ 兩個常見誤解，本書都要破除</div>
+  <p><strong>誤解一：</strong>「集合分析＝名義變數的交叉表，是初階的量化分析。」其實集合分析會把交叉表<strong>拆解</strong>成兩個不對稱的問題（必要性、充分性），問的根本是不同的事（第 1 章）。</p>
+  <p><strong>誤解二：</strong>「集合只能處理 0／1，太粗糙。」自從 Zadeh（1965）提出<strong>模糊集（fuzzy set）</strong>，隸屬分數可以落在 0 到 1 之間，既保留集合推理的嚴謹，也能表達程度上的差異（第 2 章）。</p>
+</div>
+
+<h3>模糊集從哪裡來？</h3>
+<p>模糊集原本是為了讓數學能處理<strong>語言本身的模糊性</strong>而發明的。創始人 Zadeh 以為社會科學、人文學科會最先擁抱它，結果最早熱烈採用的反而是電機與資訊工程。社會科學花了數十年才慢慢接上：Smithson（1987）的先驅論文、Ragin（2000）的《模糊集社會科學》，再加上 Ragin（1987）《比較方法》中提出的<strong>質性比較分析（Qualitative Comparative Analysis, QCA）</strong>，兩者結合後，形成了本書要談的新研究範式。</p>
+
+<div class="callout tip">
+  <div class="ct">📌 譯者的兩個好比喻（中譯本譯者序）</div>
+  <p><strong>① 實務語言本來就是集合語言。</strong>日常與管理實務裡充滿「必須」「一定」「只要……就」：「要出國唸書，雅思<em>必須</em>過幾分？」「只要各業務成長 6%，全年目標<em>就</em>能達成。」前者是<strong>必要條件</strong>，後者是<strong>充分條件</strong>。相關分析回答不了這種問題，集合分析卻可以直接對話，讓理論語言更貼近實務語言。</p>
+  <p><strong>② 西餐 vs. 中式合菜。</strong>西式點餐各點各的、一人一道；中式合菜講究菜色之間的<strong>搭配</strong>。淨效應思維像在評估「每一道菜單獨有多好吃」，組態思維則問「哪些菜搭在一起才是一桌好菜」。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s2">2. 七組對比：傳統範式 vs. 集合論範式 <span class="en">· Seven contrasts</span></h2>
+
+<p>Ragin 在為中譯本寫的序言裡，把兩種範式的差異濃縮成<strong>七組對應要素</strong>。這七組對比就是整本書的骨架。點選下方任一組，看看兩種範式各怎麼做、舉個例子，以及本書在哪幾章深入討論。</p>
+
+<div class="widget" id="w-contrast">
+  <div class="widget-head"><span class="wtag">互動</span> 七組對比切換器</div>
+  <div class="widget-body">
+    <div class="ctabs" data-ctabs></div>
+    <div class="cpanel" data-cpanel></div>
+    <div class="result-box" data-cnote></div>
+  </div>
+</div>
+
+<p>把七組對比串起來看，會發現它們其實是同一個轉向的不同面向：</p>
+
+<div class="table-wrap">
+  <table class="tbl">
+    <thead><tr><th>研究流程的環節</th><th>傳統範式</th><th>集合論範式</th></tr></thead>
+    <tbody>
+      <tr><td><strong>概念的基本單位</strong></td><td>變數（程度的維度）</td><td>集合（有隸屬標準的類別）</td></tr>
+      <tr><td><strong>把概念變成數字</strong></td><td>測量：相對於樣本平均數</td><td>校準：相對於外部、實質的標準</td></tr>
+      <tr><td><strong>要解釋什麼</strong></td><td>因變數的變異</td><td>某個定性結果「有沒有發生、發生到什麼程度」</td></tr>
+      <tr><td><strong>研究哪些案例</strong></td><td>給定的、方便的總體或樣本</td><td>從正向案例出發，建構出來的總體</td></tr>
+      <tr><td><strong>案例之間的關係</strong></td><td>相關（對稱）</td><td>子集合關係（不對稱）</td></tr>
+      <tr><td><strong>分析的核心資料結構</strong></td><td>相關矩陣</td><td>真值表</td></tr>
+      <tr><td><strong>最後的答案長什麼樣</strong></td><td>每個變數的淨效應</td><td>通往結果的一條或多條前因配方</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<details class="think">
+  <summary>想一想：模糊集到底是「質化」還是「量化」？</summary>
+  <div class="ans">
+    <p><strong>兩者都是。</strong>「完全隸屬（1）」與「完全不隸屬（0）」是兩個<em>質性狀態</em>；兩者之間的分數則表達<em>程度</em>。其中 0.5 是一個特別的點——<strong>交叉點（crossover point）</strong>，代表「偏隸屬」與「偏不隸屬」之間的質性分界。而且這些分數不是隨便給的，它們直接來自你對這個集合的定義與標籤：你說的是「富裕國家」還是「中等收入國家」，同一個國家的分數就會不同。</p>
+  </div>
+</details>
+
+<!-- ================================================= -->
+<h2 id="s3">3. 示範：從「因變數」到「定性結果」 <span class="en">· From dependent variable to qualitative outcome</span></h2>
+
+<p>七組對比中，最能讓初學者「有感」的是第 3 組。Ragin 用的例子是<strong>福利緊縮（welfare retrenchment）</strong>：</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>傳統範式：解釋變異</h4>
+    <ul>
+      <li>因變數：過去數十年各工業化國家的<strong>福利支出水準</strong>。</li>
+      <li>任務：解釋支出水準的跨國、跨時變異，看哪些自變數與支出變化有關。</li>
+      <li>選因變數幾乎是機械性的：資料庫裡有什麼就用什麼。</li>
+    </ul>
+  </div>
+  <div class="new">
+    <h4>替代範式：解釋一個「發生了」的結果</h4>
+    <ul>
+      <li>先把福利緊縮概念化為在特定時空<strong>發生的質性變化或斷裂</strong>。</li>
+      <li>先找出幾個公認的好例子、深入研究，界定它的主要特徵。</li>
+      <li>據此訂出隸屬標準，把每個案例對「福利緊縮」的隸屬度<strong>校準</strong>成模糊集。</li>
+    </ul>
+  </div>
+</div>
+
+<p>Ragin 坦白承認：第二種做法<strong>比較費工</strong>，需要大量詮釋性的工作；但正因如此，你最後解釋的是一個有清楚意義的現象，而不只是「某個數字的高低起伏」。下面用一組<strong>假想資料</strong>體驗兩種看法的差別。</p>
+
+<div class="widget" id="w-welfare">
+  <div class="widget-head"><span class="wtag">互動</span> 同一組數字，兩種讀法：相對位置 vs. 外部標準</div>
+  <div class="widget-body">
+    <p style="margin-top:0">指標：十年間社會支出佔 GDP 比例的<strong>下降幅度</strong>（百分點；負值代表反而增加）。六個國家皆為教學用假想資料。</p>
+    <div class="controls">
+      <div class="seg" data-view>
+        <button data-v="var" class="on">因變數眼光（z 分數）</button>
+        <button data-v="set">定性結果眼光（校準隸屬度）</button>
+      </div>
+    </div>
+    <div data-anchors style="display:none">
+      <p style="margin:.6rem 0 .2rem;font-size:.88rem">用你的實質知識設定三個錨點：降多少才算「確定是福利緊縮」？</p>
+      <div class="slider-row"><span class="sl-label wide">完全隸屬</span><input type="range" min="1.5" max="5" step="0.1" value="3" data-full><output data-fullout>3.0</output></div>
+      <div class="slider-row"><span class="sl-label wide">交叉點 0.5</span><input type="range" min="0.2" max="2.5" step="0.1" value="1" data-cross><output data-crossout>1.0</output></div>
+      <div class="slider-row"><span class="sl-label wide">完全不隸屬</span><input type="range" min="-1.5" max="0.5" step="0.1" value="0" data-non><output data-nonout>0.0</output></div>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl center" data-wtable>
+        <thead><tr><th>國家</th><th>下降幅度</th><th data-colh>z 分數</th><th data-colh2>解讀</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="result-box" data-wnote></div>
+  </div>
+</div>
+
+<div class="callout info">
+  <div class="ct">ℹ️ 重點不在公式，而在「標準從哪來」</div>
+  <p>z 分數的參照點是<strong>這六個國家的平均數</strong>：換一批國家，同一個國家的「高低」就變了。校準的參照點是<strong>研究者根據理論與案例知識訂下的外部標準</strong>：它回答的是「這算不算福利緊縮」。上面的校準用的是第 5 章的「直接法」（三個錨點對應 log odds +3、0、−3），現在不必懂細節，第 4、5 章會完整教。</p>
+</div>
+
+<h3>連帶的改變：總體不再是「給定的」</h3>
+<p>一旦你要解釋的是「福利緊縮」這種定性結果，研究的起點通常是<strong>正向案例</strong>（確實發生緊縮的國家）。深入研究它們之後，才知道結果該怎麼定義、隸屬標準怎麼訂；接著再建構結果的<strong>候選總體</strong>——包含正向案例，以及「本來也有可能發生、卻沒有發生」的相關反向案例。也就是說，<strong>反向案例一開始是未知的</strong>，要等研究者確定了誰有「候選資格」之後才能挑選。這就是第 4 組對比「給定總體 vs. 建構總體」。</p>
+
+<details class="think">
+  <summary>想一想：為什麼不能直接用「全部 OECD 國家」當總體？</summary>
+  <div class="ans">
+    <p>可以用，但要小心。「全部 OECD 國家」有很好的<strong>表面效度（face validity）</strong>，看起來很合理，但它是根據會員資格劃定的，不是根據「誰可能發生福利緊縮」劃定的。如果裡面有些國家根本沒有可以緊縮的福利體制，把它們當成反向案例，只會稀釋你的分析。建構總體的意思，是讓<strong>研究問題</strong>而不是<strong>現成名單</strong>決定誰該被比較。</p>
+  </div>
+</details>
+
+<!-- ================================================= -->
+<h2 id="s4">4. 淨效應 vs. 前因配方：一道菜的味道從哪來？ <span class="en">· Net effects vs. causal recipes</span></h2>
+
+<p>第 7 組對比是全書的終點站（第 10、11 章）。傳統範式的核心任務是計算<strong>淨效應</strong>：一個自變數與因變數的相關越高、與其他自變數的相關越低，它的淨效應就越大。這種思維把各個原因<strong>彼此分開、互相競爭</strong>，努力「淨化」出每個變數單獨的影響。</p>
+
+<p>案例導向的研究者卻常常這樣想：原因是<strong>搭配</strong>起來才發生作用的，就像食譜——麵粉、蛋、烤箱，少一樣都不是蛋糕。而且同一個結果可能有<strong>好幾份不同的食譜</strong>，甚至沒有任何單一條件是必要或充分的。這種「配方式」的因果觀，和「每個原因都有獨立效應」的假設，從根本上就不相容。</p>
+
+<div class="widget" id="w-recipe">
+  <div class="widget-head"><span class="wtag">互動</span> 同一份資料：迴歸看到的 vs. 配方看到的</div>
+  <div class="widget-body">
+    <p style="margin-top:0">假想情境：社區抗爭是否成功（Y）。真正的因果結構是兩份配方：<strong>「在地組織 × 媒體關注」或「有政治盟友」</strong>，寫成 <code class="inline">Y = A·B + C</code>。切換三個條件，看看結果與「A 的效果」如何隨情境改變。</p>
+    <div class="tgl" data-tgl>
+      <button data-k="0">A 在地組織</button>
+      <button data-k="1">B 媒體關注</button>
+      <button data-k="2">C 政治盟友</button>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl center" data-rtable>
+        <thead><tr><th>A</th><th>B</th><th>C</th><th>抗爭成功 Y</th><th>此情境下「加入 A」的效果</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="k">迴歸係數 A（淨效應）</div><div class="v">0.25</div></div>
+      <div class="stat"><div class="k">迴歸係數 B（淨效應）</div><div class="v">0.25</div></div>
+      <div class="stat"><div class="k">迴歸係數 C（淨效應）</div><div class="v">0.75</div></div>
+      <div class="stat"><div class="k">目前情境中 A 的實際效果</div><div class="v gold" data-aeff>—</div></div>
+    </div>
+    <div class="result-box" data-rnote></div>
+  </div>
+</div>
+
+<p>8 種組合各出現一次時，線性迴歸 <code class="inline">Y ~ A + B + C</code> 的係數恰好是 0.25、0.25、0.75（截距 0，R² ≈ 0.73）。迴歸會告訴你「C 最重要，A 和 B 只有小小的效果」。但真相是：<strong>A 的效果要嘛是 1、要嘛是 0</strong>，完全取決於 B 和 C 的狀態；0.25 只是把「有效的 1 個情境」和「無效的 3 個情境」平均起來的結果，<strong>沒有任何一個真實案例的 A 效果是 0.25</strong>。真值表與布林最小化則能直接還原出 <code class="inline">A·B + C</code> 這兩條路徑。</p>
+
+<div class="callout info">
+  <div class="ct">ℹ️ 「那加交互作用項不就好了？」</div>
+  <p>Ragin 在第 6 章回應了這個問題：要用迴歸檢查條件組合，就得放入乘積交互項。條件一多，交互項會變得繁瑣、難以解釋，而且彼此之間、與原始變數之間<strong>高度相關</strong>。集合論則把「組合」視為最自然的單位——配方就是集合的<strong>交集</strong>。</p>
+</div>
+
+<details class="think">
+  <summary>想一想（R 對照）：同一份資料在 R 裡會怎麼呈現？</summary>
+  <div class="ans">
+<pre class="code"><span class="c-com"># 8 種組合各一個案例</span>
+<span class="c-fn">library</span>(QCA)
+d <span class="c-kw">&lt;-</span> <span class="c-fn">expand.grid</span>(A = <span class="c-num">0</span>:<span class="c-num">1</span>, B = <span class="c-num">0</span>:<span class="c-num">1</span>, C = <span class="c-num">0</span>:<span class="c-num">1</span>)
+d$Y <span class="c-kw">&lt;-</span> <span class="c-fn">as.integer</span>((d$A <span class="c-kw">&amp;</span> d$B) <span class="c-kw">|</span> d$C)
+
+<span class="c-fn">coef</span>(<span class="c-fn">lm</span>(Y <span class="c-kw">~</span> A <span class="c-kw">+</span> B <span class="c-kw">+</span> C, data = d))   <span class="c-com"># 0, 0.25, 0.25, 0.75：淨效應</span>
+
+tt <span class="c-kw">&lt;-</span> <span class="c-fn">truthTable</span>(d, outcome = <span class="c-str">"Y"</span>, conditions = <span class="c-fn">c</span>(<span class="c-str">"A"</span>, <span class="c-str">"B"</span>, <span class="c-str">"C"</span>), incl.cut = <span class="c-num">1</span>)
+<span class="c-fn">minimize</span>(tt, details = <span class="c-kw">TRUE</span>)                <span class="c-com"># A*B + C：前因配方</span></pre>
+    <p>兩種方法用的是<strong>完全相同的資料</strong>，卻給出性質完全不同的答案：一個是「每個變數平均有多重要」，另一個是「哪些組合會帶來結果」。</p>
+  </div>
+</details>
+
+<h3>練習：你的研究問題是哪一種思維？</h3>
+<p>學會分辨兩種思維，是讀這本書最重要的基本功。下面每一題是一個研究問題的寫法，請判斷它比較接近哪一種範式。</p>
+
+<div class="widget" id="w-mind">
+  <div class="widget-head"><span class="wtag">互動</span> 你是哪種思考？變數／淨效應 vs. 集合／組態</div>
+  <div class="widget-body">
+    <div data-items></div>
+    <div class="result-box" data-mscore>尚未作答。</div>
+    <p style="margin-bottom:0"><button class="btn ghost" type="button" data-mreset>重新作答</button></p>
+  </div>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s5">5. 與 KKV 的對話：什麼才是真正的中間路徑 <span class="en">· The KKV middle path and beyond</span></h2>
+
+<p>在質化與量化之間找一條「中間路徑」，是許多方法論者的目標。Ragin 特別說明：本書<strong>不是</strong>專門為了批評 KKV 而寫（那份工作 Brady 與 Collier 2004 年的《重新思考社會科學研究》已經做得很徹底了）。但兩者對「中間路徑」的理解截然不同，對照起來能讓你看清本書的立場。</p>
+
+<div class="compare">
+  <div class="old">
+    <h4>KKV 的中間路徑</h4>
+    <p>接受質性研究的科學價值，但建議質性研究者<strong>改用與量化研究相容的方式</strong>做研究。換句話說，中間路徑 = 把量化研究的核心原則<strong>延伸</strong>到質性研究。</p>
+  </div>
+  <div class="new">
+    <h4>Ragin 的中間路徑</h4>
+    <p>不是兩者的妥協，也不是讓一方去模仿另一方，而是透過擴充<strong>集合論原則</strong>，發展出<strong>超越</strong>傳統質化與量化各自限制的方法。</p>
+  </div>
+</div>
+
+<h3>一個具體爭點：「選擇因變數」</h3>
+<p>KKV 批評一種很常見的質性策略：<strong>挑出有相同結果的案例，找它們共同的前因</strong>（例如：成功從威權轉型為民主的國家，共同具備哪些條件？）。從變數導向的角度看，這種做法有兩個「毛病」：</p>
+<ol>
+  <li>結果在案例之間<strong>沒有變異</strong>（全部都是成功轉型），共同前因也沒有變異；</li>
+  <li>犯了「<strong>選擇因變數（selecting on the dependent variable）</strong>」的大忌——量化教科書普遍勸人不要這麼做。</li>
+</ol>
+<p>Ragin 認為「永遠不要選擇因變數」是個<strong>誤導</strong>的建議。他的理由有兩點：</p>
+
+<div class="callout key">
+  <div class="ct">🔑 為「選擇因變數」辯護</div>
+  <p><strong>① 研究必要條件時，這正是正確的策略。</strong>必要條件的意思是「結果 ⊆ 條件」：凡是有結果的案例都具備這個條件。要檢驗它，本來就只需要看<em>有結果</em>的案例——沒有結果的案例跟這個問題無關（第 1 章的 2×2 表會清楚示範）。</p>
+  <p><strong>② 這是在理論上「定義」總體的關鍵一步。</strong>先研究正向案例，才能界定結果、找到相關的反向案例；總體是建構出來的，不是給定的。</p>
+</div>
+
+<h3>KKV 觀點的三個缺陷</h3>
+<p>Ragin 承認 KKV 的大多數建議都很有見地、很實用，但它們預設了量化研究的優先地位。他指出這種中間路徑觀有三個缺陷：</p>
+
+<div class="steps">
+  <div class="step"><div><h4>假定量化方法是通往一般知識的唯一（或最佳）道路</h4><p>KKV 的隱含前提是：社會科學已經有產生一般知識的好技術，質性研究者的任務只是向它看齊。但大多數社會科學家都承認，通往一般知識的路不只一條。</p></div></div>
+  <div class="step"><div><h4>與日常的認知方式不一致</h4><p>我們在生活中獲得一般知識，最常見的方式是<strong>累積對具體案例的了解</strong>。例如你透過與同事一次次互動，摸清了他們的脾氣；你可能會「預測」某位同事開會時會說什麼，但這種預測正是建立在對個案的扎實認識上。所以中間路徑應該包含「從案例知識建立一般知識」的方法，說清楚哪些情境與條件會促成或阻斷某種經驗連結，而不是用「分離自變數淨效應」這種完全不同的知識形式取而代之。</p></div></div>
+  <div class="step"><div><h4>其實是質性方法的「縮水版」</h4><p>KKV 主張只保留「分析槓桿（analytic leverage）」最大的那些質性做法，於是他們搭起的橋只通往現有質性方法中一小塊狹窄的子集合。Ragin 要的則是真正的替代方案。</p></div></div>
+</div>
+
+<details class="think">
+  <summary>想一想：如果你只研究 12 個國家，是不是「樣本太小、不科學」？</summary>
+  <div class="ans">
+    <p>Ragin 的看法是：依賴機率理論的方法自然不喜歡小樣本，但社會科學家<strong>不該逃避理解 5 到 50 個案例的挑戰</strong>，尤其當你有機會深入了解每個案例的時候。系統性的跨案例分析不一定需要大樣本。同時他也強調，本書的集合論方法<strong>可以延伸到大樣本</strong>——第 11 章就用上萬筆個人資料示範。所以 QCA 不是「小樣本專用的權宜之計」。</p>
+  </div>
+</details>
+
+<!-- ================================================= -->
+<h2 id="s6">6. 全書地圖與閱讀建議 <span class="en">· A map of the book</span></h2>
+
+<p>前言把全書組織成<strong>四組基本對比</strong>，每一組是一篇。它們全都是「集合論分析 vs. 傳統量化分析」的對照。Ragin 說明他刻意拿傳統量化分析來對比，有四個理由：</p>
+<ul>
+  <li><strong>它最清楚</strong>：傳統量化範式明確且居主流（尤其在美國），對照起來差異最鮮明。</li>
+  <li><strong>差異在這裡最明顯</strong>：量化分析的基石——相關係數——對集合論分析而言<strong>幾乎毫無用處</strong>。</li>
+  <li><strong>很多人以為量化分析已經涵蓋集合分析</strong>：例如以為交叉表就是集合分析。其實集合分析是把交叉表「解構」掉。</li>
+  <li><strong>證明集合分析不限於中小樣本</strong>：前兩本書偏重中小樣本，這本要示範如何延伸到大樣本。</li>
+</ul>
+
+<div class="widget" id="w-map">
+  <div class="widget-head"><span class="wtag">互動</span> 全書地圖：四篇 11 章</div>
+  <div class="widget-body">
+    <p style="margin-top:0">點選篇名展開章節；每章附一句話摘要與連結。七組對比中，每一組主要出現在哪裡，也標在篇名下方。</p>
+    <div class="controls">
+      <button class="btn ghost" type="button" data-mapall>全部展開</button>
+    </div>
+    <div class="bookmap" data-map></div>
+  </div>
+</div>
+
+<div class="callout tip">
+  <div class="ct">📌 建議的閱讀順序</div>
+  <p><strong>第一次讀：</strong>依序讀第 1→2→3 章，打好「集合關係、模糊集、一致性與覆蓋度」三個地基；接著讀第 4→5 章學會校準；再讀第 6→7 章學會用真值表找配方。這七章讀完，你就能做出一個完整的 fsQCA 分析。</p>
+  <p><strong>第二次讀：</strong>第 8→9 章（有限多樣性與反事實）決定了你報告的是哪一種解（簡約解、中間解、複雜解），投稿時審稿人一定會問；第 10→11 章則是全書論證的總結，最適合拿來說服還在用迴歸思維的同儕。</p>
+  <p><strong>邊讀邊做：</strong>第 1、2、5、6、7、9、11 章的原書都附有 fsQCA「實用附錄」，本教材在這些章節同時提供 fsQCA 軟體與 R 的實作分頁，建議當下就跟著操作一次。</p>
+</div>
+
+<!-- ================================================= -->
+<h2 id="s7">7. 導讀重點、名詞與自我測驗 <span class="en">· Review</span></h2>
+
+<ol class="takeaways">
+  <li>傳統範式：設定因變數 → 列出競爭的自變數 → 從給定總體取資料 → 估計<strong>淨效應</strong>。它清楚而成熟，但不是唯一的範式。</li>
+  <li>本書的統一主題：<strong>集合關係分析</strong>是社會科學的核心，因為質性研究與文字理論本質上都是集合論的。</li>
+  <li>七組對比：變數／集合、測量／校準、因變數／定性結果、給定總體／建構總體、相關／集合關係、相關矩陣／真值表、淨效應／前因配方。</li>
+  <li>集合關係是<strong>不對稱</strong>的；把它改寫成對稱的相關假設，常會低估甚至誤判理論的支持度。</li>
+  <li>「選擇因變數」在研究<strong>必要條件</strong>與<strong>建構總體</strong>時是合理且必要的做法。</li>
+  <li>Ragin 的中間路徑不是質量妥協，而是用集合論<strong>超越</strong>兩者的限制，而且可用於大樣本。</li>
+  <li>四篇對應四組基本對比：集合／相關（1–3 章）、校準／測量（4–5 章）、組態／自變數（6–7 章）、因果複雜性／淨效應（8–11 章）。</li>
+</ol>
+
+<h3>名詞對照</h3>
+<div class="table-wrap">
+  <table class="tbl gloss">
+    <thead><tr><th>本教材用語</th><th>簡中譯本</th><th>英文</th><th>白話說明</th></tr></thead>
+    <tbody>
+      <tr><td>範式</td><td>范例</td><td>template</td><td>做研究的一整套標準流程與預設</td></tr>
+      <tr><td>變數</td><td>变量</td><td>variable</td><td>案例之間差異的一個維度，靠相對比較排序</td></tr>
+      <tr><td>集合</td><td>集合</td><td>set</td><td>有隸屬標準的類別，例如「民主國家」</td></tr>
+      <tr><td>隸屬度</td><td>隶属度</td><td>degree of membership</td><td>案例屬於某集合的程度，0 到 1</td></tr>
+      <tr><td>校準</td><td>校准</td><td>calibration</td><td>依外部實質標準把原始數值轉成隸屬分數</td></tr>
+      <tr><td>交叉點</td><td>交叉点</td><td>crossover point</td><td>隸屬度 0.5，「偏是」與「偏不是」的分界</td></tr>
+      <tr><td>定性結果</td><td>定性结果</td><td>qualitative outcome</td><td>可觀察到的質性變化或斷裂，如福利緊縮</td></tr>
+      <tr><td>建構總體</td><td>构建总体</td><td>constructed population</td><td>由正向案例出發、依研究問題界定的案例範圍</td></tr>
+      <tr><td>淨效應</td><td>净效应</td><td>net effect</td><td>控制其他變數後，單一變數獨有的影響</td></tr>
+      <tr><td>前因配方</td><td>前因配方</td><td>causal recipe</td><td>共同帶來結果的條件組合</td></tr>
+      <tr><td>真值表</td><td>真值表</td><td>truth table</td><td>列出條件的各種組合，逐列檢查結果是否一致</td></tr>
+      <tr><td>分析歸納</td><td>分析归纳</td><td>analytic induction</td><td>從案例中找一致共同點的質性研究技術</td></tr>
+      <tr><td>選擇因變數</td><td>选择因变量</td><td>selecting on the DV</td><td>只挑有某結果的案例來研究</td></tr>
+      <tr><td>表面效度</td><td>表面效度</td><td>face validity</td><td>乍看之下合理、說得通</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>自我測驗</h3>
+<p class="quiz-score" data-quiz-score></p>
+
+<div class="quiz" data-answer="2">
+  <p class="q">下列哪一項<strong>不是</strong>Ragin 所描述的傳統範式特徵？</p>
+  <div class="opts">
+    <button class="opt">從給定的總體或其樣本蒐集資料</button>
+    <button class="opt">比較相互競爭的自變數的相對解釋力</button>
+    <button class="opt">先深入研究正向案例，再決定要比較哪些反向案例</button>
+    <button class="opt">把因變數的變異切分給各個自變數</button>
+  </div>
+  <div class="explain">先研究正向案例、再建構總體（包含相關反向案例），是替代範式「建構總體」的做法；傳統範式通常使用給定或方便取得的總體。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">某國的民主指數 z 分數為 +0.8。根據 Ragin 的觀點，這個數字最大的限制是什麼？</p>
+  <div class="opts">
+    <button class="opt">它只告訴你該國比平均更民主，卻無法告訴你它「算不算」民主國家</button>
+    <button class="opt">它的計算公式錯誤</button>
+    <button class="opt">z 分數無法比較兩個國家的高低</button>
+    <button class="opt">z 分數只能用在大樣本</button>
+  </div>
+  <div class="explain">未校準的變數只具有相對意義（相對於樣本平均數）。要回答「是不是民主國家」，需要依外部標準校準，訂出完全隸屬、交叉點與完全不隸屬。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">「已開發國家是民主國家」，但研究者發現很多貧窮國家也是民主國家。下列說法何者正確？</p>
+  <div class="opts">
+    <button class="opt">原主張被推翻了</button>
+    <button class="opt">開發與民主的相關會因此提高</button>
+    <button class="opt">這證明開發是民主的必要條件</button>
+    <button class="opt">原主張（已開發 ⊆ 民主）不受影響，只代表通往民主還有其他路徑</button>
+  </div>
+  <div class="explain">集合關係不對稱：主張只談已開發國家，貧窮的民主國家不違反它，反而顯示其他通往民主的路徑。不過它們會拉低相關係數。</div>
+</div>
+
+<div class="quiz" data-answer="1">
+  <p class="q">Ragin 認為「選擇因變數」在什麼情況下是合理的研究策略？</p>
+  <div class="opts">
+    <button class="opt">任何時候都不合理</button>
+    <button class="opt">研究必要條件時，以及在理論上界定總體時</button>
+    <button class="opt">只有在樣本數超過 1,000 時</button>
+    <button class="opt">只有在估計淨效應時</button>
+  </div>
+  <div class="explain">必要條件 = 結果 ⊆ 條件，只需要檢查有結果的案例。從正向案例出發，也是建構（而非接受給定）總體的重要步驟。</div>
+</div>
+
+<div class="quiz" data-answer="2">
+  <p class="q">在「Y = A·B + C」的資料中，迴歸給 A 的係數是 0.25。這個數字代表什麼？</p>
+  <div class="opts">
+    <button class="opt">每個案例中 A 都讓 Y 提高 0.25</button>
+    <button class="opt">A 是 Y 的必要條件</button>
+    <button class="opt">A 在一種情境中效果為 1、在其他三種情境中為 0，平均起來是 0.25</button>
+    <button class="opt">A 對 Y 沒有影響</button>
+  </div>
+  <div class="explain">A 只有在 B 存在且 C 不存在時才有作用。淨效應把不同情境的效果平均起來，結果是一個沒有任何真實案例對應的數字。</div>
+</div>
+
+<div class="quiz" data-answer="0">
+  <p class="q">下列何者是 Ragin 指出 KKV 中間路徑觀的缺陷之一？</p>
+  <div class="opts">
+    <button class="opt">它與我們從具體案例累積一般知識的日常經驗不一致</button>
+    <button class="opt">它完全否定了質性研究的價值</button>
+    <button class="opt">它主張只用模糊集研究社會現象</button>
+    <button class="opt">它反對使用任何統計方法</button>
+  </div>
+  <div class="explain">KKV 其實承認質性研究的價值。Ragin 批評的是它假定量化方法是通往一般知識的最佳途徑、與日常認知方式不一致，以及最後只保留了質性方法的狹窄子集。</div>
+</div>
+
+<div class="quiz" data-answer="3">
+  <p class="q">本書第三篇（第 6、7 章）對應的是哪一組基本對比？</p>
+  <div class="opts">
+    <button class="opt">集合關係 vs. 相關關係</button>
+    <button class="opt">校準 vs. 測量</button>
+    <button class="opt">因果複雜性 vs. 淨效應</button>
+    <button class="opt">條件組態 vs. 「自」變數</button>
+  </div>
+  <div class="explain">四篇依序為：集合關係與相關關係（1–3）、校準與測量（4–5）、條件組態與「自」變數（6–7）、因果複雜性與淨效應（8–11）。</div>
+</div>
+
+<p><button class="btn ghost" data-quiz-reset type="button">重新作答</button></p>
+
+<div class="done-box" data-ch="0">
+  <span class="msg"></span>
+  <button class="btn" type="button">標記本章為已讀</button>
+</div>
+
+<nav class="chap-nav">
+  <a class="prev" href="index.html"><div class="dir">← 上一頁</div><div class="ttl">本書首頁</div></a>
+  <a class="next" href="ch1.html"><div class="dir">下一章 →</div><div class="ttl">第 1 章 社會科學研究中的集合關係：基本概念</div></a>
+</nav>
+</main>
+
+<footer class="site-footer">
+  <p>互動式教材 · 改編自 Charles C. Ragin, <em>Redesigning Social Inquiry: Fuzzy Sets and Beyond</em> (University of Chicago Press, 2008)<br>
+  以學習為目的之概念整理與重新詮釋，非原書譯文 · <a href="index.html">回本書首頁</a></p>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="js/ragin.js"></script>
+<script>
+/* ---------- 七組對比切換器 ---------- */
+(function () {
+  const root = document.getElementById('w-contrast');
+  const C = [
+    { k: '變數 vs. 集合',
+      o: ['變數（variable）', '捕捉案例間差異的一個維度（水準、程度或種類），透過相對比較來排序，常以平均數為參照。', '「民主程度」：有的國家比較民主、有的比較不民主。'],
+      n: ['集合（set）', '有隸屬標準的類別，更貼近案例本身。模糊集讓隸屬度介於 0 與 1 之間，0.5 是質性的分界。', '「民主國家集合」：可以列出成員，並說出每國的隸屬度。'],
+      why: '「民主程度」不能當集合的名字，因為它沒有說什麼條件算「是」。換成「民主國家」，就必須先講清楚隸屬標準——這逼研究者把概念想清楚。',
+      ch: [[1, '集合關係基本概念'], [2, '模糊集']] },
+    { k: '測量 vs. 校準',
+      o: ['測量（measurement）', '指標只要能依潛在概念把案例排出順序即可；分數的意義來自樣本的平均數與標準差，所有變異都照單全收。', '某國民主分數比平均高 1 個標準差。'],
+      n: ['校準（calibration）', '依外部、實質的標準解釋分數：必須指定完全隸屬、完全不隸屬與交叉點三個錨點。', '人均所得多少算「完全屬於富裕國家」？多少算「完全不屬於」？多少是「說不準」的分界？'],
+      why: '未校準的變數只能說「A 比 B 更民主」甚至「比平均更民主」，卻說不出 A「是不是」民主國家。校準把這個質性判斷帶回來。',
+      ch: [[4, '為什麼要校準'], [5, '校準模糊集']] },
+    { k: '因變數 vs. 定性結果',
+      o: ['因變數（dependent variable）', '研究目的是解釋因變數在案例間或時間上的變異。', '解釋數十年來各工業化國家福利支出水準的變異。'],
+      n: ['定性結果（qualitative outcome）', '先把現象概念化為可觀察的變化或斷裂，界定特徵、訂出隸屬標準，再校準結果的隸屬度。', '「福利緊縮」是在特定時空發生的事件：哪些國家、在哪段時間、到什麼程度算發生？'],
+      why: '定義結果需要更多詮釋工作，但你解釋的是一個有清楚意義的現象，而不是機械地挑一個現成的數字。見本頁第 3 節示範。',
+      ch: [[1, '從結果出發的研究策略'], [5, '校準結果']] },
+    { k: '給定總體 vs. 建構總體',
+      o: ['給定總體（given population）', '使用現成或方便的總體及其樣本，如全國隨機抽樣家戶、所有國家、所有企業，倚賴它的表面效度。', '「OECD 全體會員國」直接當作研究範圍。'],
+      n: ['建構總體（constructed population）', '從結果的好例子出發，深入研究後建立隸屬標準，再建構候選總體——正向案例加上相關的反向案例。', '先確定哪些國家真的發生了福利緊縮，再找「本來也可能緊縮卻沒有」的國家來比較。'],
+      why: '反向案例一開始是未知的，要等研究者確認誰有「候選資格」才能決定。所以替代範式要求謹慎挑選反向案例——這也是「選擇因變數」的正當性所在。',
+      ch: [[1, '找共同點的兩種策略'], [3, '必要條件的評估']] },
+    { k: '相關 vs. 集合關係',
+      o: ['相關（correlation）', '從多元迴歸、因素分析到結構方程模型，都只需要相關矩陣加上平均數與標準差。相關是對稱的。', '檢驗「條件有→結果有」的同時，也等於檢驗了「條件無→結果無」。'],
+      n: ['集合關係（set relation）', '最常見的是子集合關係，它是不對稱的。充分性與必要性的評估都是集合論、不對稱的。', '「已開發國家是民主的」不要求「未開發國家就不民主」。'],
+      why: '相關係數因為對稱，天生就無法評估集合關係。相關很弱時，集合關係仍可能非常強——第 1 章的兩張 2×2 表會讓你親眼看到。',
+      ch: [[1, '非對稱與 2×2 表'], [2, '模糊子集合'], [3, '一致性與覆蓋度']] },
+    { k: '相關矩陣 vs. 真值表',
+      o: ['相關矩陣（correlation matrix）', '分析兩兩相關，看兩組數值在案例間「平行」的程度。淨效應看似「控制了其他變數」，其實只是對雙變數相關的公式操作。', '沒有直接檢查：真實案例中，哪些面向是一起出現的？'],
+      n: ['真值表（truth table）', '直接檢視資料中存在哪些「案例類型」：列出條件的各種組合，把同組合的案例放在一起，看結果是否一致。', '某一列的案例結果矛盾？比較其中的正向與負向案例，加入新條件或重新設定真值表。'],
+      why: '真值表把每一種條件組合當成一個需要「以它自己的條件」來檢驗的類型，這是相關矩陣做不到的。',
+      ch: [[1, '真值表入門'], [7, '模糊集真值表'], [8, '有限多樣性']] },
+    { k: '淨效應 vs. 前因配方',
+      o: ['淨效應（net effect）', '強調解釋變數之間的競爭：每個變數對因變數「獨有、不重疊」的貢獻與顯著性。與其他變數越不相關，淨效應越大。', '「控制其他因素後，教育對收入的影響是多少？」'],
+      n: ['前因配方（causal recipe）', '關注條件如何組合起來產生結果；結果可能有多份配方，甚至沒有單一條件是必要或充分的。', '「高教育 × 雙親家庭」與「高能力 × 穩定就業」可能是兩條不同的脫貧路徑。'],
+      why: '「每個原因都有可單獨評估的獨立效應」這個想法，與配方式的因果觀背道而馳。配方的焦點在每個案例內條件如何搭配，因此更以案例為中心。見本頁第 4 節示範。',
+      ch: [[6, '組態思維'], [10, '淨效應思維的局限'], [11, '實證示範']] },
+  ];
+  const tabs = root.querySelector('[data-ctabs]'), panel = root.querySelector('[data-cpanel]'), note = root.querySelector('[data-cnote]');
+  C.forEach((c, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.innerHTML = `<b>對比 ${i + 1}</b>${c.k}`;
+    b.addEventListener('click', () => show(i));
+    tabs.appendChild(b);
+  });
+  const btns = [...tabs.children];
+  function show(i) {
+    const c = C[i];
+    btns.forEach((b, j) => b.classList.toggle('on', j === i));
+    panel.innerHTML =
+      `<div class="compare">
+        <div class="old"><h4>傳統範式：${c.o[0]}</h4><p>${c.o[1]}</p><div class="eg">例：${c.o[2]}</div></div>
+        <div class="new"><h4>集合論範式：${c.n[0]}</h4><p>${c.n[1]}</p><div class="eg">例：${c.n[2]}</div></div>
+      </div>
+      <div style="font-size:.88rem;color:var(--ink-soft)">本書在這裡深入討論：</div>
+      <div class="chlinks">${c.ch.map(([n, t]) => `<a href="ch${n}.html">第 ${n} 章・${t}</a>`).join('')}</div>`;
+    note.innerHTML = `<span class="hl">對比 ${i + 1}／7：${c.k}</span>\n${c.why}`;
+  }
+  show(0);
+})();
+
+/* ---------- 福利緊縮：z 分數 vs. 校準 ---------- */
+(function () {
+  const root = document.getElementById('w-welfare');
+  const data = [['甲國', 4.0], ['乙國', 2.5], ['丙國', 1.2], ['丁國', 0.3], ['戊國', -0.8], ['己國', 1.8]];
+  const xs = data.map((d) => d[1]);
+  const mean = xs.reduce((s, v) => s + v, 0) / xs.length;
+  const sd = Math.sqrt(xs.reduce((s, v) => s + (v - mean) ** 2, 0) / (xs.length - 1));
+  const tb = root.querySelector('tbody'), note = root.querySelector('[data-wnote]');
+  const anchors = root.querySelector('[data-anchors]');
+  const sl = { full: root.querySelector('[data-full]'), cross: root.querySelector('[data-cross]'), non: root.querySelector('[data-non]') };
+  let view = 'var';
+  function render() {
+    const f = +sl.full.value, c = +sl.cross.value, n = +sl.non.value;
+    root.querySelector('[data-fullout]').textContent = f.toFixed(1);
+    root.querySelector('[data-crossout]').textContent = c.toFixed(1);
+    root.querySelector('[data-nonout]').textContent = n.toFixed(1);
+    anchors.style.display = view === 'set' ? '' : 'none';
+    root.querySelector('[data-colh]').textContent = view === 'var' ? 'z 分數' : '隸屬度';
+    const valid = f > c && c > n;
+    tb.innerHTML = '';
+    data.forEach(([name, x]) => {
+      let v, txt, cls = '';
+      if (view === 'var') {
+        v = (x - mean) / sd;
+        txt = v > 0 ? '高於平均' : '低於平均';
+        cls = v > 0 ? 'hi' : 'lo';
+        v = (v > 0 ? '+' : '') + v.toFixed(2);
+      } else if (valid) {
+        const m = RG.fz.calibrate(x, f, c, n);
+        txt = m >= .95 ? '完全（或幾乎完全）屬於「福利緊縮」' : m > .5 ? '偏屬於' : m === .5 ? '交叉點：說不準' : m > .05 ? '偏不屬於' : '完全（或幾乎完全）不屬於';
+        cls = m > .5 ? 'hi' : 'lo';
+        v = m.toFixed(2);
+      } else { v = '—'; txt = '錨點順序錯誤'; }
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${name}</td><td>${x.toFixed(1)}</td><td class="${cls}">${v}</td><td class="${cls}" style="text-align:left">${txt}</td>`;
+      tb.appendChild(tr);
+    });
+    if (view === 'var') {
+      note.innerHTML = `平均下降 ${mean.toFixed(2)} 個百分點，標準差 ${sd.toFixed(2)}。\n` +
+        `丙國（降 1.2）z = ${((1.2 - mean) / sd).toFixed(2)}，被歸為「低於平均」。\n` +
+        `但這只說明它在<span class="hl">這六國中</span>相對偏低——如果換成一批普遍大砍福利的國家，它會更「低」；換成一批普遍擴張的國家，它又會變成「高於平均」。\n` +
+        `z 分數回答不了：丙國到底有沒有發生福利緊縮？`;
+    } else if (!valid) {
+      note.textContent = '三個錨點必須滿足：完全隸屬 > 交叉點 > 完全不隸屬。請調整滑桿。';
+    } else {
+      const mC = RG.fz.calibrate(1.2, f, c, n);
+      const inSet = data.filter(([, x]) => RG.fz.calibrate(x, f, c, n) > .5).map((d) => d[0]);
+      note.innerHTML = `錨點：降 ${f.toFixed(1)} → 0.95；降 ${c.toFixed(1)} → 0.5；降 ${n.toFixed(1)} → 0.05。\n` +
+        `丙國（降 1.2）隸屬度 = <span class="hl">${mC.toFixed(2)}</span>：` +
+        (mC > .5 ? '依你的標準，它「偏屬於」福利緊縮——即使它低於六國平均。' : mC < .5 ? '依你的標準，它「偏不屬於」福利緊縮。' : '剛好落在交叉點。') +
+        `\n目前偏屬於（> 0.5）福利緊縮的國家：${inSet.length ? inSet.join('、') : '無'}。\n` +
+        `注意：這些數字<span class="hl">不會因為加入或移除其他國家而改變</span>——標準是你定的，不是樣本平均數定的。`;
+    }
+  }
+  root.querySelectorAll('[data-view] button').forEach((b) => b.addEventListener('click', () => {
+    root.querySelectorAll('[data-view] button').forEach((x) => x.classList.toggle('on', x === b));
+    view = b.dataset.v; render();
+  }));
+  Object.values(sl).forEach((s) => s.addEventListener('input', render));
+  render();
+})();
+
+/* ---------- 淨效應 vs. 配方 ---------- */
+(function () {
+  const root = document.getElementById('w-recipe');
+  const st = [1, 0, 0];
+  const Y = (a, b, c) => ((a && b) || c) ? 1 : 0;
+  const tb = root.querySelector('tbody'), note = root.querySelector('[data-rnote]'), aeff = root.querySelector('[data-aeff]');
+  const btns = [...root.querySelectorAll('[data-tgl] button')];
+  const rows = [];
+  for (let c = 0; c < 2; c++) for (let b = 0; b < 2; b++) for (let a = 0; a < 2; a++) rows.push([a, b, c]);
+  rows.forEach((r) => {
+    const tr = document.createElement('tr');
+    const eff = Y(1, r[1], r[2]) - Y(0, r[1], r[2]);
+    tr.innerHTML = `<td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td><strong>${Y(...r)}</strong></td><td>${eff ? '+1' : '0'}</td>`;
+    tr.style.cursor = 'pointer';
+    tr.addEventListener('click', () => { st[0] = r[0]; st[1] = r[1]; st[2] = r[2]; render(); });
+    tb.appendChild(tr);
+  });
+  const trs = [...tb.children];
+  function render() {
+    btns.forEach((b, i) => b.classList.toggle('on', !!st[i]));
+    const [a, b, c] = st;
+    trs.forEach((tr, i) => {
+      const on = rows[i][0] === a && rows[i][1] === b && rows[i][2] === c;
+      tr.querySelectorAll('td').forEach((td) => td.classList.toggle('hi', on));
+    });
+    const eff = Y(1, b, c) - Y(0, b, c);
+    aeff.textContent = eff ? '+1' : '0';
+    const y = Y(a, b, c);
+    let msg = `目前：A=${a}, B=${b}, C=${c} → 抗爭${y ? '<span class="hl">成功</span>' : '失敗'}。\n`;
+    if (y) msg += c ? '經由配方「有政治盟友（C）」達成。' : '經由配方「在地組織 × 媒體關注（A·B）」達成。';
+    else msg += '兩份配方都沒有湊齊。';
+    msg += `\n在 B=${b}、C=${c} 的情境下，加入 A 的效果是 ${eff ? '+1：A 是讓配方湊齊的關鍵一塊。' : '0：' + (c ? '已經有政治盟友，A 可有可無。' : '沒有媒體關注，光有組織不夠。')}`;
+    msg += '\n迴歸卻對所有案例都說：A 的淨效應 = 0.25。這是 1 個有效情境與 3 個無效情境的平均。';
+    note.innerHTML = msg;
+  }
+  btns.forEach((bt, i) => bt.addEventListener('click', () => { st[i] = st[i] ? 0 : 1; render(); }));
+  render();
+})();
+
+/* ---------- 你是哪種思考？ ---------- */
+(function () {
+  const root = document.getElementById('w-mind');
+  const V = 'v', S = 's';
+  const items = [
+    { t: '控制年齡與性別後，教育年數每多一年，平均月收入會增加多少？', a: V,
+      e: '「每多一年增加多少」「控制其他變數」是典型的淨效應語言。', alt: '集合版可以問：「高學歷」是不是「高收入」的充分條件？還是要搭配其他條件才成立？' },
+    { t: '哪些條件的組合，會讓新創公司成功募到 A 輪資金？', a: S,
+      e: '「條件的組合」「成功募資」這個定性結果，都是組態思維。', alt: '變數版會問：團隊規模、創辦人經驗、產業別各自對募資金額的影響多大？' },
+    { t: '所有成功從威權轉型為民主的國家，是否都經歷過菁英協商？', a: S,
+      e: '從有結果的案例出發、找共同前因——這是在問必要條件（結果 ⊆ 條件），也是 KKV 批評的「選擇因變數」。', alt: '變數版會問：菁英協商與民主程度的相關有多高？' },
+    { t: '在主管支持、薪資、工作負荷三個因素中，哪一個對離職意願的解釋力最大？', a: V,
+      e: '讓變數「互相競爭解釋力」，正是淨效應思維的核心任務。', alt: '組態版會問：「低主管支持 × 高工作負荷」是不是高離職意願的一條路徑？是否還有別條？' },
+    { t: '同時擁有高數位能力與高組織彈性的企業，是否幾乎都有高創新績效？', a: S,
+      e: '「同時擁有……是否幾乎都……」是在檢驗一個條件組合的充分性（組合 ⊆ 結果），「幾乎」則對應第 3 章的一致性。', alt: '變數版會在迴歸中加入「數位能力 × 組織彈性」交互項。' },
+    { t: '把各國民主指數標準化，看看高於平均的國家有哪些特徵。', a: V,
+      e: '「高於平均」是以樣本平均數為參照的相對判斷，屬於未校準的測量。', alt: '集合版會先問：民主指數多少才算「完全屬於民主國家」？交叉點在哪？' },
+    { t: '人均所得要多高，一個國家才算「完全屬於富裕國家」？', a: S,
+      e: '這是在設定校準的錨點，用外部實質標準界定集合隸屬。', alt: '變數版通常不問這個問題，直接把人均所得（或其對數）放進模型。' },
+    { t: '廣告支出與品牌知名度之間的相關係數有多高？', a: V,
+      e: '相關係數是對稱的關聯量數，屬於傳統範式。', alt: '集合版會問：「高廣告支出」是否為「高知名度」的必要條件？有沒有低廣告卻高知名度的路徑？' },
+  ];
+  const box = root.querySelector('[data-items]'), score = root.querySelector('[data-mscore]');
+  const state = items.map(() => null);
+  items.forEach((it, i) => {
+    const d = document.createElement('div');
+    d.className = 'think-item';
+    d.innerHTML = `<p class="stmt" data-n="${i + 1}">${it.t}</p>
+      <div class="row"><button type="button" data-a="v">變數／淨效應思維</button><button type="button" data-a="s">集合／組態思維</button></div>
+      <div class="fb"></div>`;
+    d.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+      if (state[i] !== null) return;
+      const ok = b.dataset.a === it.a;
+      state[i] = ok;
+      d.classList.add('done');
+      b.classList.add(ok ? 'right' : 'wrong');
+      if (!ok) d.querySelector(`[data-a="${it.a}"]`).classList.add('right');
+      d.querySelector('.fb').innerHTML = `<strong class="${ok ? 'ok' : 'bad'}">${ok ? '✔ 正確' : '✘ 不太對'}</strong>（${it.a === V ? '變數／淨效應思維' : '集合／組態思維'}）${it.e}<br>↔ 換個範式：${it.alt}`;
+      upd();
+    }));
+    box.appendChild(d);
+  });
+  function upd() {
+    const done = state.filter((s) => s !== null).length, right = state.filter((s) => s === true).length;
+    if (!done) { score.textContent = '尚未作答。'; return; }
+    let msg = `已作答 ${done} / ${items.length} 題，判斷正確 ${right} 題。`;
+    if (done === items.length) {
+      msg += right === items.length ? '\n全對！你已經能分辨兩種思維，可以進入第 1 章了。'
+        : right >= 6 ? '\n很好！回頭看看答錯的題目：關鍵字是「控制／解釋力／相關／高於平均」還是「組合／都／幾乎都／算不算」？'
+        : '\n提示：問「每多一單位增加多少」「誰的影響最大」→ 變數思維；問「哪些組合」「是否都」「算不算」→ 集合思維。';
+    }
+    score.textContent = msg;
+  }
+  root.querySelector('[data-mreset]').addEventListener('click', () => {
+    state.fill(null);
+    box.querySelectorAll('.think-item').forEach((d) => {
+      d.classList.remove('done');
+      d.querySelectorAll('button').forEach((b) => b.classList.remove('right', 'wrong'));
+      d.querySelector('.fb').innerHTML = '';
+    });
+    upd();
+  });
+})();
+
+/* ---------- 全書地圖 ---------- */
+(function () {
+  const root = document.getElementById('w-map');
+  const P = [
+    { no: '第一篇', t: '集合關係與相關關係', r: '1–3 章', q: '核心問題：社會科學的主張為什麼該用不對稱的集合關係，而不是對稱的相關來檢驗？（對比 1、5）',
+      ch: [[1, '社會科學研究中的集合關係：基本概念', '文字理論就是集合陳述；把 2×2 交叉表拆成必要性與充分性兩種檢驗，並初識真值表。'],
+           [2, '模糊集與模糊集合關係', '隸屬分數可以介於 0 與 1 之間；模糊子集合關係在 XY 圖上表現為案例落在對角線的一側。'],
+           [3, '評估集合關係：一致性與覆蓋度', '用一致性衡量集合關係「有多接近完美」，用覆蓋度衡量它「在經驗上有多重要」。']] },
+    { no: '第二篇', t: '校準與測量', r: '4–5 章', q: '核心問題：數字怎樣才有實質意義？如何把原始變數轉成隸屬分數？（對比 2、3）',
+      ch: [[4, '為什麼要校準', '社會科學幾乎不談校準；未校準的變數只能比較高低，說不出「算不算」。模糊集是校準的關鍵。'],
+           [5, '校準模糊集', '把定距／定比變數校準為模糊集的兩種方法：以三個錨點為基礎的直接法，以及間接法。']] },
+    { no: '第三篇', t: '條件組態與「自」變數', r: '6–7 章', q: '核心問題：把案例看成條件的組合，和把每個變數當成獨立的原因，有什麼不同？（對比 6、7）',
+      ch: [[6, '組態思維', '案例是條件的組態；前因配方就是集合的交集；為什麼迴歸的交互作用項難以勝任。'],
+           [7, '使用模糊集與真值表進行組態分析', '把模糊集資料整理成真值表，從所有邏輯上可能的組合中找出通往結果的多條路徑。']] },
+    { no: '第四篇', t: '因果複雜性與淨效應', r: '8–11 章', q: '核心問題：面對有限的經驗多樣性，如何分析因果複雜性？淨效應思維的盲點在哪？（對比 4、6、7）',
+      ch: [[8, '有限多樣性與反事實案例', '真值表中許多組合沒有案例；無論樣本大小，非實驗研究幾乎都得面對反事實。'],
+           [9, '容易反事實與困難反事實', '區分有理論支持的「容易」反事實與「困難」反事實，形式化地把前者納入分析（中間解）。'],
+           [10, '「淨效應」思維的局限性', '檢討主導當今社會科學的淨效應元理論：可加性假設、變數彼此競爭的世界觀。'],
+           [11, '淨效應與組態：實證示範', '以「鐘形曲線」大樣本資料研究貧窮，正面對比迴歸的淨效應分析與模糊集組態分析。']] },
+  ];
+  const map = root.querySelector('[data-map]');
+  P.forEach((p) => {
+    const d = document.createElement('div');
+    d.className = 'bm-part';
+    d.innerHTML = `<button type="button"><span class="pno">${p.no}</span><span class="pt">${p.t}</span><span class="pc">${p.r}</span></button>
+      <div class="bm-body"><p class="pq">${p.q}</p>${p.ch.map(([n, t, s]) =>
+        `<div class="bm-ch"><span class="no">Ch.${n}</span><div><a href="ch${n}.html">第 ${n} 章 ${t}</a><p>${s}</p></div></div>`).join('')}</div>`;
+    d.querySelector('button').addEventListener('click', () => { d.classList.toggle('open'); syncAll(); });
+    map.appendChild(d);
+  });
+  const parts = [...map.children], allBtn = root.querySelector('[data-mapall]');
+  function syncAll() { allBtn.textContent = parts.every((x) => x.classList.contains('open')) ? '全部收合' : '全部展開'; }
+  allBtn.addEventListener('click', () => {
+    const open = !parts.every((x) => x.classList.contains('open'));
+    parts.forEach((x) => x.classList.toggle('open', open));
+    syncAll();
+  });
+  parts[0].classList.add('open');
+  syncAll();
+})();
+</script>
+</body>
+</html>
